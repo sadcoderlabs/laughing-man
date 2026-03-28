@@ -10,12 +10,15 @@ laughing-man is a CLI tool that turns a folder of Markdown files into a newslett
 ## Commands
 
 ```
-bunx laughing-man init       # Generate laughing-man.yaml
-bunx laughing-man build      # Validate + generate site + email HTML
-bunx laughing-man preview    # Build (including drafts) + local server
-bunx laughing-man deploy     # Deploy to Cloudflare Pages via wrangler
-bunx laughing-man send <N>   # Send issue N via Resend Broadcast
+laughing-man init       # Generate laughing-man.yaml
+laughing-man build      # Validate + generate site + email HTML
+laughing-man preview    # Build (including drafts) + local server
+laughing-man deploy     # Deploy to Cloudflare Pages via wrangler
+laughing-man send <N>   # Send issue N via Resend Broadcast
 ```
+
+Install from npm: `bun add -g @vinta/laughing-man`
+Or run without installing: `bunx @vinta/laughing-man <command>`
 
 ## Tech Stack
 
