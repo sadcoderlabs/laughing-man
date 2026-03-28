@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a CLI tool that turns a folder of Markdown files into a newsletter — a static archive site on GitHub Pages and email delivery via Resend Broadcasts.
+**Goal:** Build a CLI tool that turns a folder of Markdown files into a newsletter — a static archive site on Cloudflare Pages and email delivery via Resend Broadcasts.
 
-**Architecture:** The tool is a Bun+TypeScript npm package invoked via `bunx laughing-man`. A pipeline reads Markdown from the user's directory, validates frontmatter, renders HTML via plain template functions, copies images, and writes output to `output/`. Separate composable commands (`build`, `send`) run independently so CI can chain or retry them. Deployment to GitHub Pages is handled by CI via `actions/deploy-pages`, not a CLI command.
+**Architecture:** The tool is a Bun+TypeScript npm package invoked via `bunx laughing-man`. A pipeline reads Markdown from the user's directory, validates frontmatter, renders HTML via plain template functions, copies images, and writes output to `output/`. Separate composable commands (`build`, `send`) run independently so CI can chain or retry them. Deployment to Cloudflare Pages is handled by CI via `cloudflare/wrangler-action`, not a CLI command.
 
 **Tech Stack:** Bun 1.x, TypeScript, zod 4.3.6, @11ty/gray-matter 2.0.1, marked 17.0.5, resend 6.9.4
 
@@ -166,8 +166,8 @@ export interface SiteConfig {
   theme: string;
   theme_options?: Record<string, string>;
   web_hosting: {
-    provider: "github-pages";
-    repo: string;               // e.g. "vinta/mensab"
+    provider: "cloudflare-pages";
+    project: string;               // Cloudflare Pages project name
   };
   email_hosting: {
     from: string;
@@ -177,6 +177,8 @@ export interface SiteConfig {
   env: {
     resend_api_key?: string;
     resend_audience_id?: string;
+    cloudflare_api_token?: string;
+    cloudflare_account_id?: string;
   };
   // Internal: resolved at load time
   configDir: string;            // Directory containing laughing-man.yaml
@@ -201,8 +203,8 @@ attachments_dir: ../Attachments
 theme: default
 
 web_hosting:
-  provider: github-pages
-  repo: vinta/mensab
+  provider: cloudflare-pages
+  project: laughing-man
 
 email_hosting:
   from: "Vinta <vinta@thenetisvastandinfinite.com>"
@@ -242,6 +244,8 @@ The config loader reads `laughing-man.yaml` from the current working directory (
 |---|---|
 | `RESEND_API_KEY` | `env.resend_api_key` |
 | `RESEND_AUDIENCE_ID` | `env.resend_audience_id` |
+| `CLOUDFLARE_API_TOKEN` | `env.cloudflare_api_token` |
+| `CLOUDFLARE_ACCOUNT_ID` | `env.cloudflare_account_id` |
 
 The loader also reads `.env` from the config directory using `Bun.file` + a simple line parser (no dotenv dependency needed — Bun loads `.env` automatically when you use `process.env` in Bun, but we read the config file manually so we must handle this ourselves).
 
@@ -276,8 +280,8 @@ url: "https://example.com"
 issues_dir: .
 theme: default
 web_hosting:
-  provider: github-pages
-  repo: user/repo
+  provider: cloudflare-pages
+  project: my-newsletter
 email_hosting:
   from: "Test <test@example.com>"
   provider: resend
@@ -303,8 +307,8 @@ url: "https://example.com"
 issues_dir: .
 theme: default
 web_hosting:
-  provider: github-pages
-  repo: user/repo
+  provider: cloudflare-pages
+  project: my-newsletter
 email_hosting:
   from: "Test <test@example.com>"
   provider: resend
@@ -333,8 +337,8 @@ url: "https://example.com"
 issues_dir: .
 theme: default
 web_hosting:
-  provider: github-pages
-  repo: user/repo
+  provider: cloudflare-pages
+  project: my-newsletter
 email_hosting:
   from: "Test <test@example.com>"
   provider: resend
@@ -366,8 +370,8 @@ issues_dir: .
 attachments_dir: ../Attachments
 theme: default
 web_hosting:
-  provider: github-pages
-  repo: user/repo
+  provider: cloudflare-pages
+  project: my-newsletter
 email_hosting:
   from: "Test <test@example.com>"
   provider: resend
@@ -405,8 +409,8 @@ const ConfigSchema = z.object({
   theme: z.string().default("default"),
   theme_options: z.record(z.string(), z.string()).optional(),
   web_hosting: z.object({
-    provider: z.literal("github-pages"),
-    repo: z.string(),
+    provider: z.literal("cloudflare-pages"),
+    project: z.string(),
   }),
   email_hosting: z.object({
     from: z.string(),
@@ -1506,8 +1510,8 @@ url: "https://example.com"
 issues_dir: ./issues
 theme: default
 web_hosting:
-  provider: github-pages
-  repo: user/repo
+  provider: cloudflare-pages
+  project: my-newsletter
 email_hosting:
   from: "Test <test@example.com>"
   provider: resend
@@ -1892,8 +1896,8 @@ theme: default
 #   font_family: "Georgia, serif"
 
 web_hosting:
-  provider: github-pages
-  repo: your-username/your-repo
+  provider: cloudflare-pages
+  project: my-newsletter
 
 email_hosting:
   from: "Your Name <you@example.com>"
@@ -2266,8 +2270,8 @@ issues_dir: "/Users/vinta/Projects/mensab/vault/Posts/The Net is Vast and Infini
 theme: default
 
 web_hosting:
-  provider: github-pages
-  repo: vinta/mensab
+  provider: cloudflare-pages
+  project: laughing-man
 
 email_hosting:
   from: "Vinta <vinta@thenetisvastandinfinite.com>"
@@ -2283,8 +2287,8 @@ url: "https://thenetisvastandinfinite.com"
 issues_dir: "/Users/vinta/Projects/mensab/vault/Posts/The Net is Vast and Infinite/drafts"
 theme: default
 web_hosting:
-  provider: github-pages
-  repo: vinta/mensab
+  provider: cloudflare-pages
+  project: laughing-man
 email_hosting:
   from: "Vinta <vinta@thenetisvastandinfinite.com>"
   provider: resend
@@ -2364,7 +2368,7 @@ Use the commit skill.
 | Build check: requires `output/email/<issue>.html` | Task 10 (`send.ts`) |
 | Confirmation prompt before send | Task 10 (`send.ts`) |
 | `--yes` flag skips prompt | Task 10 (`send.ts`) |
-| GitHub Pages deployment via CI | Spec CI section (not a CLI command) |
+| Cloudflare Pages deployment via CI | Spec CI section (not a CLI command) |
 | GitHub Actions workflow in README | Not automated -- add to README separately |
 | Provider logic isolated in `src/providers/` | Task 8 |
 | No local state file | Task 8 (state queried from Resend API) |

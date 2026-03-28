@@ -2,7 +2,7 @@
 
 ## Overview
 
-A CLI tool that turns a folder of markdown documents into a newsletter: a static archive website on GitHub Pages and email delivery via Resend Broadcasts. Built with Bun + TypeScript. Designed for open source from day one.
+A CLI tool that turns a folder of markdown documents into a newsletter: a static archive website on Cloudflare Pages and email delivery via Resend Broadcasts. Built with Bun + TypeScript. Designed for open source from day one.
 
 **Repository:** Standalone repo (not inside of-course-i-still-love-you).
 
@@ -18,7 +18,7 @@ laughing-man send 1            # Send issue 1 via Resend Broadcast
 laughing-man send 1 --yes      # Non-interactive mode (for CI)
 ```
 
-`build` and `send` are separate, composable steps. No monolithic `publish` command. Deployment to GitHub Pages is handled by CI (see CI Support), not a CLI command.
+`build` and `send` are separate, composable steps. No monolithic `publish` command. Deployment to Cloudflare Pages is handled by CI (see CI Support), not a CLI command.
 
 ## Config
 
@@ -32,8 +32,8 @@ issues_dir: .
 attachments_dir: ../Attachments
 
 web_hosting:
-  provider: github-pages
-  repo: vinta/mensab
+  provider: cloudflare-pages
+  project: laughing-man              # Cloudflare Pages project name
 
 email_hosting:
   from: "Vinta <vinta@thenetisvastandinfinite.com>"
@@ -41,11 +41,13 @@ email_hosting:
   provider: resend
 
 env:
-  resend_api_key: "re_xxxxx" # or RESEND_API_KEY from environment variables
-  resend_audience_id: "aud_xxxxx" # or RESEND_AUDIENCE_ID from environment variables
+  resend_api_key: "re_xxxxx"              # or RESEND_API_KEY from environment variables
+  resend_audience_id: "aud_xxxxx"         # or RESEND_AUDIENCE_ID from environment variables
+  cloudflare_api_token: "cf_xxxxx"        # or CLOUDFLARE_API_TOKEN from environment variables
+  cloudflare_account_id: "xxxxx"          # or CLOUDFLARE_ACCOUNT_ID from environment variables
 ```
 
-**Environment variable override:** Values in the `env` section can be overridden by environment variables. `RESEND_API_KEY` overrides `resend_api_key`, etc. The tool loads `.env` from the newsletter directory if it exists, so locally you keep secrets in `.env` (gitignored) and in CI inject them as real env vars.
+**Environment variable override:** Values in the `env` section can be overridden by environment variables. `RESEND_API_KEY` overrides `resend_api_key`, `CLOUDFLARE_API_TOKEN` overrides `cloudflare_api_token`, etc. The tool loads `.env` from the newsletter directory if it exists, so locally you keep secrets in `.env` (gitignored) and in CI inject them as real env vars.
 
 A `laughing-man.example.yaml` ships with the package for open source reference.
 
@@ -84,7 +86,7 @@ Filenames are arbitrary. The tool discovers issues by scanning `issues_dir` for 
 
 ### Status field
 
-- `draft`: included in `preview`, excluded from `build`/`deploy`/`send`. Work in progress.
+- `draft`: included in `preview`, excluded from `build`/`send`. Work in progress.
 - `ready`: included everywhere. Ready to publish.
 
 ## Images
@@ -160,7 +162,7 @@ All templates are plain TypeScript functions returning HTML strings. No React or
 
 Templates receive issue metadata and rendered content:
 
-```tsx
+```typescript
 interface IssueProps {
   title: string; // Extracted from first # heading
   issue: number;
@@ -181,9 +183,9 @@ interface IssueProps {
 6. For each issue:
    - Render markdown to HTML (via marked)
    - Process images: resolve relative paths, copy to output, rewrite URLs
-   - Render email HTML via theme's `email.tsx` (absolute image URLs)
-   - Render web HTML via theme's `web.tsx` (site-relative image URLs)
-7. Render `index.tsx` with the list of all issues
+   - Render email HTML via theme's `email.ts` (absolute image URLs)
+   - Render web HTML via theme's `web.ts` (site-relative image URLs)
+7. Render `index.ts` with the list of all issues
 8. Write everything to `output/website/` and `output/email/`
 
 ## Preview
@@ -222,25 +224,19 @@ on:
         description: "Issue number to send"
         required: true
 
-permissions:
-  pages: write
-  id-token: write
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bunx laughing-man build
-      - uses: actions/upload-pages-artifact@v3
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
         with:
-          path: output/website
-      - id: deploy
-        uses: actions/deploy-pages@v4
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy output/website --project-name=laughing-man
 
   send:
     needs: build-and-deploy
@@ -255,7 +251,13 @@ jobs:
           RESEND_AUDIENCE_ID: ${{ secrets.RESEND_AUDIENCE_ID }}
 ```
 
-Deployment uses GitHub's native `actions/deploy-pages`, which uploads an artifact directly without needing a `gh-pages` branch. The repo must have Settings > Pages > Source set to "GitHub Actions". Each job is independent and can be retried individually.
+Deployment uses Cloudflare's `wrangler-action` to upload `output/website/` directly to Cloudflare Pages via direct upload. The Cloudflare Pages project must be created first (Workers & Pages > Create > Pages > Upload assets). No `gh-pages` branch needed; no GitHub Pages configuration required. Works with private repos on the free plan. Each job is independent and can be retried individually.
+
+**Why Cloudflare Pages over GitHub Pages:**
+- Works with private repos on the free GitHub plan (GitHub Pages requires Pro for private repos)
+- Unlimited bandwidth (GitHub Pages has a 100GB/mo soft cap)
+- Global edge network with automatic asset optimization
+- Aligns with the Cloudflare Workers stack planned for the subscribe system in v2
 
 ## Package Structure
 
@@ -300,7 +302,7 @@ Config YAML parsing uses `Bun.YAML.parse()` (built-in, no dependency). Email tem
 - Provider logic isolated in `src/providers/`. Adding a new email or hosting provider means adding a file, not modifying existing ones.
 - No user data in the package. All state lives in the user's directory or the provider (Resend).
 - Config-driven. No hardcoded assumptions about newsletter name, domain, or provider details.
-- No local state files for distributed concerns. Send state lives in Resend API, deploy state lives in git.
+- No local state files for distributed concerns. Send state lives in Resend API, deploy state lives in Cloudflare Pages.
 
 ## Out of Scope for v1
 
