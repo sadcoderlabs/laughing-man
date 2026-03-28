@@ -6,7 +6,7 @@
 
 **Architecture:** The tool is a Bun+TypeScript npm package invoked via `bunx laughing-man`. A pipeline reads Markdown from the user's directory, validates frontmatter, renders HTML via plain template functions, copies images, and writes output to `output/`. Separate composable commands (`build`, `deploy`, `send`) run independently so CI can chain or retry them.
 
-**Tech Stack:** Bun 1.x, TypeScript, zod 4.3.6, @11ty/gray-matter 2.0.1, marked 17.0.5, resend 6.9.4
+**Tech Stack:** Bun 1.x, TypeScript 6.0.2, zod 4.3.6, @11ty/gray-matter 2.0.1, marked 17.0.5, resend 6.9.4
 
 ---
 
@@ -92,7 +92,7 @@ Note: pin exact versions in `package.json` (no `^` or `~` prefixes). The `bun ad
 - [ ] **Step 3: Install dev dependencies**
 
 ```bash
-bun add -d typescript@^5 "@types/bun" "@types/node" "@cloudflare/workers-types@^4"
+bun add -d typescript@6.0.2 "@types/bun@1.3.11" "@types/node@25.5.0" "@cloudflare/workers-types@4.20260317.1"
 ```
 
 - [ ] **Step 4: Write `package.json`**
@@ -119,10 +119,10 @@ Replace the generated `package.json` entirely:
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4",
-    "@types/bun": "latest",
-    "@types/node": "latest",
-    "typescript": "^5"
+    "@cloudflare/workers-types": "4.20260317.1",
+    "@types/bun": "1.3.11",
+    "@types/node": "25.5.0",
+    "typescript": "6.0.2"
   }
 }
 ```
