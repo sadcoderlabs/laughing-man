@@ -1,4 +1,4 @@
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { runBuild } from "./build.js";
 
 interface PreviewOptions {
@@ -10,7 +10,7 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
 
   await runBuild({ configDir, includeDrafts: true });
 
-  const websiteDir = join(configDir, "output", "website");
+  const websiteDir = resolve(configDir, "output", "website");
 
   const server = Bun.serve({
     port: 4000,
@@ -22,7 +22,10 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
         pathname += "index.html";
       }
 
-      const filePath = join(websiteDir, pathname);
+      const filePath = resolve(join(websiteDir, pathname));
+      if (!filePath.startsWith(websiteDir)) {
+        return new Response("Forbidden", { status: 403 });
+      }
       const file = Bun.file(filePath);
       return new Response(file);
     },
