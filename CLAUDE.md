@@ -36,7 +36,23 @@ bun src/cli.ts --help   # Run CLI locally
 
 ## External Tool Documentation
 
-When you need information about tools used in this project, use the `find-docs` skill. These pre-resolved library IDs can be passed directly to `ctx7 docs`, skipping the `ctx7 library` step:
+When you need information about tools used in this project, use the `find-docs` skill or the Cloudflare skills listed below.
+
+### Cloudflare Skills (`.claude/skills/`)
+
+Use these skills for Cloudflare-specific work. They pull from Cloudflare docs and cover best practices.
+
+| Skill | Use when |
+| ----- | -------- |
+| `cloudflare` | General Cloudflare platform work (Workers, Pages, KV, D1, R2, AI) |
+| `wrangler` | Running wrangler commands, configuring `wrangler.jsonc` |
+| `workers-best-practices` | Writing or reviewing Workers/Pages Functions code |
+| `durable-objects` | Stateful coordination (not needed for v1) |
+| `web-perf` | Auditing page load performance with Lighthouse/DevTools |
+
+### Context7 Library IDs
+
+Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skipping the `ctx7 library` step:
 
 | Tool             | `libraryId`                              |
 | ---------------- | ---------------------------------------- |
