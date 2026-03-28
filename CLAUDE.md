@@ -40,10 +40,10 @@ Run `bun link` from the project root to register the package globally. This syml
 
 ```bash
 bun link                       # One-time setup
-bunx laughing-man --help       # Works from any directory
+laughing-man --help            # Works from any directory
 ```
 
-Re-run `bun link` after Bun upgrades or if `bunx laughing-man` stops resolving.
+Re-run `bun link` after Bun upgrades or if `laughing-man` stops resolving.
 
 ## External Tool Documentation
 
