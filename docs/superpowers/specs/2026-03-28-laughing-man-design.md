@@ -14,12 +14,11 @@ A CLI tool that turns a folder of markdown documents into a newsletter: a static
 laughing-man init              # Generate laughing-man.yaml
 laughing-man build             # Validate + generate site + email HTML to output/
 laughing-man preview           # Build + start local server for preview
-laughing-man deploy            # Push site to GitHub Pages
 laughing-man send 1            # Send issue 1 via Resend Broadcast
 laughing-man send 1 --yes      # Non-interactive mode (for CI)
 ```
 
-`deploy` and `send` are separate, composable steps. No monolithic `publish` command. Run them independently or chain them in CI.
+`build` and `send` are separate, composable steps. No monolithic `publish` command. Deployment to GitHub Pages is handled by CI (see CI Support), not a CLI command.
 
 ## Config
 
@@ -143,19 +142,19 @@ Minimal footprint. `init` scaffolds only `laughing-man.yaml`.
 
 ### Built-in themes
 
-Themes live inside the `laughing-man` package source. Users do not interact with TSX directly.
+Themes live inside the `laughing-man` package source. Users do not interact with template files directly.
 
 ```
 laughing-man (package source)/
   themes/
     default/
-      email.tsx          # React Email template for newsletter email
-      web.tsx            # Template for individual issue page
-      index.tsx          # Archive/home page listing all issues
+      email.ts           # Email HTML template (plain function)
+      web.ts             # Template for individual issue page
+      index.ts           # Archive/home page listing all issues
       styles.css         # Default styles
 ```
 
-v1 ships with one theme: `default`. No customization in v1.
+All templates are plain TypeScript functions returning HTML strings. No React or JSX. v1 ships with one theme: `default`. No customization in v1.
 
 ### Template props
 
@@ -195,14 +194,6 @@ interface IssueProps {
 - Opens the browser automatically
 - Includes `status: draft` issues so you can preview work in progress
 
-## Deploy
-
-`laughing-man deploy` pushes `output/website/` to GitHub Pages.
-
-The recommended path is CI-based deployment via the generated GitHub Actions workflow (see CI Support). The `deploy` command exists for manual use but is not the primary path.
-
-Requires `build` to have been run first. If `output/website/` does not exist, errors with a message to run `build`.
-
 ## Send
 
 `laughing-man send <issue-number>` sends an issue via Resend Broadcasts:
@@ -231,21 +222,40 @@ on:
         description: "Issue number to send"
         required: true
 
+permissions:
+  pages: write
+  id-token: write
+
 jobs:
-  publish:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bunx laughing-man build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: output/website
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+  send:
+    needs: build-and-deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bunx laughing-man build
-      - run: bunx laughing-man deploy
       - run: bunx laughing-man send ${{ inputs.issue }} --yes
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RESEND_AUDIENCE_ID: ${{ secrets.RESEND_AUDIENCE_ID }}
 ```
 
-Each step is independent. If `deploy` fails, `send` does not run. Steps can be retried individually.
+Deployment uses GitHub's native `actions/deploy-pages`, which uploads an artifact directly without needing a `gh-pages` branch. The repo must have Settings > Pages > Source set to "GitHub Actions". Each job is independent and can be retried individually.
 
 ## Package Structure
 
@@ -257,7 +267,6 @@ laughing-man/
       init.ts
       build.ts
       preview.ts
-      deploy.ts
       send.ts
     pipeline/
       markdown.ts        # Markdown parsing + rendering
@@ -266,12 +275,11 @@ laughing-man/
       validation.ts      # Frontmatter validation, duplicate detection
     providers/
       resend.ts          # Resend Broadcasts API client
-      github-pages.ts    # GitHub Pages deployment
   themes/
     default/
-      email.tsx
-      web.tsx
-      index.tsx
+      email.ts           # Email HTML template (plain function, no React)
+      web.ts             # Individual issue web page template
+      index.ts           # Archive/home page template
       styles.css
   package.json
   tsconfig.json
@@ -280,12 +288,12 @@ laughing-man/
 
 ## Key Dependencies
 
-- **@react-email/components** + **@react-email/render** - Email template rendering (internal, users don't write TSX)
-- **gray-matter** - YAML frontmatter parsing
+- **@11ty/gray-matter** - YAML frontmatter parsing (actively maintained fork of gray-matter)
 - **marked** - Markdown to HTML
 - **resend** - Resend API SDK (Broadcasts)
-- **yaml** - laughing-man.yaml parsing
 - **zod** - Config and frontmatter validation
+
+Config YAML parsing uses `Bun.YAML.parse()` (built-in, no dependency). Email templates are plain HTML functions (no React dependency).
 
 ## Open Source Design Principles
 

@@ -4,9 +4,9 @@
 
 **Goal:** Build a CLI tool that turns a folder of Markdown files into a newsletter — a static archive site on GitHub Pages and email delivery via Resend Broadcasts.
 
-**Architecture:** The tool is a Bun+TypeScript npm package invoked via `bunx laughing-man`. A pipeline reads Markdown from the user's directory, validates frontmatter, renders HTML via React Email templates, copies images, and writes output to `output/`. Separate composable commands (`build`, `deploy`, `send`) run independently so CI can chain or retry them.
+**Architecture:** The tool is a Bun+TypeScript npm package invoked via `bunx laughing-man`. A pipeline reads Markdown from the user's directory, validates frontmatter, renders HTML via plain template functions, copies images, and writes output to `output/`. Separate composable commands (`build`, `send`) run independently so CI can chain or retry them. Deployment to GitHub Pages is handled by CI via `actions/deploy-pages`, not a CLI command.
 
-**Tech Stack:** Bun 1.x, TypeScript, zod 4.x, gray-matter 4.x, marked 17.x, @react-email/components 1.x + @react-email/render 2.x, resend 6.x, yaml 2.x, gh-pages 6.x
+**Tech Stack:** Bun 1.x, TypeScript, zod 4.3.6, @11ty/gray-matter 2.0.1, marked 17.0.5, resend 6.9.4
 
 ---
 
@@ -26,7 +26,6 @@ laughing-man/
       init.ts                 # Writes laughing-man.yaml + .gitignore entry
       build.ts                # Orchestrates the full build pipeline
       preview.ts              # Build (draft-inclusive) + Bun.serve local server
-      deploy.ts               # Pushes output/website/ to GitHub Pages via gh-pages
       send.ts                 # Sends an issue via Resend Broadcasts
     pipeline/
       config.ts               # Load + parse laughing-man.yaml, apply env overrides
@@ -35,13 +34,12 @@ laughing-man/
       images.ts               # Resolve relative image paths, copy, rewrite src
     providers/
       resend.ts               # Resend Broadcasts: create, list, send
-      github-pages.ts         # Wrap gh-pages npm package
     types.ts                  # Shared TypeScript interfaces (IssueData, SiteConfig, etc.)
   themes/
     default/
-      email.tsx               # React Email template for the newsletter email
-      web.tsx                 # React component for individual issue web page
-      index.tsx               # React component for archive/home page
+      email.ts                # Email HTML template (plain function, no React)
+      web.ts                  # Individual issue web page template
+      index.ts                # Archive/home page template
       styles.css              # Base styles (loaded by web templates)
   tests/
     pipeline/
@@ -80,13 +78,15 @@ Expected: `package.json` and `tsconfig.json` created.
 - [ ] **Step 2: Install runtime dependencies**
 
 ```bash
-bun add zod@^4.3.6 gray-matter@^4.0.3 marked@^17.0.5 "@react-email/components@^1.0.10" "@react-email/render@^2.0.4" resend@^6.9.4 yaml@^2.8.2 gh-pages@^6.3.0
+bun add zod@4.3.6 "@11ty/gray-matter@2.0.1" marked@17.0.5 resend@6.9.4
 ```
+
+Note: pin exact versions in `package.json` (no `^` or `~` prefixes). The `bun add` command adds `^` by default, so the `package.json` in Step 4 specifies exact versions.
 
 - [ ] **Step 3: Install dev dependencies**
 
 ```bash
-bun add -d typescript@^5 "@types/bun" "@types/node" "@types/gray-matter"
+bun add -d typescript@^5 "@types/bun" "@types/node"
 ```
 
 - [ ] **Step 4: Write `package.json`**
@@ -107,14 +107,10 @@ Replace the generated `package.json` entirely:
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@react-email/components": "^1.0.10",
-    "@react-email/render": "^2.0.4",
-    "gray-matter": "^4.0.3",
-    "gh-pages": "^6.3.0",
-    "marked": "^17.0.5",
-    "resend": "^6.9.4",
-    "yaml": "^2.8.2",
-    "zod": "^4.3.6"
+    "@11ty/gray-matter": "2.0.1",
+    "marked": "17.0.5",
+    "resend": "6.9.4",
+    "zod": "4.3.6"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -133,8 +129,6 @@ Replace the generated `package.json` entirely:
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ESNext"],
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
@@ -400,7 +394,6 @@ Expected: FAIL — `loadConfig` not found.
 ```typescript
 import { readFileSync, existsSync } from "node:fs";
 import { join, resolve, isAbsolute } from "node:path";
-import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 import type { SiteConfig } from "../types.js";
 
@@ -410,7 +403,7 @@ const ConfigSchema = z.object({
   issues_dir: z.string().default("."),
   attachments_dir: z.string().optional(),
   theme: z.string().default("default"),
-  theme_options: z.record(z.string()).optional(),
+  theme_options: z.record(z.string(), z.string()).optional(),
   web_hosting: z.object({
     provider: z.literal("github-pages"),
     repo: z.string(),
@@ -447,7 +440,7 @@ export async function loadConfig(configDir: string): Promise<SiteConfig> {
     throw new Error(`laughing-man.yaml not found in ${configDir}`);
   }
 
-  const raw = parseYaml(readFileSync(yamlPath, "utf8"));
+  const raw = Bun.YAML.parse(readFileSync(yamlPath, "utf8"));
   const parsed = ConfigSchema.parse(raw);
 
   // Load .env from config dir (Bun auto-loads from cwd, but config dir may differ)
@@ -641,7 +634,7 @@ Use the commit skill.
 - Create: `src/pipeline/markdown.ts`
 - Create: `tests/pipeline/markdown.test.ts`
 
-Scans `issues_dir` for `.md` files, parses frontmatter with gray-matter, extracts the title from the first `# heading`, validates required frontmatter fields, renders markdown to HTML.
+Scans `issues_dir` for `.md` files, parses frontmatter with @11ty/gray-matter, extracts the title from the first `# heading`, validates required frontmatter fields, renders markdown to HTML.
 
 Frontmatter parsing uses Zod for field validation. Missing `issue` or `status`, or an invalid `status` value, throws an error naming the file.
 
@@ -807,7 +800,7 @@ Expected: FAIL — `parseIssueFile` not found.
 ```typescript
 import { readFileSync, readdirSync } from "node:fs";
 import { join, extname } from "node:path";
-import matter from "gray-matter";
+import matter from "@11ty/gray-matter";
 import { marked } from "marked";
 import { z } from "zod";
 import type { IssueData } from "../types.js";
@@ -1117,12 +1110,12 @@ Use the commit skill.
 ## Task 6: Default Theme Templates
 
 **Files:**
-- Create: `themes/default/email.tsx`
-- Create: `themes/default/web.tsx`
-- Create: `themes/default/index.tsx`
+- Create: `themes/default/email.ts`
+- Create: `themes/default/web.ts`
+- Create: `themes/default/index.ts`
 - Create: `themes/default/styles.css`
 
-These are React components. `email.tsx` uses `@react-email/components`. `web.tsx` and `index.tsx` produce plain HTML using React (rendered to string server-side). Users never edit these files.
+All templates are plain TypeScript functions that return HTML strings. No React, no JSX. Users never edit these files.
 
 - [ ] **Step 1: Write `themes/default/styles.css`**
 
@@ -1246,12 +1239,11 @@ footer {
 }
 ```
 
-- [ ] **Step 2: Write `themes/default/web.tsx`**
+- [ ] **Step 2: Write `themes/default/web.ts`**
 
 This renders a single issue page as a complete HTML document.
 
-```tsx
-import React from "react";
+```typescript
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import type { IssueProps } from "../../src/types.js";
@@ -1309,11 +1301,11 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
 }
 ```
 
-- [ ] **Step 3: Write `themes/default/index.tsx`**
+- [ ] **Step 3: Write `themes/default/index.ts`**
 
 This renders the archive/home page listing all issues.
 
-```tsx
+```typescript
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import type { SiteConfig, IssueData } from "../../src/types.js";
@@ -1388,97 +1380,61 @@ export function IndexPage({ issues, config }: IndexProps): string {
 }
 ```
 
-- [ ] **Step 4: Write `themes/default/email.tsx`**
+- [ ] **Step 4: Write `themes/default/email.ts`**
 
-Uses `@react-email/components` to produce email-safe HTML. The component is rendered via `@react-email/render` in the build step.
+Plain function returning email-safe HTML. Uses inline styles for cross-client compatibility. The `{{{RESEND_UNSUBSCRIBE_URL}}}` placeholder is replaced by Resend at send time.
 
-```tsx
-import React from "react";
-import {
-  Html,
-  Head,
-  Body,
-  Container,
-  Section,
-  Text,
-  Link,
-  Hr,
-  Preview,
-} from "@react-email/components";
+```typescript
 import type { IssueProps } from "../../src/types.js";
 
-export function EmailTemplate({ title, issue, content, config }: IssueProps) {
+export function EmailPage({ title, issue, content, config }: IssueProps): string {
   const accentColor = config.theme_options?.accent_color ?? "#2563eb";
   const fontFamily = config.theme_options?.font_family ?? "Georgia, 'Times New Roman', serif";
 
-  return (
-    <Html lang="en">
-      <Head />
-      <Preview>{title}</Preview>
-      <Body
-        style={{
-          backgroundColor: "#ffffff",
-          fontFamily,
-          color: "#1a1a1a",
-          margin: 0,
-          padding: 0,
-        }}
-      >
-        <Container
-          style={{
-            maxWidth: "600px",
-            margin: "0 auto",
-            padding: "2rem 1.5rem",
-          }}
-        >
-          <Section
-            style={{
-              borderBottom: `2px solid #e5e7eb`,
-              paddingBottom: "1rem",
-              marginBottom: "2rem",
-            }}
-          >
-            <Link
-              href={config.url}
-              style={{
-                fontWeight: 600,
-                fontSize: "1rem",
-                color: "#1a1a1a",
-                textDecoration: "none",
-                letterSpacing: "0.02em",
-              }}
-            >
-              {config.name}
-            </Link>
-          </Section>
-
-          <Section>
-            <Text
-              style={{ fontSize: "0.85rem", color: "#6b7280", margin: "0 0 1rem" }}
-            >
-              Issue #{issue}
-            </Text>
-            {/* Render pre-built HTML content inline */}
-            <div dangerouslySetInnerHTML={{ __html: content }} />
-          </Section>
-
-          <Hr style={{ borderColor: "#e5e7eb", margin: "2rem 0 1rem" }} />
-
-          <Section>
-            <Text style={{ fontSize: "0.8rem", color: "#6b7280", textAlign: "center" }}>
-              You're receiving this because you subscribed to {config.name}.{" "}
-              <Link
-                href="{{{RESEND_UNSUBSCRIBE_URL}}}"
-                style={{ color: accentColor }}
-              >
-                Unsubscribe
-              </Link>
-            </Text>
-          </Section>
-        </Container>
-      </Body>
-    </Html>
-  );
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--[if !mso]><!--><meta http-equiv="X-UA-Compatible" content="IE=edge"><!--<![endif]-->
+  <title>${title}</title>
+  <!--[if mso]>
+  <style>body,table,td{font-family:Arial,Helvetica,sans-serif!important}</style>
+  <![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#ffffff;font-family:${fontFamily};color:#1a1a1a;line-height:1.7;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+    <tr>
+      <td align="center" style="padding:0;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;margin:0 auto;padding:32px 24px;">
+          <!-- Header -->
+          <tr>
+            <td style="border-bottom:2px solid #e5e7eb;padding-bottom:16px;margin-bottom:32px;">
+              <a href="${config.url}" style="font-weight:600;font-size:16px;color:#1a1a1a;text-decoration:none;letter-spacing:0.02em;">${config.name}</a>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding-top:32px;">
+              <p style="font-size:13px;color:#6b7280;margin:0 0 16px;">Issue #${issue}</p>
+              ${content}
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="border-top:1px solid #e5e7eb;padding-top:24px;margin-top:32px;">
+              <p style="font-size:13px;color:#6b7280;text-align:center;margin:0;">
+                You're receiving this because you subscribed to ${config.name}.
+                <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:${accentColor};">Unsubscribe</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 }
 ```
 
@@ -1649,16 +1605,13 @@ Expected: FAIL — `runBuild` not found.
 ```typescript
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { renderAsync } from "@react-email/render";
 import { loadConfig } from "../pipeline/config.js";
 import { scanIssuesDir } from "../pipeline/markdown.js";
 import { validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
-import { EmailTemplate } from "../../themes/default/email.js";
+import { EmailPage } from "../../themes/default/email.js";
 import { WebPage } from "../../themes/default/web.js";
 import { IndexPage } from "../../themes/default/index.js";
-import type { SiteConfig, IssueData } from "../types.js";
-import React from "react";
 
 interface BuildOptions {
   configDir: string;
@@ -1708,14 +1661,12 @@ export async function runBuild(options: BuildOptions): Promise<void> {
     writeFileSync(issuePage, webPage, "utf8");
 
     // Render email HTML
-    const emailHtml = await renderAsync(
-      React.createElement(EmailTemplate, {
-        title: issue.title,
-        issue: issue.issue,
-        content: contentEmail,
-        config,
-      })
-    );
+    const emailHtml = EmailPage({
+      title: issue.title,
+      issue: issue.issue,
+      content: contentEmail,
+      config,
+    });
     writeFileSync(join(emailDir, `${issue.issue}.html`), emailHtml, "utf8");
   }
 
@@ -1914,53 +1865,7 @@ Use the commit skill.
 
 ---
 
-## Task 9: GitHub Pages Provider
-
-**Files:**
-- Create: `src/providers/github-pages.ts`
-
-Wraps the `gh-pages` npm package. No tests (the package itself is integration-tested by its maintainers; testing this wrapper would require a real git repo and GitHub credentials). Manual verification in Task 13.
-
-- [ ] **Step 1: Implement `src/providers/github-pages.ts`**
-
-```typescript
-import ghpages from "gh-pages";
-import { join } from "node:path";
-
-export async function deployToGitHubPages(outputDir: string): Promise<void> {
-  const websiteDir = join(outputDir, "website");
-
-  await new Promise<void>((resolve, reject) => {
-    ghpages.publish(
-      websiteDir,
-      {
-        dotfiles: true,
-        message: "chore: deploy newsletter",
-      },
-      (err) => {
-        if (err) reject(err);
-        else resolve();
-      }
-    );
-  });
-}
-```
-
-- [ ] **Step 2: Verify TypeScript compiles**
-
-```bash
-cd /Users/vinta/Projects/laughing-man && bun run typecheck
-```
-
-Expected: exits 0.
-
-- [ ] **Step 3: Commit**
-
-Use the commit skill.
-
----
-
-## Task 10: `init` Command
+## Task 9: `init` Command
 
 **Files:**
 - Create: `src/commands/init.ts`
@@ -2034,14 +1939,13 @@ Use the commit skill.
 
 ---
 
-## Task 11: `send`, `deploy`, and `preview` Commands
+## Task 10: `send` and `preview` Commands
 
 **Files:**
 - Create: `src/commands/send.ts`
-- Create: `src/commands/deploy.ts`
 - Create: `src/commands/preview.ts`
 
-These are thin orchestrators — the real logic lives in the providers and pipeline.
+These are thin orchestrators -- the real logic lives in the providers and pipeline.
 
 - [ ] **Step 1: Implement `src/commands/send.ts`**
 
@@ -2131,37 +2035,7 @@ export async function runSend(options: SendOptions): Promise<void> {
 }
 ```
 
-- [ ] **Step 2: Implement `src/commands/deploy.ts`**
-
-```typescript
-import { existsSync } from "node:fs";
-import { join } from "node:path";
-import { loadConfig } from "../pipeline/config.js";
-import { deployToGitHubPages } from "../providers/github-pages.js";
-
-interface DeployOptions {
-  configDir: string;
-}
-
-export async function runDeploy(options: DeployOptions): Promise<void> {
-  const { configDir } = options;
-
-  const config = await loadConfig(configDir);
-
-  const websiteDir = join(configDir, "output", "website");
-  if (!existsSync(websiteDir)) {
-    throw new Error(
-      `output/website/ not found. Run 'laughing-man build' first.`
-    );
-  }
-
-  console.log(`Deploying to GitHub Pages (${config.web_hosting.repo})...`);
-  await deployToGitHubPages(join(configDir, "output"));
-  console.log("Deploy complete.");
-}
-```
-
-- [ ] **Step 3: Implement `src/commands/preview.ts`**
+- [ ] **Step 2: Implement `src/commands/preview.ts`**
 
 ```typescript
 import { join } from "node:path";
@@ -2229,7 +2103,7 @@ Use the commit skill.
 
 ---
 
-## Task 12: CLI Entry Point
+## Task 11: CLI Entry Point
 
 **Files:**
 - Create: `src/cli.ts`
@@ -2240,11 +2114,9 @@ Parses `process.argv` and dispatches to the correct command. No external CLI arg
 
 ```typescript
 #!/usr/bin/env bun
-import { join } from "node:path";
 import { runInit } from "./commands/init.js";
 import { runBuild } from "./commands/build.js";
 import { runPreview } from "./commands/preview.js";
-import { runDeploy } from "./commands/deploy.js";
 import { runSend } from "./commands/send.js";
 
 const args = process.argv.slice(2);
@@ -2254,13 +2126,12 @@ async function main(): Promise<void> {
   const command = args[0];
 
   if (!command || command === "--help" || command === "-h") {
-    console.log(`laughing-man — Turn your Markdown into a newsletter.
+    console.log(`laughing-man -- Turn your Markdown into a newsletter.
 
 Commands:
   init              Generate laughing-man.yaml in the current directory
   build             Validate + build site and email HTML
   preview [issue]   Build (including drafts) + start local preview server
-  deploy            Push output/website/ to GitHub Pages
   send <issue>      Send an issue via Resend Broadcast
     --yes           Skip confirmation prompt (for CI)
 
@@ -2269,7 +2140,6 @@ Examples:
   laughing-man build
   laughing-man preview
   laughing-man preview 2
-  laughing-man deploy
   laughing-man send 1
   laughing-man send 1 --yes
 `);
@@ -2294,11 +2164,6 @@ Examples:
           ? parseInt(issueArg, 10)
           : undefined;
         await runPreview({ configDir, issueNumber });
-        break;
-      }
-
-      case "deploy": {
-        await runDeploy({ configDir });
         break;
       }
 
@@ -2367,7 +2232,7 @@ Use the commit skill.
 
 ---
 
-## Task 13: End-to-End Manual Smoke Test
+## Task 12: End-to-End Manual Smoke Test
 
 This task verifies the tool works against the real newsletter content at `/Users/vinta/Projects/mensab/vault/Posts/The Net is Vast and Infinite/drafts/`.
 
@@ -2468,13 +2333,12 @@ Use the commit skill.
 
 | Spec requirement | Covered by |
 |---|---|
-| `laughing-man init` generates config | Task 10 |
+| `laughing-man init` generates config | Task 9 |
 | `laughing-man build` validates + generates output | Task 7 |
-| `laughing-man preview` includes drafts + local server | Task 11 |
-| `laughing-man preview 2` (specific issue) | Task 11 |
-| `laughing-man deploy` pushes to GitHub Pages | Task 11 |
-| `laughing-man send 1` creates + sends Resend Broadcast | Task 11 |
-| `laughing-man send 1 --yes` skips prompt | Task 11 |
+| `laughing-man preview` includes drafts + local server | Task 10 |
+| `laughing-man preview 2` (specific issue) | Task 10 |
+| `laughing-man send 1` creates + sends Resend Broadcast | Task 10 |
+| `laughing-man send 1 --yes` skips prompt | Task 10 |
 | Config: `laughing-man.yaml` with all documented fields | Tasks 1, 2 |
 | Env var override for Resend secrets | Task 2 |
 | `.env` file loading from config dir | Task 2 |
@@ -2483,29 +2347,30 @@ Use the commit skill.
 | Title extracted from first `# heading` | Task 4 |
 | Missing required field = build error with filename | Task 4 |
 | Duplicate `issue` number = build error naming both files | Tasks 3, 7 |
-| `status: draft` excluded from `build`/`deploy`/`send` | Task 7 |
+| `status: draft` excluded from `build`/`send` | Task 7 |
 | `status: draft` included in `preview` | Task 7 |
 | Image resolution: relative to markdown file, then `attachments_dir` | Task 5 |
 | Image copy to `output/website/images/<issue>/` | Task 5 |
 | Web HTML: site-relative image src | Task 5 |
 | Email HTML: absolute URL image src | Task 5 |
 | Missing image = build error | Task 5 |
-| React Email template for email | Task 6 |
+| Email template with inline styles | Task 6 |
 | Web + index templates | Task 6 |
 | Theme CSS + config token overrides | Task 6 |
 | User CSS override at `./themes/default/styles.css` | Task 6 |
 | `{{{RESEND_UNSUBSCRIBE_URL}}}` in email | Task 6 |
-| Duplicate send prevention via Resend API query | Task 11 (`send.ts`) |
-| `status: draft` = refuse to send | Task 11 (`send.ts`) |
-| Build check: requires `output/email/<issue>.html` | Task 11 (`send.ts`) |
-| Confirmation prompt before send | Task 11 (`send.ts`) |
-| `--yes` flag skips prompt | Task 11 (`send.ts`) |
-| GitHub Actions workflow in README | Not automated — add to README separately |
-| Provider logic isolated in `src/providers/` | Tasks 8, 9 |
+| Duplicate send prevention via Resend API query | Task 10 (`send.ts`) |
+| `status: draft` = refuse to send | Task 10 (`send.ts`) |
+| Build check: requires `output/email/<issue>.html` | Task 10 (`send.ts`) |
+| Confirmation prompt before send | Task 10 (`send.ts`) |
+| `--yes` flag skips prompt | Task 10 (`send.ts`) |
+| GitHub Pages deployment via CI | Spec CI section (not a CLI command) |
+| GitHub Actions workflow in README | Not automated -- add to README separately |
+| Provider logic isolated in `src/providers/` | Task 8 |
 | No local state file | Task 8 (state queried from Resend API) |
 | Open source design: config-driven, no hardcoded data | All tasks |
 
-**Gap found:** The spec mentions a GitHub Actions workflow should be documented in the README. This is documentation, not code — handle it manually after the smoke test passes by adding a CI section to `README.md`.
+**Gap found:** The spec mentions a GitHub Actions workflow should be documented in the README. This is documentation, not code -- handle it manually after the smoke test passes by adding a CI section to `README.md`.
 
 ### Placeholder scan
 
@@ -2514,12 +2379,11 @@ No TBDs, TODOs, or "implement later" notes found. All code steps contain real im
 ### Type consistency check
 
 - `IssueData` defined in `types.ts` Task 1, used in Tasks 3, 4, 7
-- `SiteConfig` defined in `types.ts` Task 1, used in Tasks 2, 6, 7, 11
+- `SiteConfig` defined in `types.ts` Task 1, used in Tasks 2, 6, 7, 10
 - `IssueProps` defined in `types.ts` Task 1, used in Tasks 6, 7
 - `processImages` params: `markdownFilePath` (string) consistent across Tasks 5 and 7
-- `runBuild({ configDir, includeDrafts })` consistent across Tasks 7 and 11 (`preview.ts` calls it)
-- `createResendProvider(resend)` returns `ResendProvider` interface — used consistently in Tasks 8 and 11
-- `WebPage`, `IndexPage` are synchronous string-returning functions — consistent with how Task 7 calls them
-- `EmailTemplate` is a React component rendered via `renderAsync` — consistent between Tasks 6 and 7
+- `runBuild({ configDir, includeDrafts })` consistent across Tasks 7 and 10 (`preview.ts` calls it)
+- `createResendProvider(resend)` returns `ResendProvider` interface -- used consistently in Tasks 8 and 10
+- `WebPage`, `IndexPage`, `EmailPage` are all synchronous string-returning functions -- consistent with how Task 7 calls them
 
 All types, method names, and property names are consistent.
