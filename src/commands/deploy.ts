@@ -19,14 +19,6 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
     );
   }
 
-  const which = Bun.spawnSync(["which", "wrangler"]);
-  if (which.exitCode !== 0) {
-    throw new Error(
-      "wrangler not found. Install it with: bun add -D wrangler\n" +
-      "Then authenticate with: bunx wrangler login"
-    );
-  }
-
   console.log(`Deploying to Cloudflare Pages (${config.web_hosting.project})...`);
 
   const proc = Bun.spawn([
@@ -40,7 +32,10 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
 
   const exitCode = await proc.exited;
   if (exitCode !== 0) {
-    throw new Error(`wrangler pages deploy failed with exit code ${exitCode}`);
+    throw new Error(
+      `wrangler pages deploy failed with exit code ${exitCode}.\n` +
+      `If wrangler is not installed, run: bun add -D wrangler`
+    );
   }
 
   console.log("Deploy complete.");
