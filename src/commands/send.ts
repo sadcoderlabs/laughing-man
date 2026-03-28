@@ -42,12 +42,10 @@ export async function runSend(options: SendOptions): Promise<void> {
 
   const broadcastName = `Issue #${issueNumber}`;
   const existing = await provider.listBroadcasts();
-  const alreadySent = existing.find(
-    (b) => b.name === broadcastName && b.status === "sent"
-  );
-  if (alreadySent) {
+  const alreadyExists = existing.find((b) => b.name === broadcastName);
+  if (alreadyExists) {
     throw new Error(
-      `Issue #${issueNumber} has already been sent (Resend broadcast id: ${alreadySent.id}).`
+      `Issue #${issueNumber} already has a Resend broadcast (id: ${alreadyExists.id}, status: ${alreadyExists.status}). Delete it in the Resend dashboard to re-send.`
     );
   }
 
