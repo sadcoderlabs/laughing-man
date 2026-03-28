@@ -42,27 +42,27 @@ When you need information about tools used in this project, use the `find-docs` 
 
 Use these skills for Cloudflare-specific work. They pull from Cloudflare docs and cover best practices.
 
-| Skill | Use when |
-| ----- | -------- |
-| `cloudflare` | General Cloudflare platform work (Workers, Pages, KV, D1, R2, AI) |
-| `wrangler` | Running wrangler commands, configuring `wrangler.jsonc` |
-| `workers-best-practices` | Writing or reviewing Workers/Pages Functions code |
-| `durable-objects` | Stateful coordination (not needed for v1) |
-| `web-perf` | Auditing page load performance with Lighthouse/DevTools |
+| Skill                    | Use when                                                          |
+| ------------------------ | ----------------------------------------------------------------- |
+| `cloudflare`             | General Cloudflare platform work (Workers, Pages, KV, D1, R2, AI) |
+| `wrangler`               | Running wrangler commands, configuring `wrangler.jsonc`           |
+| `workers-best-practices` | Writing or reviewing Workers/Pages Functions code                 |
+| `durable-objects`        | Stateful coordination (not needed for v1)                         |
+| `web-perf`               | Auditing page load performance with Lighthouse/DevTools           |
 
 ### Context7 Library IDs
 
 Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skipping the `ctx7 library` step:
 
-| Tool             | `libraryId`                              |
-| ---------------- | ---------------------------------------- |
-| Bun              | `/oven-sh/bun`                           |
-| TypeScript       | `/microsoft/typescript`                  |
-| Zod v4           | `/websites/zod_dev_v4`                   |
-| gray-matter      | `/jonschlinkert/gray-matter`             |
-| marked           | `/markedjs/marked`                       |
-| Resend SDK       | `/resend/resend-node`                    |
-| Resend API       | `/websites/resend`                       |
-| Wrangler         | `/cloudflare/workers-sdk`                |
-| Cloudflare Pages | `/websites/developers_cloudflare_pages`  |
-| CF Workers (Pages Functions runtime) | `/websites/developers_cloudflare_workers` |
+| Tool                                         | `libraryId`                               |
+| -------------------------------------------- | ----------------------------------------- |
+| Bun                                          | `/oven-sh/bun`                            |
+| TypeScript                                   | `/microsoft/typescript`                   |
+| Zod v4                                       | `/websites/zod_dev_v4`                    |
+| gray-matter                                  | `/jonschlinkert/gray-matter`              |
+| marked                                       | `/markedjs/marked`                        |
+| Resend SDK                                   | `/resend/resend-node`                     |
+| Resend API                                   | `/websites/resend`                        |
+| Wrangler                                     | `/cloudflare/workers-sdk`                 |
+| Cloudflare Pages                             | `/websites/developers_cloudflare_pages`   |
+| Cloudflare Workers (Pages Functions runtime) | `/websites/developers_cloudflare_workers` |
