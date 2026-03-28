@@ -1,0 +1,176 @@
+/* laughing-man default theme */
+:root {
+  --accent: #2563eb;
+  --font-family: Georgia, 'Times New Roman', serif;
+  --font-family-mono: 'Courier New', monospace;
+  --max-width: 680px;
+  --text: #1a1a1a;
+  --muted: #6b7280;
+  --bg: #ffffff;
+  --border: #e5e7eb;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-family);
+  color: var(--text);
+  background: var(--bg);
+  margin: 0;
+  padding: 0;
+  line-height: 1.7;
+}
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+header .site-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  text-decoration: none;
+}
+
+h1 { font-size: 2rem; line-height: 1.2; margin-bottom: 0.5rem; }
+h2 { font-size: 1.5rem; margin-top: 2rem; }
+h3 { font-size: 1.2rem; margin-top: 1.5rem; }
+
+p { margin: 1rem 0; }
+
+a { color: var(--accent); }
+
+img { max-width: 100%; height: auto; border-radius: 4px; }
+
+blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 1.5rem 0;
+  padding: 0.5rem 0 0.5rem 1.25rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+pre {
+  background: #f4f4f4;
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: var(--font-family-mono);
+  font-size: 0.9rem;
+}
+
+code {
+  font-family: var(--font-family-mono);
+  background: #f4f4f4;
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.issue-meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+}
+
+.issue-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.issue-list li {
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 0;
+}
+
+.issue-list a {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.issue-list a:hover { color: var(--accent); }
+
+.issue-list .issue-number {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.subscribe-link {
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: var(--accent);
+}
+
+.subscribe-section {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.subscribe-section h2 {
+  margin-top: 0;
+  font-size: 1.3rem;
+}
+
+.subscribe-form {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 400px;
+}
+
+.subscribe-form input[type="email"] {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  font-family: var(--font-family);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.subscribe-form button {
+  padding: 0.5rem 1.25rem;
+  font-size: 1rem;
+  font-family: var(--font-family);
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.subscribe-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.subscribe-message {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.subscribe-message.success { color: #16a34a; }
+.subscribe-message.error { color: #dc2626; }
+
+footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.875rem;
+}

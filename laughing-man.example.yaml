@@ -1,0 +1,18 @@
+name: "The Net is Vast and Infinite"
+url: "https://thenetisvastandinfinite.com"
+
+issues_dir: .
+attachments_dir: ../Attachments
+
+web_hosting:
+  provider: cloudflare-pages
+  project: laughing-man
+
+email_hosting:
+  from: "Vinta <vinta@thenetisvastandinfinite.com>"
+  reply_to: vinta@thenetisvastandinfinite.com
+  provider: resend
+
+env:
+  resend_api_key: "re_xxxxx" # or set RESEND_API_KEY env var
+  resend_audience_id: "aud_xxxxx" # or set RESEND_AUDIENCE_ID env var

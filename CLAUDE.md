@@ -10,12 +10,15 @@ laughing-man is a CLI tool that turns a folder of Markdown files into a newslett
 ## Commands
 
 ```
-bunx laughing-man init       # Generate laughing-man.yaml
-bunx laughing-man build      # Validate + generate site + email HTML
-bunx laughing-man preview    # Build (including drafts) + local server
-bunx laughing-man deploy     # Deploy to Cloudflare Pages via wrangler
-bunx laughing-man send <N>   # Send issue N via Resend Broadcast
+laughing-man init       # Generate laughing-man.yaml
+laughing-man build      # Validate + generate site + email HTML
+laughing-man preview    # Build (including drafts) + local server
+laughing-man deploy     # Deploy to Cloudflare Pages via wrangler
+laughing-man send <N>   # Send issue N via Resend Broadcast
 ```
+
+Install from npm: `bun add -g @vinta/laughing-man`
+Or run without installing: `bunx @vinta/laughing-man <command>`
 
 ## Tech Stack
 
@@ -33,6 +36,17 @@ bun test                # Run tests
 bun run typecheck       # TypeScript check
 bun src/cli.ts --help   # Run CLI locally
 ```
+
+### Local CLI testing
+
+Run `bun link` from the project root to register the package globally. This symlinks to source, so code changes take effect immediately without re-running.
+
+```bash
+bun link                       # One-time setup
+laughing-man --help            # Works from any directory
+```
+
+Re-run `bun link` after Bun upgrades or if `laughing-man` stops resolving.
 
 ## External Tool Documentation
 
