@@ -59,10 +59,11 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
 
   const server = Bun.serve({
     port: 4000,
-    async fetch(req) {
+    async fetch(req, server) {
       const url = new URL(req.url);
 
       if (url.pathname === "/__reload") {
+        server.timeout(req, 0);
         let ctrl: ReadableStreamDefaultController | undefined;
         const stream = new ReadableStream({
           start(controller) {
