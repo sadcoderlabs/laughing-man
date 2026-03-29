@@ -1,6 +1,7 @@
 export interface FrontmatterRaw {
   issue: number;
   status: "draft" | "ready";
+  title?: string;
 }
 
 export interface IssueData {

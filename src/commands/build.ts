@@ -4,17 +4,23 @@ import { loadConfig } from "../pipeline/config.js";
 import { scanIssuesDir } from "../pipeline/markdown.js";
 import { validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
-import { EmailPage } from "../../themes/default/email.js";
-import { WebPage } from "../../themes/default/web.js";
-import { IndexPage } from "../../themes/default/index.js";
 
 interface BuildOptions {
   configDir: string;
   includeDrafts: boolean;
 }
 
+const themesDir = resolve(import.meta.dirname, "../../themes/default");
+
 export async function runBuild(options: BuildOptions): Promise<void> {
   const { configDir, includeDrafts } = options;
+
+  const bust = `?v=${Date.now()}`;
+  const [{ EmailPage }, { WebPage }, { IndexPage }] = await Promise.all([
+    import(`${themesDir}/email.ts${bust}`),
+    import(`${themesDir}/web.ts${bust}`),
+    import(`${themesDir}/index.ts${bust}`),
+  ]);
 
   const config = await loadConfig(configDir);
   const allIssues = await scanIssuesDir(config.issues_dir);
