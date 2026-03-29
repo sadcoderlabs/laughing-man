@@ -23,7 +23,6 @@ export function IndexPage({ issues, config }: IndexProps): string {
       <a class="feed-row" href="/issues/${issue.issue}/">
         <span class="feed-marker">&gt;</span>
         <span class="feed-issue">${String(issue.issue).padStart(2, "0")}</span>
-        <span class="feed-fill" aria-hidden="true"></span>
         <span class="feed-title">${escapeHtml(issue.title)}</span>
       </a>
     </li>`,
@@ -46,7 +45,7 @@ export function IndexPage({ issues, config }: IndexProps): string {
     <a class="site-name" href="/">${escapeHtml(config.name)}</a>
     <nav class="site-nav">
       <a href="#subscribe">Subscribe</a>
-      <a href="#archive">Archive</a>
+      <a href="#archive">Archives</a>
     </nav>
   </header>
   <main>
@@ -69,11 +68,11 @@ export function IndexPage({ issues, config }: IndexProps): string {
       <p class="hero-stat">${sorted.length} published</p>
     </section>
     <section id="archive" class="feed">
-      <p class="feed-label" aria-hidden="true">Feed</p>
+      <p class="feed-label" aria-hidden="true">Archives</p>
       <ul class="feed-list" aria-label="Published issues">
         ${feedItems}
       </ul>
-      <p class="feed-end">End of Archive</p>
+      <p class="feed-end">End of Archives</p>
     </section>
   </main>
   <footer class="site-footer">

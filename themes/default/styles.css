@@ -286,14 +286,6 @@ strong {
   flex-shrink: 0;
 }
 
-.feed-fill {
-  flex: 1;
-  border-block-end: 1px dashed var(--text-muted);
-  min-inline-size: 1rem;
-  margin-block-end: 0.25em;
-  opacity: 0.25;
-}
-
 .feed-title {
   font-size: 1.05rem;
   font-weight: 500;
@@ -553,10 +545,6 @@ del {
 
   .feed-row {
     gap: 0.5rem;
-  }
-
-  .feed-fill {
-    display: none;
   }
 }
 
