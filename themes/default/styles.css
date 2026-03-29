@@ -328,7 +328,12 @@ strong {
   font-family: var(--font-mono);
   font-size: 0.82rem;
   color: var(--text-muted);
+  transition: color 0.2s ease;
   flex-shrink: 0;
+}
+
+.feed-row:hover .feed-marker {
+  color: var(--accent);
 }
 
 .feed-issue {
@@ -343,9 +348,11 @@ strong {
   font-size: 1.05rem;
   font-weight: 500;
   color: var(--text);
+  transition: color 0.2s ease;
 }
 
 .feed-row:hover .feed-title {
+  color: var(--accent);
   text-decoration: underline;
 }
 
