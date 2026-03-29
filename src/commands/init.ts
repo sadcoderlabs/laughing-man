@@ -9,6 +9,9 @@ import {
 import { join, dirname } from "node:path";
 
 const TEMPLATE = `name: "My Newsletter"
+# description: |
+#   New issues arrive by email.
+#   The archive stays open.
 url: "https://example.com"
 
 issues_dir: .

@@ -5,6 +5,7 @@ import type { SiteConfig } from "../types.js";
 
 const ConfigSchema = z.object({
   name: z.string(),
+  description: z.string().optional(),
   url: z.url(),
   issues_dir: z.string().default("."),
   attachments_dir: z.string().optional(),

@@ -15,6 +15,7 @@ export interface IssueData {
 
 export interface SiteConfig {
   name: string;
+  description?: string;
   url: string;
   issues_dir: string;           // Resolved absolute path
   attachments_dir?: string;     // Resolved absolute path (optional)

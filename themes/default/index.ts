@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { marked } from "marked";
 import type { SiteConfig, IssueData } from "../../src/types.js";
 import { escapeHtml } from "./escape.js";
 import { laughingManLogo } from "./logo.js";
@@ -52,9 +53,9 @@ export function IndexPage({ issues, config }: IndexProps): string {
         ${laughingManLogo}
       </div>
       <h1>${escapeHtml(config.name)}</h1>
-      <p class="hero-summary">
-        New issues arrive by email. The archive stays open.
-      </p>
+      <div class="hero-summary">
+        ${config.description ? marked.parse(config.description) : "<p>New issues arrive by email. The archive stays open.</p>"}
+      </div>
       <div id="subscribe">
         <form class="subscribe-form" id="subscribe-form">
           <label class="visually-hidden" for="email">Email address</label>
