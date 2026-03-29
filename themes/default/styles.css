@@ -437,11 +437,19 @@ strong {
   text-decoration-color: var(--accent);
 }
 
-.issue-body img,
-iframe {
+.issue-body img {
   display: block;
   max-inline-size: 100%;
   block-size: auto;
+  border-radius: 0.5rem;
+  border: 1px solid var(--line);
+}
+
+.issue-body iframe {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 16 / 9;
   border-radius: 0.5rem;
   border: 1px solid var(--line);
 }
