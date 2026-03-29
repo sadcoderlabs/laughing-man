@@ -16,6 +16,7 @@ const FrontmatterSchema = z.object({
         ? "status is required"
         : `status must be 'draft' or 'ready', got '${iss.input}'`,
   }),
+  title: z.string().optional(),
 });
 
 function extractTitle(markdown: string): string {
@@ -35,7 +36,7 @@ export async function parseIssueFile(filePath: string): Promise<IssueData> {
   }
 
   const { issue, status } = result.data;
-  const title = extractTitle(content);
+  const title = result.data.title ?? extractTitle(content);
   const html = await marked(content);
 
   return {
