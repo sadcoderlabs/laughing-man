@@ -75,15 +75,6 @@ body::before {
       transparent 0.5deg,
       transparent 15deg
     ),
-    /* Stronger cardinal perspective lines (0/90/180/270) */
-    conic-gradient(
-      from 0deg at 50% 50%,
-      rgba(140, 180, 220, 0.15) 0.5deg, transparent 1deg,
-      transparent 89.5deg, rgba(140, 180, 220, 0.15) 90.5deg, transparent 91deg,
-      transparent 179.5deg, rgba(140, 180, 220, 0.15) 180.5deg, transparent 181deg,
-      transparent 269.5deg, rgba(140, 180, 220, 0.15) 270.5deg, transparent 271deg,
-      transparent 360deg
-    ),
     /* Blue beam - horizontal upper band */
     linear-gradient(180deg, transparent 25%, rgba(80, 170, 255, 0.06) 31%, rgba(120, 200, 255, 0.16) 35%, rgba(80, 170, 255, 0.06) 39%, transparent 45%),
     /* Blue beam - horizontal lower band */
@@ -100,7 +91,6 @@ body::before {
     radial-gradient(ellipse 55% 45% at 50% 48%, rgba(225, 238, 252, 0.6) 0%, transparent 65%);
   background-size:
     60px 60px,
-    100% 100%,
     100% 100%,
     100% 100%,
     100% 100%,
