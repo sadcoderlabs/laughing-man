@@ -1,5 +1,5 @@
 name: Your Newsletter Name
-description: A newsletter made by [Your Name](https://blog.example.com)
+description: A newsletter by [Your Name](https://blog.example.com)
 url: "https://newsletter.example.com"
 issues_dir: .
 attachments_dir: .
