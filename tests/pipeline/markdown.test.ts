@@ -154,6 +154,52 @@ Content.
     expect(result.title).toBe("First Heading");
   });
 
+  it("parses the date field", async () => {
+    const content = `---
+issue: 1
+status: ready
+date: 2026-03-15
+---
+
+# My Issue
+`;
+    const filePath = join(tmpDir, "issue-1.md");
+    writeFileSync(filePath, content);
+
+    const result = await parseIssueFile(filePath);
+    expect(result.date).toBe("2026-03-15");
+  });
+
+  it("leaves date undefined when not provided", async () => {
+    const content = `---
+issue: 1
+status: draft
+---
+
+# My Issue
+`;
+    const filePath = join(tmpDir, "issue-1.md");
+    writeFileSync(filePath, content);
+
+    const result = await parseIssueFile(filePath);
+    expect(result.date).toBeUndefined();
+  });
+
+  it("throws on invalid date format", async () => {
+    const content = `---
+issue: 1
+status: ready
+date: March 15, 2026
+---
+
+# My Issue
+`;
+    const filePath = join(tmpDir, "bad.md");
+    writeFileSync(filePath, content);
+
+    await expect(parseIssueFile(filePath)).rejects.toThrow("YYYY-MM-DD");
+  });
+
   it("ignores # headings inside fenced code blocks", async () => {
     const content = `---
 issue: 1

@@ -7,6 +7,7 @@ function makeIssue(overrides: Partial<IssueData> = {}): IssueData {
     issue: 1,
     status: "ready",
     title: "My Title",
+    date: "2026-03-15",
     filePath: "/newsletter/issue-1.md",
     rawContent: "# My Title\n\nContent here.",
     html: "<h1>My Title</h1><p>Content here.</p>",
@@ -58,6 +59,16 @@ describe("validateIssues", () => {
 
   it("accepts a single ready issue", () => {
     const issues = [makeIssue({ status: "ready" })];
+    expect(() => validateIssues(issues)).not.toThrow();
+  });
+
+  it("throws if ready issue is missing a date", () => {
+    const issues = [makeIssue({ status: "ready", date: undefined })];
+    expect(() => validateIssues(issues)).toThrow("missing a 'date' field");
+  });
+
+  it("accepts draft issues without a date", () => {
+    const issues = [makeIssue({ status: "draft", date: undefined })];
     expect(() => validateIssues(issues)).not.toThrow();
   });
 });

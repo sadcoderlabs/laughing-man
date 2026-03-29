@@ -12,6 +12,15 @@ export function validateIssues(issues: IssueData[]): void {
     }
   }
 
+  // Check for ready issues missing a date
+  for (const issue of issues) {
+    if (issue.status === "ready" && !issue.date) {
+      errors.push(
+        `Issue ${issue.issue} (${issue.filePath}) has status 'ready' but is missing a 'date' field`
+      );
+    }
+  }
+
   // Check for duplicate issue numbers
   const seen = new Map<number, string>();
   for (const issue of issues) {

@@ -2,12 +2,14 @@ export interface FrontmatterRaw {
   issue: number;
   status: "draft" | "ready";
   title?: string;
+  date?: string;
 }
 
 export interface IssueData {
   issue: number;
   status: "draft" | "ready";
   title: string;       // Extracted from first # heading in body
+  date?: string;       // YYYY-MM-DD, required when status is "ready"
   filePath: string;    // Absolute path to source .md file
   rawContent: string;  // Markdown body (frontmatter stripped)
   html: string;        // Rendered HTML from markdown (before image rewriting)

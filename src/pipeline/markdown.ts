@@ -17,6 +17,10 @@ const FrontmatterSchema = z.object({
         : `status must be 'draft' or 'ready', got '${iss.input}'`,
   }),
   title: z.string().optional(),
+  date: z.preprocess(
+    (val) => val instanceof Date ? val.toISOString().slice(0, 10) : val,
+    z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be in YYYY-MM-DD format"),
+  ).optional(),
 });
 
 function extractTitle(markdown: string): string {
@@ -35,7 +39,7 @@ export async function parseIssueFile(filePath: string): Promise<IssueData> {
     throw new Error(`${filePath}: invalid frontmatter — ${messages}`);
   }
 
-  const { issue, status } = result.data;
+  const { issue, status, date } = result.data;
   const title = result.data.title ?? extractTitle(content);
   const html = await marked(content);
 
@@ -43,6 +47,7 @@ export async function parseIssueFile(filePath: string): Promise<IssueData> {
     issue,
     status,
     title,
+    date,
     filePath,
     rawContent: content,
     html,

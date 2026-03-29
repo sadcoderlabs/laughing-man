@@ -33,7 +33,7 @@ env: {}
   it("generates index.html and issue pages", async () => {
     writeFileSync(
       join(tmpDir, "issues", "issue-1.md"),
-      "---\nissue: 1\nstatus: ready\n---\n# Issue One\n\nHello.\n"
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Issue One\n\nHello.\n"
     );
 
     await runBuild({ configDir: tmpDir, includeDrafts: false });
@@ -46,7 +46,7 @@ env: {}
   it("excludes draft issues from build output", async () => {
     writeFileSync(
       join(tmpDir, "issues", "issue-1.md"),
-      "---\nissue: 1\nstatus: ready\n---\n# Issue One\n\nReady.\n"
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Issue One\n\nReady.\n"
     );
     writeFileSync(
       join(tmpDir, "issues", "issue-2.md"),
@@ -76,11 +76,11 @@ env: {}
   it("throws on duplicate issue numbers", async () => {
     writeFileSync(
       join(tmpDir, "issues", "a.md"),
-      "---\nissue: 1\nstatus: ready\n---\n# Issue A\n"
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Issue A\n"
     );
     writeFileSync(
       join(tmpDir, "issues", "b.md"),
-      "---\nissue: 1\nstatus: ready\n---\n# Issue B\n"
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Issue B\n"
     );
 
     await expect(runBuild({ configDir: tmpDir, includeDrafts: false })).rejects.toThrow(
@@ -91,7 +91,7 @@ env: {}
   it("index.html contains issue titles", async () => {
     writeFileSync(
       join(tmpDir, "issues", "issue-1.md"),
-      "---\nissue: 1\nstatus: ready\n---\n# Hello World\n\nContent.\n"
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Hello World\n\nContent.\n"
     );
 
     await runBuild({ configDir: tmpDir, includeDrafts: false });

@@ -26,6 +26,7 @@ export function IndexPage({ issues, config }: IndexProps): string {
         <span class="feed-marker">&gt;</span>
         <span class="feed-issue">${String(issue.issue).padStart(2, "0")}</span>
         <span class="feed-title">${escapeHtml(issue.title)}</span>
+        <span class="feed-meta">${issue.status === "draft" ? "(draft)" : issue.date ?? ""}</span>
       </a>
     </li>`,
     )

@@ -356,6 +356,15 @@ strong {
   text-decoration: underline;
 }
 
+.feed-meta {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-inline-start: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .feed-empty {
   font-family: var(--font-mono);
   font-size: 0.85rem;
