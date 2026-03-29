@@ -31,10 +31,10 @@ describe("runInit", () => {
     expect(content).toContain("# domain:");
   });
 
-  it("copies skill file to .claude/skills/", async () => {
+  it("copies skill file to .claude/skills/laughing-man/", async () => {
     await runInit(tmpDir);
 
-    const skillPath = join(tmpDir, ".claude", "skills", "laughing-man.md");
+    const skillPath = join(tmpDir, ".claude", "skills", "laughing-man", "SKILL.md");
     expect(existsSync(skillPath)).toBe(true);
 
     const content = readFileSync(skillPath, "utf8");
@@ -42,13 +42,13 @@ describe("runInit", () => {
   });
 
   it("does not overwrite existing skill file", async () => {
-    const skillDir = join(tmpDir, ".claude", "skills");
+    const skillDir = join(tmpDir, ".claude", "skills", "laughing-man");
     mkdirSync(skillDir, { recursive: true });
-    writeFileSync(join(skillDir, "laughing-man.md"), "custom content");
+    writeFileSync(join(skillDir, "SKILL.md"), "custom content");
 
     await runInit(tmpDir);
 
-    const content = readFileSync(join(skillDir, "laughing-man.md"), "utf8");
+    const content = readFileSync(join(skillDir, "SKILL.md"), "utf8");
     expect(content).toBe("custom content");
   });
 });

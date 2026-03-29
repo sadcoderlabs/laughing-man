@@ -52,13 +52,13 @@ export async function runInit(targetDir: string): Promise<void> {
   }
 
   // Copy bundled skill file
-  const skillSrc = join(dirname(import.meta.dir), "..", "skills", "laughing-man.md");
-  const skillDestDir = join(targetDir, ".claude", "skills");
-  const skillDest = join(skillDestDir, "laughing-man.md");
+  const skillSrc = join(dirname(import.meta.dir), "..", "skills", "laughing-man", "SKILL.md");
+  const skillDestDir = join(targetDir, ".claude", "skills", "laughing-man");
+  const skillDest = join(skillDestDir, "SKILL.md");
 
   if (existsSync(skillSrc) && !existsSync(skillDest)) {
     mkdirSync(skillDestDir, { recursive: true });
     copyFileSync(skillSrc, skillDest);
-    console.log("Copied laughing-man skill to .claude/skills/laughing-man.md");
+    console.log("Copied laughing-man skill to .claude/skills/laughing-man/SKILL.md");
   }
 }

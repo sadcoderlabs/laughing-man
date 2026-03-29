@@ -6,7 +6,7 @@ import {
   ensureDomain,
   ensureDnsRecord,
 } from "../../src/pipeline/cloudflare";
-import type Cloudflare from "cloudflare";
+import Cloudflare from "cloudflare";
 
 describe("extractApexDomain", () => {
   it("extracts apex from subdomain", () => {
@@ -23,24 +23,23 @@ describe("extractApexDomain", () => {
 });
 
 describe("verifyAuth", () => {
-  it("returns account name on success", async () => {
+  it("returns account ID on success", async () => {
+    const mockList = mock(() => Promise.resolve([]));
     const mockClient = {
-      accounts: {
-        get: mock(() => Promise.resolve({ name: "my-account" })),
-      },
+      pages: { projects: { list: mockList } },
     } as unknown as Cloudflare;
 
-    const name = await verifyAuth(mockClient, "acc_123");
-    expect(name).toBe("my-account");
-    expect(mockClient.accounts.get).toHaveBeenCalledWith({
-      account_id: "acc_123",
-    });
+    const result = await verifyAuth(mockClient, "acc_123");
+    expect(result).toBe("acc_123");
+    expect(mockList).toHaveBeenCalledWith({ account_id: "acc_123" });
   });
 
   it("throws on invalid token", async () => {
     const mockClient = {
-      accounts: {
-        get: mock(() => Promise.reject(new Error("Unauthorized"))),
+      pages: {
+        projects: {
+          list: mock(() => Promise.reject(new Error("Unauthorized"))),
+        },
       },
     } as unknown as Cloudflare;
 
@@ -75,8 +74,7 @@ describe("ensureProject", () => {
   });
 
   it("creates project when it does not exist", async () => {
-    const notFound = new Error("Not found");
-    Object.defineProperty(notFound, "status", { value: 404 });
+    const notFound = new Cloudflare.APIError(404, undefined, "Not found", undefined);
 
     const mockClient = {
       pages: {
