@@ -1,5 +1,12 @@
-import { existsSync, writeFileSync, readFileSync, appendFileSync } from "node:fs";
-import { join } from "node:path";
+import {
+  existsSync,
+  writeFileSync,
+  readFileSync,
+  appendFileSync,
+  mkdirSync,
+  copyFileSync,
+} from "node:fs";
+import { join, dirname } from "node:path";
 
 const TEMPLATE = `name: "My Newsletter"
 url: "https://example.com"
@@ -10,6 +17,7 @@ issues_dir: .
 web_hosting:
   provider: cloudflare-pages
   project: my-newsletter
+  # domain: newsletter.example.com
 
 email_hosting:
   from: "Your Name <you@example.com>"
@@ -17,8 +25,10 @@ email_hosting:
   provider: resend
 
 env:
-  resend_api_key: "re_xxxxx" # or set RESEND_API_KEY env var
-  resend_audience_id: "aud_xxxxx" # or set RESEND_AUDIENCE_ID env var
+  cloudflare_api_token: "cf_xxxxx" # or set CLOUDFLARE_API_TOKEN env var
+  cloudflare_account_id: "xxxxx"   # or set CLOUDFLARE_ACCOUNT_ID env var
+  resend_api_key: "re_xxxxx"       # or set RESEND_API_KEY env var
+  resend_audience_id: "aud_xxxxx"  # or set RESEND_AUDIENCE_ID env var
 `;
 
 export async function runInit(targetDir: string): Promise<void> {
@@ -36,5 +46,16 @@ export async function runInit(targetDir: string): Promise<void> {
   if (!existing.split("\n").some((line) => line.trim() === "output/")) {
     appendFileSync(gitignorePath, "\noutput/\n");
     console.log(`Added output/ to .gitignore`);
+  }
+
+  // Copy bundled skill file
+  const skillSrc = join(dirname(import.meta.dir), "..", "skills", "laughing-man.md");
+  const skillDestDir = join(targetDir, ".claude", "skills");
+  const skillDest = join(skillDestDir, "laughing-man.md");
+
+  if (existsSync(skillSrc) && !existsSync(skillDest)) {
+    mkdirSync(skillDestDir, { recursive: true });
+    copyFileSync(skillSrc, skillDest);
+    console.log("Copied laughing-man skill to .claude/skills/laughing-man.md");
   }
 }
