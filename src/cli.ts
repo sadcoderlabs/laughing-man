@@ -4,6 +4,7 @@ import { runBuild } from "./commands/build.js";
 import { runPreview } from "./commands/preview.js";
 import { runDeploy } from "./commands/deploy.js";
 import { runSend } from "./commands/send.js";
+import { runSetupWeb } from "./commands/setup-web.js";
 
 const args = process.argv.slice(2);
 const configDir = process.cwd();
@@ -16,6 +17,7 @@ async function main(): Promise<void> {
 
 Commands:
   init              Generate laughing-man.yaml in the current directory
+  setup web         Create Cloudflare Pages project + custom domain + DNS
   build             Validate + build site and email HTML
   preview           Build (including drafts) + start local preview server
   deploy            Deploy output/website/ to Cloudflare Pages
@@ -24,6 +26,7 @@ Commands:
 
 Examples:
   laughing-man init
+  laughing-man setup web
   laughing-man build
   laughing-man preview
   laughing-man deploy
@@ -52,6 +55,20 @@ Examples:
 
       case "deploy": {
         await runDeploy({ configDir });
+        break;
+      }
+
+      case "setup": {
+        const subcommand = args[1];
+        if (subcommand !== "web") {
+          console.error(
+            subcommand
+              ? `Unknown setup subcommand: ${subcommand}`
+              : "Usage: laughing-man setup web",
+          );
+          process.exit(1);
+        }
+        await runSetupWeb({ configDir });
         break;
       }
 
