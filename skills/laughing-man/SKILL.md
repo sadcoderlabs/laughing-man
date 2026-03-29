@@ -61,6 +61,8 @@ Walk the user through creating a scoped token:
 4. Permissions:
    - **Account | Cloudflare Pages | Edit** (required for creating/deploying Pages projects)
    - **Zone | DNS | Edit** (only if using a custom domain on Cloudflare DNS)
+   - **Account | Workers Tail | Read** (required for `wrangler pages deployment tail` to stream live logs)
+   - **User | Memberships | Read** (required by wrangler to discover which accounts the token can access)
    - No other permissions needed. Account Settings Read is NOT required.
 5. Account Resources: Include > Specific account > (their account)
 6. Zone Resources: Include > Specific zone > (their zone, only if custom domain)
