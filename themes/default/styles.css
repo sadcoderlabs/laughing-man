@@ -7,7 +7,8 @@
   --line: rgba(0, 85, 119, 0.1);
   --success: #1a7a3a;
   --danger: #b83030;
-  --content-width: 52rem;
+  --content-width: 75rem;
+  --reading-width: 64rem;
   --header-height: 3.5rem;
   --font-sans: "Space Grotesk", "Noto Sans TC", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
@@ -221,7 +222,7 @@ strong {
 /* ─── Index: Feed ─── */
 
 .feed {
-  max-inline-size: var(--content-width);
+  max-inline-size: var(--reading-width);
   margin-inline: auto;
   padding: 0 clamp(1.25rem, 4vw, 2.5rem) clamp(3rem, 6vw, 5rem);
   animation: fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both 0.12s;
@@ -375,6 +376,8 @@ strong {
 /* ─── Issue: Body typography ─── */
 
 .issue-body {
+  max-inline-size: var(--reading-width);
+  margin-inline: auto;
   font-size: 1.125rem;
   line-height: 1.75;
 }
