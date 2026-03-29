@@ -22,7 +22,7 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
     <a class="site-name" href="/">${escapeHtml(config.name)}</a>
     <nav class="site-nav">
       <a href="/#subscribe">Subscribe</a>
-      <a href="/">Archives</a>
+      <a href="/#archive">Archives</a>
     </nav>
   </header>
   <main class="issue-main">
@@ -36,7 +36,7 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
       </article>
     </section>
     <nav class="issue-back">
-      <a href="/">&lt; Back to Archives</a>
+      <a href="/#archive">&lt; Back to Archives</a>
     </nav>
   </main>
   <footer class="site-footer">
