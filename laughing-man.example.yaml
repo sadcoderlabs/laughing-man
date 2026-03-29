@@ -1,6 +1,6 @@
-name: "The Net is Vast and Infinite"
-url: "https://thenetisvastandinfinite.com"
-
+name: Your Newsletter Name
+description: A newsletter made by [Your Name](https://example.com)
+url: "https://example.com"
 issues_dir: .
 attachments_dir: ../Attachments
 
@@ -9,10 +9,6 @@ web_hosting:
   project: laughing-man
 
 email_hosting:
-  from: "Vinta <vinta@thenetisvastandinfinite.com>"
-  reply_to: vinta@thenetisvastandinfinite.com
+  from: "Your Name <newsletter@example.com>"
+  reply_to: newsletter@example.com
   provider: resend
-
-env:
-  resend_api_key: "re_xxxxx" # or set RESEND_API_KEY env var
-  resend_audience_id: "aud_xxxxx" # or set RESEND_AUDIENCE_ID env var
