@@ -24,12 +24,12 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
   <header class="site-header">
     <a class="site-name" href="/">${escapeHtml(config.name)}</a>
     <nav class="site-nav">
-      <a href="/">archive</a>
+      <a href="/">Archive</a>
     </nav>
   </header>
   <main class="issue-main">
     <section class="issue-hero">
-      <p class="issue-meta">issue #${issue}</p>
+      <p class="issue-meta">Issue #${issue}</p>
       <h1>${escapeHtml(title)}</h1>
       <div class="issue-hero-emblem" aria-hidden="true">
         ${laughingManLogo}
@@ -43,11 +43,11 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
   </main>
   <footer class="site-footer">
     <div class="footer-rule" aria-hidden="true"></div>
-    <p class="footer-comment">// end of transmission</p>
+    <p class="footer-comment">// End of Transmission</p>
     <nav class="footer-nav" aria-label="Footer">
-      <a href="/">archive</a>
+      <a href="/">Archive</a>
       <span class="footer-sep" aria-hidden="true">&middot;</span>
-      <a href="/#subscribe">subscribe</a>
+      <a href="/#subscribe">Subscribe</a>
     </nav>
     <p class="footer-name">${escapeHtml(config.name)}</p>
   </footer>

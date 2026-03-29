@@ -45,8 +45,8 @@ export function IndexPage({ issues, config }: IndexProps): string {
   <header class="site-header">
     <a class="site-name" href="/">${escapeHtml(config.name)}</a>
     <nav class="site-nav">
-      <a href="#subscribe">subscribe</a>
-      <a href="#archive">archive</a>
+      <a href="#subscribe">Subscribe</a>
+      <a href="#archive">Archive</a>
     </nav>
   </header>
   <main>
@@ -62,14 +62,14 @@ export function IndexPage({ issues, config }: IndexProps): string {
         <form class="subscribe-form" id="subscribe-form">
           <label class="visually-hidden" for="email">Email address</label>
           <input id="email" type="email" name="email" placeholder="your@email.com" required>
-          <button type="submit">subscribe</button>
+          <button type="submit">Subscribe</button>
         </form>
         <p class="subscribe-message" id="subscribe-message" hidden></p>
       </div>
       <p class="hero-stat">${sorted.length} published</p>
     </section>
     <section id="archive" class="feed">
-      <p class="feed-label" aria-hidden="true">feed</p>
+      <p class="feed-label" aria-hidden="true">Feed</p>
       <ul class="feed-list" aria-label="Published issues">
         ${feedItems}
       </ul>
@@ -77,13 +77,13 @@ export function IndexPage({ issues, config }: IndexProps): string {
   </main>
   <footer class="site-footer">
     <div class="footer-rule" aria-hidden="true"></div>
-    <p class="footer-comment">// end of archive</p>
+    <p class="footer-comment">// End of Archive</p>
     <nav class="footer-nav" aria-label="Footer">
-      <a href="#subscribe">subscribe</a>
+      <a href="#subscribe">Subscribe</a>
       <span class="footer-sep" aria-hidden="true">&middot;</span>
-      <a href="#archive">archive</a>
+      <a href="#archive">Archive</a>
       <span class="footer-sep" aria-hidden="true">&middot;</span>
-      <a href="#">top</a>
+      <a href="#">Top</a>
     </nav>
     <p class="footer-name">${escapeHtml(config.name)}</p>
   </footer>
@@ -102,7 +102,7 @@ export function IndexPage({ issues, config }: IndexProps): string {
         });
         const data = await res.json();
         if (data.ok) {
-          msg.textContent = 'subscribed';
+          msg.textContent = 'Subscribed';
           msg.className = 'subscribe-message success';
           form.reset();
         } else {
@@ -110,7 +110,7 @@ export function IndexPage({ issues, config }: IndexProps): string {
           msg.className = 'subscribe-message error';
         }
       } catch {
-        msg.textContent = 'something went wrong';
+        msg.textContent = 'Something went wrong';
         msg.className = 'subscribe-message error';
       }
       msg.hidden = false;
