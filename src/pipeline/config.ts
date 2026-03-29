@@ -11,6 +11,7 @@ const ConfigSchema = z.object({
   web_hosting: z.object({
     provider: z.literal("cloudflare-pages"),
     project: z.string(),
+    domain: z.string().optional(),
   }),
   email_hosting: z.object({
     from: z.string(),
@@ -18,6 +19,8 @@ const ConfigSchema = z.object({
     provider: z.literal("resend"),
   }),
   env: z.object({
+    cloudflare_api_token: z.string().optional(),
+    cloudflare_account_id: z.string().optional(),
     resend_api_key: z.string().optional(),
     resend_audience_id: z.string().optional(),
   }).default({}),
@@ -66,6 +69,16 @@ export async function loadConfig(configDir: string): Promise<SiteConfig> {
     dotEnvVars.RESEND_AUDIENCE_ID ??
     parsed.env.resend_audience_id;
 
+  const cloudflare_api_token =
+    process.env.CLOUDFLARE_API_TOKEN ??
+    dotEnvVars.CLOUDFLARE_API_TOKEN ??
+    parsed.env.cloudflare_api_token;
+
+  const cloudflare_account_id =
+    process.env.CLOUDFLARE_ACCOUNT_ID ??
+    dotEnvVars.CLOUDFLARE_ACCOUNT_ID ??
+    parsed.env.cloudflare_account_id;
+
   function resolvePath(p: string): string {
     return isAbsolute(p) ? p : resolve(configDir, p);
   }
@@ -74,7 +87,7 @@ export async function loadConfig(configDir: string): Promise<SiteConfig> {
     ...parsed,
     issues_dir: resolvePath(parsed.issues_dir),
     attachments_dir: parsed.attachments_dir ? resolvePath(parsed.attachments_dir) : undefined,
-    env: { resend_api_key, resend_audience_id },
+    env: { cloudflare_api_token, cloudflare_account_id, resend_api_key, resend_audience_id },
     configDir,
   };
 }

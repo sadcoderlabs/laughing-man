@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@11ty/gray-matter": "2.0.1",
+    "cloudflare": "5.2.0",
     "marked": "17.0.5",
     "resend": "6.9.4",
     "zod": "4.3.6"

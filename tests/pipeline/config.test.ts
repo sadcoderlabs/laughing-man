@@ -102,6 +102,122 @@ env: {}
     await expect(loadConfig(tmpDir)).rejects.toThrow();
   });
 
+  it("parses optional web_hosting.domain field", async () => {
+    const yaml = `
+name: "Test Newsletter"
+url: "https://example.com"
+issues_dir: .
+web_hosting:
+  provider: cloudflare-pages
+  project: my-newsletter
+  domain: newsletter.example.com
+email_hosting:
+  from: "Test <test@example.com>"
+  provider: resend
+env: {}
+`.trim();
+    writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
+
+    const config = await loadConfig(tmpDir);
+    expect(config.web_hosting.domain).toBe("newsletter.example.com");
+  });
+
+  it("parses Cloudflare credentials from config", async () => {
+    const yaml = `
+name: "Test Newsletter"
+url: "https://example.com"
+issues_dir: .
+web_hosting:
+  provider: cloudflare-pages
+  project: my-newsletter
+email_hosting:
+  from: "Test <test@example.com>"
+  provider: resend
+env:
+  cloudflare_api_token: "cf_test_token"
+  cloudflare_account_id: "abc123"
+  resend_api_key: "re_test"
+`.trim();
+    writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
+
+    const config = await loadConfig(tmpDir);
+    expect(config.env.cloudflare_api_token).toBe("cf_test_token");
+    expect(config.env.cloudflare_account_id).toBe("abc123");
+  });
+
+  it("Cloudflare env vars override config values", async () => {
+    const yaml = `
+name: "Test Newsletter"
+url: "https://example.com"
+issues_dir: .
+web_hosting:
+  provider: cloudflare-pages
+  project: my-newsletter
+email_hosting:
+  from: "Test <test@example.com>"
+  provider: resend
+env:
+  cloudflare_api_token: "cf_from_config"
+  cloudflare_account_id: "id_from_config"
+`.trim();
+    writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
+
+    process.env.CLOUDFLARE_API_TOKEN = "cf_from_env";
+    process.env.CLOUDFLARE_ACCOUNT_ID = "id_from_env";
+
+    try {
+      const config = await loadConfig(tmpDir);
+      expect(config.env.cloudflare_api_token).toBe("cf_from_env");
+      expect(config.env.cloudflare_account_id).toBe("id_from_env");
+    } finally {
+      delete process.env.CLOUDFLARE_API_TOKEN;
+      delete process.env.CLOUDFLARE_ACCOUNT_ID;
+    }
+  });
+
+  it("Cloudflare credentials load from .env file", async () => {
+    const yaml = `
+name: "Test Newsletter"
+url: "https://example.com"
+issues_dir: .
+web_hosting:
+  provider: cloudflare-pages
+  project: my-newsletter
+email_hosting:
+  from: "Test <test@example.com>"
+  provider: resend
+env: {}
+`.trim();
+    writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
+    writeFileSync(
+      join(tmpDir, ".env"),
+      "CLOUDFLARE_API_TOKEN=cf_from_dotenv\nCLOUDFLARE_ACCOUNT_ID=id_from_dotenv\n",
+    );
+
+    const config = await loadConfig(tmpDir);
+    expect(config.env.cloudflare_api_token).toBe("cf_from_dotenv");
+    expect(config.env.cloudflare_account_id).toBe("id_from_dotenv");
+  });
+
+  it("domain field is optional and defaults to undefined", async () => {
+    const yaml = `
+name: "Test Newsletter"
+url: "https://example.com"
+issues_dir: .
+web_hosting:
+  provider: cloudflare-pages
+  project: my-newsletter
+email_hosting:
+  from: "Test <test@example.com>"
+  provider: resend
+env: {}
+`.trim();
+    writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
+
+    const config = await loadConfig(tmpDir);
+    expect(config.web_hosting.domain).toBeUndefined();
+  });
+
   it("resolves attachments_dir relative to config dir", async () => {
     const yaml = `
 name: "Test Newsletter"

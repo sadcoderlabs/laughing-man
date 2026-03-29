@@ -21,6 +21,7 @@ export interface SiteConfig {
   web_hosting: {
     provider: "cloudflare-pages";
     project: string;               // Cloudflare Pages project name
+    domain?: string;               // Custom domain (optional)
   };
   email_hosting: {
     from: string;
@@ -28,6 +29,8 @@ export interface SiteConfig {
     provider: "resend";
   };
   env: {
+    cloudflare_api_token?: string;
+    cloudflare_account_id?: string;
     resend_api_key?: string;
     resend_audience_id?: string;
   };
