@@ -5,12 +5,13 @@ import { runBuild } from "./build.js";
 
 interface PreviewOptions {
   configDir: string;
+  includeDrafts: boolean;
 }
 
 export async function runPreview(options: PreviewOptions): Promise<void> {
-  const { configDir } = options;
+  const { configDir, includeDrafts } = options;
 
-  await runBuild({ configDir, includeDrafts: true });
+  await runBuild({ configDir, includeDrafts });
 
   const config = await loadConfig(configDir);
   const websiteDir = resolve(configDir, "output", "website");
@@ -29,7 +30,7 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
       if (building) return;
       building = true;
       try {
-        await runBuild({ configDir, includeDrafts: true });
+        await runBuild({ configDir, includeDrafts });
         for (const client of clients) {
           try {
             client.enqueue(encoder.encode("data: reload\n\n"));

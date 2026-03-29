@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { marked } from "marked";
 import type { SiteConfig, IssueData } from "../../src/types.js";
 import { escapeHtml } from "./escape.js";
 import { laughingManLogo } from "./logo.js";
@@ -9,9 +10,12 @@ interface IndexProps {
 }
 
 const stylesPath = new URL("styles.css", import.meta.url).pathname;
+const faviconPath = new URL("favicon.svg", import.meta.url).pathname;
 
 export function IndexPage({ issues, config }: IndexProps): string {
   const styles = readFileSync(stylesPath, "utf8");
+  const favicon = readFileSync(faviconPath, "utf8");
+  const faviconDataUri = `data:image/svg+xml,${encodeURIComponent(favicon)}`;
   const sorted = [...issues].sort((a, b) => b.issue - a.issue);
 
   const feedItems = sorted
@@ -33,6 +37,7 @@ export function IndexPage({ issues, config }: IndexProps): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(config.name)}</title>
+  <link rel="icon" type="image/svg+xml" href="${faviconDataUri}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
@@ -52,9 +57,9 @@ export function IndexPage({ issues, config }: IndexProps): string {
         ${laughingManLogo}
       </div>
       <h1>${escapeHtml(config.name)}</h1>
-      <p class="hero-summary">
-        New issues arrive by email. The archive stays open.
-      </p>
+      <div class="hero-summary">
+        ${config.description ? marked.parse(config.description) : "<p>New issues arrive by email. The archive stays open.</p>"}
+      </div>
       <div id="subscribe">
         <form class="subscribe-form" id="subscribe-form">
           <label class="visually-hidden" for="email">Email address</label>
@@ -67,9 +72,9 @@ export function IndexPage({ issues, config }: IndexProps): string {
     <section id="archive" class="feed">
       <p class="feed-label" aria-hidden="true">Archives</p>
       <ul class="feed-list" aria-label="Published issues">
-        ${feedItems}
+        ${feedItems || '<li class="feed-empty">No published issues yet. Subscribe to get notified.</li>'}
       </ul>
-      <p class="feed-end">End of Archives</p>
+      ${feedItems ? '<p class="feed-end">End of Archives</p>' : ""}
     </section>
   </main>
   <footer class="site-footer">
