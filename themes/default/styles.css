@@ -306,10 +306,7 @@ strong {
 
 .feed-label::before,
 .feed-label::after {
-  content: "";
-  flex: 1;
-  block-size: 1px;
-  background: var(--line);
+  display: none;
 }
 
 .feed-list {
