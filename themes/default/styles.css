@@ -47,6 +47,7 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  opacity: 0.55;
   background:
     /* Grid dots at intersections */
     radial-gradient(circle 1.5px at 0 0, rgba(150, 180, 210, 0.45) 0.7px, transparent 1.5px),
