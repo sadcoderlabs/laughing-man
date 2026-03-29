@@ -1,14 +1,21 @@
 name: Your Newsletter Name
-description: A newsletter made by [Your Name](https://example.com)
-url: "https://example.com"
+description: A newsletter made by [Your Name](https://blog.example.com)
+url: "https://newsletter.example.com"
 issues_dir: .
 attachments_dir: ../Attachments
 
 web_hosting:
   provider: cloudflare-pages
   project: laughing-man
+  # domain: newsletter.example.com
 
 email_hosting:
   from: "Your Name <newsletter@example.com>"
   reply_to: newsletter@example.com
   provider: resend
+
+env:
+  cloudflare_api_token: "cf_xxxxx" # or set CLOUDFLARE_API_TOKEN env var
+  cloudflare_account_id: "xxxxx"   # or set CLOUDFLARE_ACCOUNT_ID env var
+  resend_api_key: "re_xxxxx"       # or set RESEND_API_KEY env var
+  resend_audience_id: "aud_xxxxx"  # or set RESEND_AUDIENCE_ID env var
