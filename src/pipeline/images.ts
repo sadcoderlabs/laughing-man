@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, copyFileSync } from "node:fs";
 import { join, dirname, basename, isAbsolute } from "node:path";
+import { escapeHtml } from "../escape.js";
 
 interface ProcessImagesOptions {
   html: string;
@@ -135,7 +136,7 @@ export async function processImages(
     const [fullTag, videoId] = match;
     const titleMatch = fullTag.match(/\btitle="([^"]*)"/);
     const rawAlt = titleMatch ? titleMatch[1] : "YouTube video";
-    const alt = rawAlt.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const alt = escapeHtml(rawAlt);
 
     const thumbnail = `<a href="https://www.youtube.com/watch?v=${videoId}" target="_blank"><img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="${alt}" width="100%" style="width:100%;max-width:100%;border-radius:8px;" /></a>`;
 
