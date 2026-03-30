@@ -38,6 +38,19 @@ export async function runSend(options: SendOptions): Promise<void> {
 
   const resend = new Resend(apiKey);
   const provider = createResendProvider(resend);
+  const html = readFileSync(emailHtmlPath, "utf8");
+
+  if (testAddress) {
+    await provider.sendEmail({
+      to: testAddress,
+      from: config.email_hosting.from,
+      replyTo: config.email_hosting.reply_to,
+      subject: issue.title,
+      html,
+    });
+    console.log(`Test email for issue #${issueNumber} sent to ${testAddress}`);
+    return;
+  }
 
   // Auto-discover segment
   const segments = await provider.listSegments();
@@ -70,20 +83,6 @@ export async function runSend(options: SendOptions): Promise<void> {
     throw new Error(
       `Issue #${issueNumber} already has a Resend broadcast (id: ${alreadyExists.id}, status: ${alreadyExists.status}). Delete it in the Resend dashboard to re-send.`
     );
-  }
-
-  const html = readFileSync(emailHtmlPath, "utf8");
-
-  if (testAddress) {
-    await provider.sendEmail({
-      to: testAddress,
-      from: config.email_hosting.from,
-      replyTo: config.email_hosting.reply_to,
-      subject: issue.title,
-      html,
-    });
-    console.log(`Test email for issue #${issueNumber} sent to ${testAddress}`);
-    return;
   }
 
   if (!yes) {
