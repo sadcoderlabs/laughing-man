@@ -1,6 +1,7 @@
 import { escapeHtml } from "./escape.js";
 
-export function siteHeader(name: string, archiveHref: string): string {
+export function siteHeader(name: string, isIssuePage = false): string {
+  const archiveHref = isIssuePage ? "/#archive" : "#archive";
   return `<header class="site-header">
     <a class="site-name" href="/">${escapeHtml(name)}</a>
     <nav class="site-nav">

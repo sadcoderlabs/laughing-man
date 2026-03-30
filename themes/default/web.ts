@@ -19,7 +19,7 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
   <style>${styles}</style>
 </head>
 <body class="issue-page">
-  ${siteHeader(config.name, "/#archive")}
+  ${siteHeader(config.name, true)}
   <main class="issue-main">
     <section class="issue-hero">
       <div class="issue-emblem" aria-hidden="true">

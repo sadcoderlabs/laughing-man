@@ -24,9 +24,11 @@ const FrontmatterSchema = z.object({
   ).optional(),
 });
 
-async function parseIssueRaw(filePath: string, raw: string): Promise<IssueData> {
-  const { data, content } = matter(raw);
-
+async function parseIssue(
+  filePath: string,
+  data: Record<string, unknown>,
+  content: string,
+): Promise<IssueData> {
   const result = FrontmatterSchema.safeParse(data);
   if (!result.success) {
     const messages = result.error.issues.map((i) => i.message).join(", ");
@@ -49,7 +51,8 @@ async function parseIssueRaw(filePath: string, raw: string): Promise<IssueData> 
 }
 
 export async function parseIssueFile(filePath: string): Promise<IssueData> {
-  return parseIssueRaw(filePath, readFileSync(filePath, "utf8"));
+  const { data, content } = matter(readFileSync(filePath, "utf8"));
+  return parseIssue(filePath, data, content);
 }
 
 export async function scanIssuesDir(issuesDir: string): Promise<IssueData[]> {
@@ -61,16 +64,15 @@ export async function scanIssuesDir(issuesDir: string): Promise<IssueData[]> {
     );
   }
 
-  // Read all files once. If every file lacks frontmatter, suggest `stamp`
+  // Parse all files once. If every file lacks frontmatter, suggest `stamp`
   // instead of throwing cryptic per-file validation errors.
-  const rawContents = files.map((f) => ({
-    filePath: join(issuesDir, f),
-    raw: readFileSync(join(issuesDir, f), "utf8"),
-  }));
+  const entries = files.map((f) => {
+    const filePath = join(issuesDir, f);
+    const { data, content } = matter(readFileSync(filePath, "utf8"));
+    return { filePath, data, content };
+  });
 
-  const allBare = rawContents.every(
-    ({ raw }) => Object.keys(matter(raw).data).length === 0,
-  );
+  const allBare = entries.every(({ data }) => Object.keys(data).length === 0);
 
   if (allBare) {
     throw new Error(
@@ -78,5 +80,5 @@ export async function scanIssuesDir(issuesDir: string): Promise<IssueData[]> {
     );
   }
 
-  return Promise.all(rawContents.map(({ filePath, raw }) => parseIssueRaw(filePath, raw)));
+  return Promise.all(entries.map(({ filePath, data, content }) => parseIssue(filePath, data, content)));
 }

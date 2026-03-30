@@ -58,7 +58,7 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
   <style>${styles}</style>
 </head>
 <body>
-  ${siteHeader(config.name, "#archive")}
+  ${siteHeader(config.name)}
   <main>
     <section class="hero">
       <div class="hero-emblem" aria-hidden="true">
