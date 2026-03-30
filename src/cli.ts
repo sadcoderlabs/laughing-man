@@ -5,6 +5,7 @@ import { runPreview } from "./commands/preview.js";
 import { runDeploy } from "./commands/deploy.js";
 import { runSend } from "./commands/send.js";
 import { runSetupWeb } from "./commands/setup-web.js";
+import { runSetupNewsletter } from "./commands/setup-newsletter.js";
 import { runStamp } from "./commands/stamp.js";
 import { loadConfig } from "./pipeline/config.js";
 
@@ -26,6 +27,7 @@ async function main(): Promise<void> {
 Commands:
   init              Generate laughing-man.yaml in the current directory
   setup web         Create Cloudflare Pages project + custom domain + DNS
+  setup newsletter  Verify Resend API key + sender domain + DNS records
   build             Validate + build site and email HTML
   preview           Build (including drafts) + start local preview server
   stamp             Add frontmatter to .md files that don't have it
@@ -91,13 +93,30 @@ Runs a clean build first to ensure drafts are never included.
 
       case "setup": {
         const subcommand = args[1];
-        if (wantsHelp || subcommand !== "web") {
-          showHelp(`Usage: laughing-man setup web
+        if (subcommand === "web") {
+          if (wantsHelp) {
+            showHelp(`Usage: laughing-man setup web
 
 Create a Cloudflare Pages project with custom domain and DNS.
 `);
+          }
+          await runSetupWeb({ configDir });
+        } else if (subcommand === "newsletter") {
+          if (wantsHelp) {
+            showHelp(`Usage: laughing-man setup newsletter
+
+Verify Resend API key, register sender domain, print DNS records, and check verification status.
+`);
+          }
+          await runSetupNewsletter({ configDir });
+        } else {
+          showHelp(`Usage: laughing-man setup <subcommand>
+
+Subcommands:
+  web           Create Cloudflare Pages project + custom domain + DNS
+  newsletter    Verify Resend API key + sender domain + DNS records
+`);
         }
-        await runSetupWeb({ configDir });
         break;
       }
 

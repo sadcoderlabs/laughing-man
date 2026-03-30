@@ -58,7 +58,7 @@ laughing-man deploy             # Deploy to Cloudflare Pages
 Set up Resend and send an issue:
 
 ```bash
-laughing-man setup mail
+laughing-man setup newsletter          # Verify Resend API key + sender domain + DNS
 laughing-man send <issue-number>       # Send an issue via Resend Broadcast
 ```
 

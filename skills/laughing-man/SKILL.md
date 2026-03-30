@@ -13,7 +13,7 @@ Check current state and skip completed steps:
 
 - `laughing-man.yaml` exists with real values (not placeholders)? Skip steps 1-2.
 - `.env` has `CLOUDFLARE_API_TOKEN`? Skip steps 3-4.
-- `.env` has `RESEND_API_KEY` and Pages secret is set? Skip steps 5-6.
+- `.env` has `RESEND_API_KEY` and Pages secret is set? Skip steps 5-6. Run `setup newsletter` to verify domain status.
 - `.md` issue files already exist? Skip step 8.
 
 Tell the user which steps you're skipping and why, then start from the first incomplete step.
@@ -155,6 +155,27 @@ Docs:
 - https://developers.cloudflare.com/dns/cname-flattening/
 - https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-zone-apex/
 
+### 7b. Run setup newsletter
+
+```bash
+bunx @sadcoder/laughing-man setup newsletter
+```
+
+Expected output:
+
+```
+[ok] Resend API key valid
+[ok] Sender domain "send.example.com" exists (status: verified)
+[ok] Segment "General" found (seg_xxxxx)
+
+Setup complete. If you haven't already, set the Resend API key as a Pages secret:
+  bunx wrangler pages secret put RESEND_API_KEY --project-name <project>
+```
+
+If the domain is not yet verified, the command prints the DNS records you need to add (SPF, DKIM, DMARC) and triggers a verification check. Re-run the command after adding the records.
+
+If no sender domain exists yet, the command registers it with Resend automatically (extracted from `email_hosting.from` in `laughing-man.yaml`).
+
 ### 8. Write the first issue
 
 Create a Markdown file (e.g., `001.md`) in the newsletter directory:
@@ -204,5 +225,7 @@ bunx @sadcoder/laughing-man preview --no-drafts  # published issues only
 | "A DNS record managed by Workers already exists" | Another Workers/Pages project owns a record on that host. Managed records can't be deleted from the DNS page directly. Delete the Worker or Pages project that owns the record under Workers & Pages in the dashboard, or use a different domain/subdomain. |
 | Deploy fails with "wrangler not found"  | Run `bun add -D wrangler`                                                                |
 | Custom domain shows 522 error           | Wait for DNS propagation (up to 48h), verify CNAME is correct                            |
+| "Resend API key is invalid"                 | Regenerate at resend.com/api-keys. Must have "Full access" permission.                   |
+| `setup newsletter` shows "not yet verified" | Add the DNS records printed by the command, wait a few minutes, re-run.                  |
 | Subscribe form returns "Failed to subscribe" | Resend secret not set on Pages project. Run `bunx wrangler pages secret put RESEND_API_KEY --project-name <project>`. Verify with `bunx wrangler pages secret list --project-name <project>`. |
 | Subscribe form returns "Invalid request" | Request body is not valid JSON or missing `email` field. Check browser console for errors. |
