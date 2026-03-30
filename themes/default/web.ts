@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import type { IssueProps } from "../../src/types.js";
 import { escapeHtml } from "./escape.js";
+import { laughingManLogo } from "./logo.js";
 
 const stylesPath = new URL("styles.css", import.meta.url).pathname;
 const faviconPath = new URL("favicon.svg", import.meta.url).pathname;
@@ -31,6 +32,9 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
   </header>
   <main class="issue-main">
     <section class="issue-hero">
+      <div class="issue-emblem" aria-hidden="true">
+        ${laughingManLogo}
+      </div>
       <p class="issue-meta">Issue #${issue}</p>
       <h1>${escapeHtml(title)}</h1>
     </section>
