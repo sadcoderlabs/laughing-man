@@ -33,7 +33,6 @@ export interface SiteConfig {
   };
   env: {
     cloudflare_api_token?: string;
-    cloudflare_account_id?: string;
     resend_api_key?: string;
   };
   // Internal: resolved at load time

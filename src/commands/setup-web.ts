@@ -1,7 +1,7 @@
 import { loadConfig } from "../pipeline/config.js";
 import {
   createClient,
-  verifyAuth,
+  discoverAccountId,
   ensureProject,
   ensureDomain,
   ensureDnsRecord,
@@ -15,16 +15,10 @@ export async function runSetupWeb(options: SetupWebOptions) {
   const config = await loadConfig(options.configDir);
 
   const apiToken = config.env.cloudflare_api_token;
-  const accountId = config.env.cloudflare_account_id;
 
   if (!apiToken) {
     throw new Error(
       "Cloudflare API token not found. Set CLOUDFLARE_API_TOKEN env var or add cloudflare_api_token to laughing-man.yaml",
-    );
-  }
-  if (!accountId) {
-    throw new Error(
-      "Cloudflare account ID not found. Set CLOUDFLARE_ACCOUNT_ID env var or add cloudflare_account_id to laughing-man.yaml",
     );
   }
 
@@ -32,9 +26,9 @@ export async function runSetupWeb(options: SetupWebOptions) {
   const projectName = config.web_hosting.project;
   const domain = config.web_hosting.domain;
 
-  // Step 1: Verify auth
-  await verifyAuth(client, accountId);
-  console.log(`[ok] Cloudflare API token valid`);
+  // Step 1: Discover account ID (verifies auth in the process)
+  const accountId = await discoverAccountId(client);
+  console.log(`[ok] Cloudflare API token valid (account: ${accountId})`);
 
   // Step 2: Ensure project
   const projectResult = await ensureProject(client, accountId, projectName);

@@ -1,7 +1,7 @@
 import { describe, expect, it, mock } from "bun:test";
 import {
   extractApexDomain,
-  verifyAuth,
+  discoverAccountId,
   ensureProject,
   ensureDomain,
   ensureDnsRecord,
@@ -22,28 +22,39 @@ describe("extractApexDomain", () => {
   });
 });
 
-describe("verifyAuth", () => {
-  it("returns account ID on success", async () => {
-    const mockList = mock(() => Promise.resolve([]));
+describe("discoverAccountId", () => {
+  it("returns account ID when exactly one account exists", async () => {
     const mockClient = {
-      pages: { projects: { list: mockList } },
+      accounts: { list: mockPageResult([{ id: "acc_123", name: "My Account" }]) },
     } as unknown as Cloudflare;
 
-    const result = await verifyAuth(mockClient, "acc_123");
+    const result = await discoverAccountId(mockClient);
     expect(result).toBe("acc_123");
-    expect(mockList).toHaveBeenCalledWith({ account_id: "acc_123" });
   });
 
-  it("throws on invalid token", async () => {
+  it("throws when no accounts found", async () => {
     const mockClient = {
-      pages: {
-        projects: {
-          list: mock(() => Promise.reject(new Error("Unauthorized"))),
-        },
+      accounts: { list: mockPageResult([]) },
+    } as unknown as Cloudflare;
+
+    await expect(discoverAccountId(mockClient)).rejects.toThrow(
+      /No Cloudflare accounts found/,
+    );
+  });
+
+  it("throws when multiple accounts found", async () => {
+    const mockClient = {
+      accounts: {
+        list: mockPageResult([
+          { id: "acc_1", name: "Account One" },
+          { id: "acc_2", name: "Account Two" },
+        ]),
       },
     } as unknown as Cloudflare;
 
-    await expect(verifyAuth(mockClient, "acc_123")).rejects.toThrow();
+    await expect(discoverAccountId(mockClient)).rejects.toThrow(
+      /Multiple Cloudflare accounts found/,
+    );
   });
 });
 

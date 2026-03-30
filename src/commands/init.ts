@@ -29,7 +29,6 @@ email_hosting:
 
 env:
   cloudflare_api_token: "cf_xxxxx" # or set CLOUDFLARE_API_TOKEN env var
-  cloudflare_account_id: "xxxxx"   # or set CLOUDFLARE_ACCOUNT_ID env var
   resend_api_key: "re_xxxxx"       # or set RESEND_API_KEY env var
 `;
 

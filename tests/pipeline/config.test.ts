@@ -129,14 +129,12 @@ email_hosting:
   provider: resend
 env:
   cloudflare_api_token: "cf_test_token"
-  cloudflare_account_id: "abc123"
   resend_api_key: "re_test"
 `.trim();
     writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
 
     const config = await loadConfig(tmpDir);
     expect(config.env.cloudflare_api_token).toBe("cf_test_token");
-    expect(config.env.cloudflare_account_id).toBe("abc123");
   });
 
   it("Cloudflare env vars override config values", async () => {
@@ -152,20 +150,16 @@ email_hosting:
   provider: resend
 env:
   cloudflare_api_token: "cf_from_config"
-  cloudflare_account_id: "id_from_config"
 `.trim();
     writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
 
     process.env.CLOUDFLARE_API_TOKEN = "cf_from_env";
-    process.env.CLOUDFLARE_ACCOUNT_ID = "id_from_env";
 
     try {
       const config = await loadConfig(tmpDir);
       expect(config.env.cloudflare_api_token).toBe("cf_from_env");
-      expect(config.env.cloudflare_account_id).toBe("id_from_env");
     } finally {
       delete process.env.CLOUDFLARE_API_TOKEN;
-      delete process.env.CLOUDFLARE_ACCOUNT_ID;
     }
   });
 
@@ -185,12 +179,11 @@ env: {}
     writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
     writeFileSync(
       join(tmpDir, ".env"),
-      "CLOUDFLARE_API_TOKEN=cf_from_dotenv\nCLOUDFLARE_ACCOUNT_ID=id_from_dotenv\n",
+      "CLOUDFLARE_API_TOKEN=cf_from_dotenv\n",
     );
 
     const config = await loadConfig(tmpDir);
     expect(config.env.cloudflare_api_token).toBe("cf_from_dotenv");
-    expect(config.env.cloudflare_account_id).toBe("id_from_dotenv");
   });
 
   it("domain field is optional and defaults to undefined", async () => {

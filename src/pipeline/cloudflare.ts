@@ -9,10 +9,25 @@ export function extractApexDomain(domain: string) {
   return parts.slice(-2).join(".");
 }
 
-export async function verifyAuth(client: Cloudflare, accountId: string) {
-  // List Pages projects to verify token + account ID without needing Account Settings Read
-  await client.pages.projects.list({ account_id: accountId });
-  return accountId;
+export async function discoverAccountId(client: Cloudflare) {
+  const accounts = [];
+  for await (const account of client.accounts.list()) {
+    accounts.push(account);
+  }
+
+  if (accounts.length === 0) {
+    throw new Error(
+      "No Cloudflare accounts found for this API token. Check that the token has the correct permissions.",
+    );
+  }
+  if (accounts.length > 1) {
+    const names = accounts.map((a) => `  - ${a.name} (${a.id})`).join("\n");
+    throw new Error(
+      `Multiple Cloudflare accounts found. Set CLOUDFLARE_ACCOUNT_ID to pick one:\n${names}`,
+    );
+  }
+
+  return accounts[0].id;
 }
 
 export async function ensureProject(

@@ -4,7 +4,7 @@ import { join } from "node:path";
 import os from "node:os";
 
 // Mock the cloudflare module before importing setup-web
-const mockVerifyAuth = mock(() => Promise.resolve("test-account"));
+const mockDiscoverAccountId = mock(() => Promise.resolve("acc_123"));
 const mockEnsureProject = mock(() => Promise.resolve({ created: true }));
 const mockEnsureDomain = mock(() => Promise.resolve({ created: true }));
 const mockEnsureDnsRecord = mock((): Promise<{ status: string; domain?: string; target?: string }> =>
@@ -14,7 +14,7 @@ const mockCreateClient = mock(() => ({}));
 
 mock.module("../../src/pipeline/cloudflare", () => ({
   createClient: mockCreateClient,
-  verifyAuth: mockVerifyAuth,
+  discoverAccountId: mockDiscoverAccountId,
   ensureProject: mockEnsureProject,
   ensureDomain: mockEnsureDomain,
   ensureDnsRecord: mockEnsureDnsRecord,
@@ -29,7 +29,6 @@ function minimalYaml(overrides: {
   const domain = overrides.domain ? `\n  domain: ${overrides.domain}` : "";
   const env = overrides.env ?? {
     cloudflare_api_token: "cf_test",
-    cloudflare_account_id: "acc_123",
   };
   const envLines = Object.entries(env)
     .map(([k, v]) => `  ${k}: "${v}"`)
@@ -60,7 +59,7 @@ describe("runSetupWeb", () => {
     spyOn(console, "log").mockImplementation((...args: unknown[]) => {
       logs.push(args.join(" "));
     });
-    mockVerifyAuth.mockReset().mockImplementation(() => Promise.resolve("test-account"));
+    mockDiscoverAccountId.mockReset().mockImplementation(() => Promise.resolve("acc_123"));
     mockEnsureProject.mockReset().mockImplementation(() => Promise.resolve({ created: true }));
     mockEnsureDomain.mockReset().mockImplementation(() => Promise.resolve({ created: true }));
     mockEnsureDnsRecord.mockReset().mockImplementation(() =>
@@ -77,20 +76,10 @@ describe("runSetupWeb", () => {
   it("throws when cloudflare_api_token is missing", async () => {
     writeFileSync(
       join(tmpDir, "laughing-man.yaml"),
-      minimalYaml({ env: { cloudflare_account_id: "acc_123" } }),
+      minimalYaml({ env: { resend_api_key: "re_test" } }),
     );
     await expect(runSetupWeb({ configDir: tmpDir })).rejects.toThrow(
       /Cloudflare API token not found/,
-    );
-  });
-
-  it("throws when cloudflare_account_id is missing", async () => {
-    writeFileSync(
-      join(tmpDir, "laughing-man.yaml"),
-      minimalYaml({ env: { cloudflare_api_token: "cf_test" } }),
-    );
-    await expect(runSetupWeb({ configDir: tmpDir })).rejects.toThrow(
-      /Cloudflare account ID not found/,
     );
   });
 
@@ -99,7 +88,7 @@ describe("runSetupWeb", () => {
 
     await runSetupWeb({ configDir: tmpDir });
 
-    expect(mockVerifyAuth).toHaveBeenCalledTimes(1);
+    expect(mockDiscoverAccountId).toHaveBeenCalledTimes(1);
     expect(mockEnsureProject).toHaveBeenCalledTimes(1);
     expect(mockEnsureDomain).not.toHaveBeenCalled();
     expect(mockEnsureDnsRecord).not.toHaveBeenCalled();
