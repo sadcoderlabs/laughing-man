@@ -6,7 +6,6 @@ import type { SiteConfig } from "../types.js";
 const ConfigSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
-  url: z.url(),
   issues_dir: z.string().default("."),
   attachments_dir: z.string().optional(),
   web_hosting: z.object({
@@ -72,8 +71,13 @@ export async function loadConfig(configDir: string): Promise<SiteConfig> {
     return isAbsolute(p) ? p : resolve(configDir, p);
   }
 
+  const url = parsed.web_hosting.domain
+    ? `https://${parsed.web_hosting.domain}`
+    : `https://${parsed.web_hosting.project}.pages.dev`;
+
   return {
     ...parsed,
+    url,
     issues_dir: resolvePath(parsed.issues_dir),
     attachments_dir: parsed.attachments_dir ? resolvePath(parsed.attachments_dir) : undefined,
     env: { cloudflare_api_token, resend_api_key },

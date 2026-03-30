@@ -43,13 +43,12 @@ Ask the user for each value, then edit `laughing-man.yaml`:
 | Field                    | Ask                            | Example                          |
 | ------------------------ | ------------------------------ | -------------------------------- |
 | `name`                   | Newsletter name?               | "The Laughing Man"               |
-| `url`                    | URL it will be hosted at?      | "https://newsletter.example.com" |
 | `web_hosting.project`    | Cloudflare Pages project name? | "my-newsletter"                  |
 | `web_hosting.domain`     | Custom domain? (optional)      | "newsletter.example.com"         |
 | `email_hosting.from`     | Sender name and email?         | "Vinta <hello@example.com>"      |
 | `email_hosting.reply_to` | Reply-to email? (optional)     | "hello@example.com"              |
 
-If `url` uses a custom domain, remind the user to also set `web_hosting.domain`. Without it, `setup web` skips custom domain and DNS setup.
+The site URL is computed automatically: `https://{domain}` if a custom domain is set, otherwise `https://{project}.pages.dev`.
 
 ### 3. Create a Cloudflare API token
 

@@ -18,7 +18,6 @@ describe("loadConfig", () => {
   it("loads a valid config file", async () => {
     const yaml = `
 name: "Test Newsletter"
-url: "https://example.com"
 issues_dir: .
 web_hosting:
   provider: cloudflare-pages
@@ -34,7 +33,7 @@ env:
     const config = await loadConfig(tmpDir);
 
     expect(config.name).toBe("Test Newsletter");
-    expect(config.url).toBe("https://example.com");
+    expect(config.url).toBe("https://my-newsletter.pages.dev");
     expect(config.issues_dir).toBe(tmpDir); // resolved to absolute
     expect(config.env.resend_api_key).toBe("re_test");
     expect(config.configDir).toBe(tmpDir);
@@ -43,7 +42,6 @@ env:
   it("env vars override config values", async () => {
     const yaml = `
 name: "Test Newsletter"
-url: "https://example.com"
 issues_dir: .
 web_hosting:
   provider: cloudflare-pages
@@ -69,7 +67,6 @@ env:
   it("loads .env file from config directory", async () => {
     const yaml = `
 name: "Test Newsletter"
-url: "https://example.com"
 issues_dir: .
 web_hosting:
   provider: cloudflare-pages
@@ -99,7 +96,6 @@ env: {}
   it("parses optional web_hosting.domain field", async () => {
     const yaml = `
 name: "Test Newsletter"
-url: "https://example.com"
 issues_dir: .
 web_hosting:
   provider: cloudflare-pages
@@ -114,12 +110,12 @@ env: {}
 
     const config = await loadConfig(tmpDir);
     expect(config.web_hosting.domain).toBe("newsletter.example.com");
+    expect(config.url).toBe("https://newsletter.example.com");
   });
 
   it("parses Cloudflare credentials from config", async () => {
     const yaml = `
 name: "Test Newsletter"
-url: "https://example.com"
 issues_dir: .
 web_hosting:
   provider: cloudflare-pages
@@ -140,7 +136,6 @@ env:
   it("Cloudflare env vars override config values", async () => {
     const yaml = `
 name: "Test Newsletter"
-url: "https://example.com"
 issues_dir: .
 web_hosting:
   provider: cloudflare-pages
@@ -166,7 +161,6 @@ env:
   it("Cloudflare credentials load from .env file", async () => {
     const yaml = `
 name: "Test Newsletter"
-url: "https://example.com"
 issues_dir: .
 web_hosting:
   provider: cloudflare-pages
@@ -189,7 +183,6 @@ env: {}
   it("domain field is optional and defaults to undefined", async () => {
     const yaml = `
 name: "Test Newsletter"
-url: "https://example.com"
 issues_dir: .
 web_hosting:
   provider: cloudflare-pages
@@ -208,7 +201,6 @@ env: {}
   it("resolves attachments_dir relative to config dir", async () => {
     const yaml = `
 name: "Test Newsletter"
-url: "https://example.com"
 issues_dir: .
 attachments_dir: ../Attachments
 web_hosting:

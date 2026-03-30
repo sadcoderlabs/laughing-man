@@ -8,7 +8,7 @@ You write Markdown files with whatever apps/tools you like (Obsidian, Logseq, VS
 
 ## Installation
 
-Requires [Bun](https://bun.sh) and a domain.
+Requires [Bun](https://bun.sh) and a domain name.
 
 ```bash
 bun add -g @sadcoder/laughing-man
@@ -22,22 +22,22 @@ bunx @sadcoder/laughing-man --help
 
 ## Usage
 
-### Ask your agent
+### Ask Your Agent
 
 ```prompt
 How do I use this tool? Read https://raw.githubusercontent.com/sadcoderlabs/laughing-man/main/skills/laughing-man/SKILL.md
 ```
 
-### Do it yourself
+### Do It Yourself
 
-Generate `laughing-man.yaml` in the current directory:
+Generate `laughing-man.yaml` in any folder:
 
 ```bash
 cd /path/to/your/markdown/folder/
 laughing-man init
 ```
 
-Build (including drafts) + start local preview server
+Preview your newsletter website with the local server
 
 ```bash
 newsletter/
@@ -62,14 +62,13 @@ laughing-man setup mail
 laughing-man send <issue-number>       # Send an issue via Resend Broadcast
 ```
 
-## Configuration
+## Configurations
 
 `laughing-man init` generates a `laughing-man.yaml` in your newsletter directory:
 
 ```yaml
 name: Your Newsletter Name
 description: A newsletter by [Your Name](https://blog.example.com)
-url: "https://newsletter.example.com"
 issues_dir: .
 attachments_dir: .
 

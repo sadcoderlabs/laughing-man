@@ -13,7 +13,6 @@ describe("runBuild", () => {
 
     const config = `
 name: "Test Newsletter"
-url: "https://example.com"
 issues_dir: ./issues
 web_hosting:
   provider: cloudflare-pages

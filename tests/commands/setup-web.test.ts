@@ -36,7 +36,6 @@ function minimalYaml(overrides: {
 
   return `
 name: "Test Newsletter"
-url: "https://example.com"
 issues_dir: .
 web_hosting:
   provider: cloudflare-pages
