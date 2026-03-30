@@ -1,4 +1,5 @@
 import { loadConfig } from "../pipeline/config.js";
+import Cloudflare from "cloudflare";
 import {
   createClient,
   discoverAccountId,
@@ -54,26 +55,41 @@ export async function runSetupWeb(options: SetupWebOptions) {
     `[ok] Custom domain ${domain} ${domainResult.created ? "added to" : "already on"} Pages project "${projectName}"`,
   );
 
+  if (domainResult.status === "active") {
+    console.log(`[ok] Custom domain ${domain} is active on Pages`);
+  }
+
   // Step 4: Ensure DNS
   const target = `${projectName}.pages.dev`;
-  const dnsResult = await ensureDnsRecord(client, domain, target);
+  let dnsResult;
+  try {
+    dnsResult = await ensureDnsRecord(
+      client,
+      domain,
+      target,
+      domainResult.zoneTag,
+    );
+  } catch (err) {
+    if (err instanceof Cloudflare.APIError && err.status === 403) {
+      throw new Error(
+        `Custom domain setup for "${domain}" requires Zone > DNS > Edit on that specific zone, in addition to Account > Cloudflare Pages > Edit.`,
+      );
+    }
+    throw err;
+  }
 
   if (dnsResult.status === "managed_conflict") {
     console.log(
       `[!!] A DNS record managed by Cloudflare Workers or Pages already exists on ${domain}.`,
     );
-    console.log(
-      `     This may be from another project. To fix, either:`,
-    );
+    console.log(`     This may be from another project. To fix, either:`);
     console.log(
       `     1. Remove the existing DNS record in the Cloudflare dashboard`,
     );
     console.log(
       `     2. Use a different domain or subdomain in laughing-man.yaml`,
     );
-    console.log(
-      `\n     Then re-run 'laughing-man setup web'.`,
-    );
+    console.log(`\n     Then re-run 'laughing-man setup web'.`);
   } else if (dnsResult.status === "external") {
     console.log(`[!!] Domain ${domain} is not on Cloudflare DNS.`);
     console.log(`     Add this record with your DNS provider:\n`);

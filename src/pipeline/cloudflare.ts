@@ -51,6 +51,47 @@ export async function ensureProject(
   }
 }
 
+export async function upsertProjectSecret(
+  client: Cloudflare,
+  accountId: string,
+  projectName: string,
+  secretName: string,
+  secretValue: string,
+) {
+  let project;
+  try {
+    project = await client.pages.projects.get(projectName, {
+      account_id: accountId,
+    });
+  } catch (err) {
+    if (err instanceof Cloudflare.APIError && err.status === 404) {
+      throw new Error(`Pages project "${projectName}" not found`);
+    }
+    throw err;
+  }
+
+  const deploymentConfigs = project.deployment_configs ?? {};
+  const production = deploymentConfigs.production ?? {};
+  const productionEnvVars = production.env_vars ?? {};
+
+  await client.pages.projects.edit(projectName, {
+    account_id: accountId,
+    deployment_configs: {
+      ...deploymentConfigs,
+      production: {
+        ...production,
+        env_vars: {
+          ...productionEnvVars,
+          [secretName]: {
+            type: "secret_text",
+            value: secretValue,
+          },
+        },
+      },
+    },
+  });
+}
+
 export async function ensureDomain(
   client: Cloudflare,
   accountId: string,
@@ -61,14 +102,24 @@ export async function ensureDomain(
     account_id: accountId,
   });
   for await (const d of domains) {
-    if (d.name === domain) return { created: false };
+    if (d.name === domain) {
+      return {
+        created: false,
+        zoneTag: d.zone_tag,
+        status: d.status,
+      };
+    }
   }
 
-  await client.pages.projects.domains.create(projectName, {
+  const createdDomain = await client.pages.projects.domains.create(projectName, {
     account_id: accountId,
     name: domain,
   });
-  return { created: true };
+  return {
+    created: true,
+    zoneTag: createdDomain?.zone_tag,
+    status: createdDomain?.status,
+  };
 }
 
 export type DnsResult =
@@ -81,14 +132,17 @@ export async function ensureDnsRecord(
   client: Cloudflare,
   domain: string,
   target: string,
+  zoneTag?: string,
 ): Promise<DnsResult> {
-  const apex = extractApexDomain(domain);
+  let zoneId = zoneTag;
 
-  // Find zone for the apex domain
-  let zoneId: string | undefined;
-  for await (const zone of client.zones.list({ name: apex })) {
-    zoneId = zone.id;
-    break;
+  if (!zoneId) {
+    const apex = extractApexDomain(domain);
+
+    for await (const zone of client.zones.list({ name: apex })) {
+      zoneId = zone.id;
+      break;
+    }
   }
 
   if (!zoneId) {

@@ -13,7 +13,7 @@ Check current state and skip completed steps:
 
 - `laughing-man.yaml` exists with real values (not placeholders)? Skip steps 1-2.
 - `.env` has `CLOUDFLARE_API_TOKEN`? Skip steps 3-4.
-- `.env` has `RESEND_API_KEY` and Pages secret is set? Skip steps 5-6.
+- `.env` has `RESEND_API_KEY` and Pages secret is set? Skip steps 5-6. Run `setup newsletter` to verify domain status.
 - `.md` issue files already exist? Skip step 8.
 
 Tell the user which steps you're skipping and why, then start from the first incomplete step.
@@ -59,15 +59,15 @@ Walk the user through creating a scoped token:
 3. Token name: `laughing-man`
 4. Permissions:
    - **Account | Cloudflare Pages | Edit** (required for creating/deploying Pages projects)
-   - **Zone | DNS | Edit** (only if using a custom domain on Cloudflare DNS)
-   - **Account | Workers Tail | Read** (required for `wrangler pages deployment tail` to stream live logs)
-   - **User | Memberships | Read** (required by wrangler to discover which accounts the token can access)
+   - **Zone | DNS | Edit** (required when `web_hosting.domain` is set, because `setup web` verifies or creates DNS for that custom domain)
+   - **Account | Workers Tail | Read** (optional, only needed for `wrangler pages deployment tail` to stream live logs)
+   - **User | Memberships | Read** (optional, only needed if another workflow depends on wrangler account discovery)
    - No other permissions needed. Account Settings Read is NOT required.
 5. Account Resources: Include > Specific account > (their account)
-6. Zone Resources: Include > Specific zone > (their zone, only if custom domain)
+6. Zone Resources: Include > Specific zone > (their zone, only if custom domain). Do **not** use "All zones" unless they explicitly want one token to manage DNS across every zone in the account.
 7. "Continue to summary" > "Create Token"
 
-Note: the Pages Edit permission is account-scoped (Cloudflare does not support per-project scoping). This token can manage all Pages projects under the account. DNS Edit is scoped to the specific zone selected.
+Note: the Pages Edit permission is account-scoped (Cloudflare does not support per-project scoping). This token can manage all Pages projects under the account. DNS Edit should be scoped to the specific zone selected for least privilege.
 
 Save the API token (shown only once after creation). The account ID is auto-discovered from the token at runtime.
 
@@ -112,7 +112,9 @@ Add to `.env` in the newsletter directory:
 RESEND_API_KEY=<key>
 ```
 
-Then set it as a **secret** on the Cloudflare Pages project so the subscribe function can access it in production:
+`setup newsletter` now sets this as a **secret** on the Cloudflare Pages project automatically when `CLOUDFLARE_API_TOKEN` is available and the Pages project already exists.
+
+Manual fallback if Cloudflare auth is unavailable or the automatic update fails:
 
 ```bash
 bunx wrangler pages secret put RESEND_API_KEY --project-name <project>
@@ -132,6 +134,7 @@ Expected output (all green):
 [ok] Cloudflare API token valid
 [ok] Pages project "..." created
 [ok] Custom domain ... added to Pages project "..."   # only if domain configured
+[ok] Custom domain ... is active on Pages             # when already verified/working
 [ok] DNS CNAME record created (... -> ....pages.dev)   # only if domain on Cloudflare DNS
 ```
 
@@ -139,6 +142,11 @@ If output shows `[!!]`:
 
 - **DNS not on Cloudflare**: relay the CNAME record to the user so they can add it with their external DNS provider.
 - **Managed DNS conflict** ("A DNS record managed by Workers or Pages already exists"): a different Workers or Pages project already owns a DNS record on that host. Managed records can't be deleted from the DNS page. The user must delete the Worker or Pages project that owns the record (under Workers & Pages in the dashboard), or change `web_hosting.domain` to a different domain/subdomain.
+
+Important:
+
+- `setup web` expects a stable permission set. If `web_hosting.domain` is configured, tell the user to include **Zone | DNS | Edit** for that specific zone even if the domain may already be active.
+- For apex domains on Cloudflare DNS, Cloudflare may use CNAME flattening rather than showing a literal end-state CNAME to the user.
 
 ### Apex domains and CNAME flattening
 
@@ -154,6 +162,29 @@ Docs:
 - https://developers.cloudflare.com/pages/configuration/custom-domains/
 - https://developers.cloudflare.com/dns/cname-flattening/
 - https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-zone-apex/
+
+### 7b. Run setup newsletter
+
+```bash
+bunx @sadcoder/laughing-man setup newsletter
+```
+
+Expected output:
+
+```
+[ok] Resend API key valid
+[ok] Sender domain "send.example.com" exists (status: verified)
+[ok] Segment "General" found (seg_xxxxx)
+[ok] Pages secret RESEND_API_KEY set for project "<project>"   # when CLOUDFLARE_API_TOKEN is available
+
+This allows the subscribe form to work in production.
+```
+
+If the domain is not yet verified, the command prints the DNS records you need to add (SPF, DKIM, DMARC) and triggers a verification check. Re-run the command after adding the records.
+
+If no sender domain exists yet, the command registers it with Resend automatically (extracted from `email_hosting.from` in `laughing-man.yaml`).
+
+If Cloudflare auth is missing or the Pages secret update fails, the command falls back to printing the manual `wrangler pages secret put` command.
 
 ### 8. Write the first issue
 
@@ -198,11 +229,13 @@ bunx @sadcoder/laughing-man preview --no-drafts  # published issues only
 | Problem                                 | Fix                                                                                      |
 | --------------------------------------- | ---------------------------------------------------------------------------------------- |
 | "Cloudflare API token is invalid"       | Regenerate at dash.cloudflare.com/profile/api-tokens                                     |
-| 403 Unauthorized on `setup web`         | Token needs Account > Cloudflare Pages > Edit. Account Settings Read is NOT needed.      |
-| "API token lacks required permissions"  | Token needs Account > Cloudflare Pages > Edit (and Zone > DNS > Edit for custom domains) |
+| 403 Unauthorized on `setup web`         | Token needs Account > Cloudflare Pages > Edit. If `web_hosting.domain` is set, also add Zone > DNS > Edit for that specific zone. |
+| "API token lacks required permissions"  | Token needs Account > Cloudflare Pages > Edit. If `web_hosting.domain` is set, also add Zone > DNS > Edit for that specific zone. |
 | "Pages project name X is not available" | Change `web_hosting.project` in laughing-man.yaml                                        |
 | "A DNS record managed by Workers already exists" | Another Workers/Pages project owns a record on that host. Managed records can't be deleted from the DNS page directly. Delete the Worker or Pages project that owns the record under Workers & Pages in the dashboard, or use a different domain/subdomain. |
 | Deploy fails with "wrangler not found"  | Run `bun add -D wrangler`                                                                |
 | Custom domain shows 522 error           | Wait for DNS propagation (up to 48h), verify CNAME is correct                            |
-| Subscribe form returns "Failed to subscribe" | Resend secret not set on Pages project. Run `bunx wrangler pages secret put RESEND_API_KEY --project-name <project>`. Verify with `bunx wrangler pages secret list --project-name <project>`. |
+| "Resend API key is invalid"                 | Regenerate at resend.com/api-keys. Must have "Full access" permission.                   |
+| `setup newsletter` shows "not yet verified" | Add the DNS records printed by the command, wait a few minutes, re-run.                  |
+| Subscribe form returns "Failed to subscribe" | Resend secret not set on Pages project. Re-run `setup newsletter` with a valid `CLOUDFLARE_API_TOKEN`, or run `bunx wrangler pages secret put RESEND_API_KEY --project-name <project>`. Verify with `bunx wrangler pages secret list --project-name <project>`. |
 | Subscribe form returns "Invalid request" | Request body is not valid JSON or missing `email` field. Check browser console for errors. |
