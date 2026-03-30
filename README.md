@@ -2,13 +2,13 @@
 
 Turn your Markdown into a newsletter.
 
-You write Markdown files with whatever apps/tools you like (Obsidian, Logseq, VSCode, etc.), `laughing-man` CLI builds them into a browsable archive website and send-ready email newsletter. You deploy the site to Cloudflare Pages, send the newsletter to subscribers via Resend. Fully self-hosted and free (included in Resend free tier). No CMS, no database, no code, just you and your Markdown files.
+You write Markdown files with whatever apps/tools you like (Obsidian, Logseq, VSCode, etc.). The `laughing-man` CLI builds them into a browsable archive website and send-ready email newsletter. Deploy the site to Cloudflare Pages, send issues to subscribers via Resend. Fully self-hosted and free (within Resend and Cloudflare free tiers). No CMS, no database, no code — just you and your Markdown files.
 
-> This project is named after Kenji Kamiyama's Ghost in the Shell: Stand Alone Complex: an elite hacker who broadcasts information by hijacking digital perceptions across the network.
+> Named after the Laughing Man from Kenji Kamiyama's *Ghost in the Shell: Stand Alone Complex* — an elite hacker who broadcasts information by hijacking digital perceptions across the network.
 
 ## Installation
 
-Requires [Bun](https://bun.sh) and a domain name.
+Requires [Bun](https://bun.sh/) and a domain name.
 
 ```bash
 bun add -g @sadcoder/laughing-man
@@ -37,7 +37,7 @@ cd /path/to/your/markdown/folder/
 laughing-man init
 ```
 
-Preview your newsletter website with the local server
+Preview your newsletter website with the local server:
 
 ```bash
 newsletter/
@@ -48,14 +48,14 @@ newsletter/
 laughing-man preview
 ```
 
-Create Cloudflare Pages project + custom domain + DNS:
+Set up Cloudflare Pages (project + custom domain + DNS) and deploy:
 
 ```bash
 laughing-man setup web          # Create Cloudflare Pages project + custom domain + DNS
 laughing-man deploy             # Deploy to Cloudflare Pages
 ```
 
-Set up Resend for newsletter sending:
+Set up Resend and send an issue:
 
 ```bash
 laughing-man setup mail
@@ -64,7 +64,7 @@ laughing-man send <issue-number>       # Send an issue via Resend Broadcast
 
 ## Configurations
 
-`laughing-man init` generates a `laughing-man.yaml` in your newsletter directory:
+`laughing-man init` generates a `laughing-man.yaml` in your newsletter directory.
 
 ```yaml
 name: Your Newsletter Name
