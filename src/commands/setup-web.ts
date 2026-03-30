@@ -14,11 +14,11 @@ interface SetupWebOptions {
 export async function runSetupWeb(options: SetupWebOptions) {
   const config = await loadConfig(options.configDir);
 
-  const apiToken = config.env.cloudflare_api_token;
+  const apiToken = config.env.CLOUDFLARE_API_TOKEN;
 
   if (!apiToken) {
     throw new Error(
-      "Cloudflare API token not found. Set CLOUDFLARE_API_TOKEN env var or add cloudflare_api_token to laughing-man.yaml",
+      "Cloudflare API token not found. Set CLOUDFLARE_API_TOKEN env var or add it to laughing-man.yaml",
     );
   }
 

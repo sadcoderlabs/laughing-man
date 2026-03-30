@@ -26,7 +26,7 @@ email_hosting:
   from: "Test <test@example.com>"
   provider: resend
 env:
-  resend_api_key: "re_test"
+  RESEND_API_KEY: "re_test"
 `.trim();
     writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
 
@@ -35,7 +35,7 @@ env:
     expect(config.name).toBe("Test Newsletter");
     expect(config.url).toBe("https://my-newsletter.pages.dev");
     expect(config.issues_dir).toBe(tmpDir); // resolved to absolute
-    expect(config.env.resend_api_key).toBe("re_test");
+    expect(config.env.RESEND_API_KEY).toBe("re_test");
     expect(config.configDir).toBe(tmpDir);
   });
 
@@ -50,7 +50,7 @@ email_hosting:
   from: "Test <test@example.com>"
   provider: resend
 env:
-  resend_api_key: "re_from_config"
+  RESEND_API_KEY: "re_from_config"
 `.trim();
     writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
 
@@ -58,7 +58,7 @@ env:
 
     try {
       const config = await loadConfig(tmpDir);
-      expect(config.env.resend_api_key).toBe("re_from_env");
+      expect(config.env.RESEND_API_KEY).toBe("re_from_env");
     } finally {
       delete process.env.RESEND_API_KEY;
     }
@@ -81,7 +81,7 @@ env: {}
 
     const config = await loadConfig(tmpDir);
 
-    expect(config.env.resend_api_key).toBe("re_from_dotenv");
+    expect(config.env.RESEND_API_KEY).toBe("re_from_dotenv");
   });
 
   it("throws if laughing-man.yaml is missing", async () => {
@@ -124,13 +124,13 @@ email_hosting:
   from: "Test <test@example.com>"
   provider: resend
 env:
-  cloudflare_api_token: "cf_test_token"
-  resend_api_key: "re_test"
+  CLOUDFLARE_API_TOKEN: "cf_test_token"
+  RESEND_API_KEY: "re_test"
 `.trim();
     writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
 
     const config = await loadConfig(tmpDir);
-    expect(config.env.cloudflare_api_token).toBe("cf_test_token");
+    expect(config.env.CLOUDFLARE_API_TOKEN).toBe("cf_test_token");
   });
 
   it("Cloudflare env vars override config values", async () => {
@@ -144,7 +144,7 @@ email_hosting:
   from: "Test <test@example.com>"
   provider: resend
 env:
-  cloudflare_api_token: "cf_from_config"
+  CLOUDFLARE_API_TOKEN: "cf_from_config"
 `.trim();
     writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
 
@@ -152,7 +152,7 @@ env:
 
     try {
       const config = await loadConfig(tmpDir);
-      expect(config.env.cloudflare_api_token).toBe("cf_from_env");
+      expect(config.env.CLOUDFLARE_API_TOKEN).toBe("cf_from_env");
     } finally {
       delete process.env.CLOUDFLARE_API_TOKEN;
     }
@@ -177,7 +177,7 @@ env: {}
     );
 
     const config = await loadConfig(tmpDir);
-    expect(config.env.cloudflare_api_token).toBe("cf_from_dotenv");
+    expect(config.env.CLOUDFLARE_API_TOKEN).toBe("cf_from_dotenv");
   });
 
   it("domain field is optional and defaults to undefined", async () => {

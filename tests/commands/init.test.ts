@@ -26,7 +26,7 @@ describe("runInit", () => {
     await runInit(tmpDir);
 
     const content = readFileSync(join(tmpDir, "laughing-man.yaml"), "utf8");
-    expect(content).toContain("cloudflare_api_token:");
+    expect(content).toContain("CLOUDFLARE_API_TOKEN:");
     expect(content).not.toContain("cloudflare_account_id:");
     expect(content).not.toContain("url:");
     expect(content).toContain("# domain:");

@@ -28,7 +28,7 @@ function minimalYaml(overrides: {
 } = {}) {
   const domain = overrides.domain ? `\n  domain: ${overrides.domain}` : "";
   const env = overrides.env ?? {
-    cloudflare_api_token: "cf_test",
+    CLOUDFLARE_API_TOKEN: "cf_test",
   };
   const envLines = Object.entries(env)
     .map(([k, v]) => `  ${k}: "${v}"`)
@@ -72,10 +72,10 @@ describe("runSetupWeb", () => {
     mock.restore();
   });
 
-  it("throws when cloudflare_api_token is missing", async () => {
+  it("throws when CLOUDFLARE_API_TOKEN is missing", async () => {
     writeFileSync(
       join(tmpDir, "laughing-man.yaml"),
-      minimalYaml({ env: { resend_api_key: "re_test" } }),
+      minimalYaml({ env: { RESEND_API_KEY: "re_test" } }),
     );
     await expect(runSetupWeb({ configDir: tmpDir })).rejects.toThrow(
       /Cloudflare API token not found/,

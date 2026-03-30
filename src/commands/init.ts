@@ -26,8 +26,8 @@ email_hosting:
   provider: resend
 
 env:
-  cloudflare_api_token: "cf_xxxxx" # or set CLOUDFLARE_API_TOKEN env var
-  resend_api_key: "re_xxxxx"       # or set RESEND_API_KEY env var
+  CLOUDFLARE_API_TOKEN: "cf_xxxxx" # or set CLOUDFLARE_API_TOKEN env var
+  RESEND_API_KEY: "re_xxxxx"       # or set RESEND_API_KEY env var
 `;
 
 export async function runInit(targetDir: string): Promise<void> {

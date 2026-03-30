@@ -19,8 +19,8 @@ const ConfigSchema = z.object({
     provider: z.literal("resend"),
   }),
   env: z.object({
-    cloudflare_api_token: z.string().optional(),
-    resend_api_key: z.string().optional(),
+    CLOUDFLARE_API_TOKEN: z.string().optional(),
+    RESEND_API_KEY: z.string().optional(),
   }).default({}),
 });
 
@@ -57,15 +57,15 @@ export async function loadConfig(configDir: string): Promise<SiteConfig> {
   }
 
   // Priority: process.env > .env file > config yaml
-  const resend_api_key =
+  const RESEND_API_KEY =
     process.env.RESEND_API_KEY ??
     dotEnvVars.RESEND_API_KEY ??
-    parsed.env.resend_api_key;
+    parsed.env.RESEND_API_KEY;
 
-  const cloudflare_api_token =
+  const CLOUDFLARE_API_TOKEN =
     process.env.CLOUDFLARE_API_TOKEN ??
     dotEnvVars.CLOUDFLARE_API_TOKEN ??
-    parsed.env.cloudflare_api_token;
+    parsed.env.CLOUDFLARE_API_TOKEN;
 
   function resolvePath(p: string): string {
     return isAbsolute(p) ? p : resolve(configDir, p);
@@ -80,7 +80,7 @@ export async function loadConfig(configDir: string): Promise<SiteConfig> {
     url,
     issues_dir: resolvePath(parsed.issues_dir),
     attachments_dir: parsed.attachments_dir ? resolvePath(parsed.attachments_dir) : undefined,
-    env: { cloudflare_api_token, resend_api_key },
+    env: { CLOUDFLARE_API_TOKEN, RESEND_API_KEY },
     configDir,
   };
 }

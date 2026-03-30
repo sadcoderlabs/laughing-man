@@ -32,8 +32,8 @@ export async function runSend(options: SendOptions): Promise<void> {
     throw new Error(`Issue #${issueNumber} has status 'draft'. Set status to 'ready' before sending.`);
   }
 
-  const apiKey = config.env.resend_api_key;
-  if (!apiKey) throw new Error("resend_api_key is not configured. Set RESEND_API_KEY env var or add it to laughing-man.yaml.");
+  const apiKey = config.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error("RESEND_API_KEY is not configured. Set RESEND_API_KEY env var or add it to laughing-man.yaml.");
 
   const resend = new Resend(apiKey);
   const provider = createResendProvider(resend);

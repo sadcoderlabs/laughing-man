@@ -75,7 +75,7 @@ attachments_dir: .
 web_hosting:
   provider: cloudflare-pages
   project: laughing-man
-  # domain: newsletter.example.com
+  # domain: example.com
 
 email_hosting:
   from: "Your Name <newsletter@example.com>"
@@ -83,6 +83,6 @@ email_hosting:
   provider: resend
 
 env:
-  cloudflare_api_token: "xxx" # or set CLOUDFLARE_API_TOKEN env var
-  resend_api_key: "xxx" # or set RESEND_API_KEY env var
+  CLOUDFLARE_API_TOKEN: "xxx" # or set CLOUDFLARE_API_TOKEN env var
+  RESEND_API_KEY: "xxx" # or set RESEND_API_KEY env var
 ```
