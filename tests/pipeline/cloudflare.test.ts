@@ -112,7 +112,13 @@ describe("ensureDomain", () => {
       pages: {
         projects: {
           domains: {
-            list: mockPageResult([{ name: "newsletter.example.com" }]),
+            list: mockPageResult([
+              {
+                name: "newsletter.example.com",
+                zone_tag: "zone_1",
+                status: "active",
+              },
+            ]),
             create: mock(() => Promise.resolve(null)),
           },
         },
@@ -126,6 +132,8 @@ describe("ensureDomain", () => {
       "newsletter.example.com",
     );
     expect(result.created).toBe(false);
+    expect(result.zoneTag).toBe("zone_1");
+    expect(result.status).toBe("active");
     expect(mockClient.pages.projects.domains.create).not.toHaveBeenCalled();
   });
 
@@ -136,7 +144,11 @@ describe("ensureDomain", () => {
           domains: {
             list: mockPageResult([]),
             create: mock(() =>
-              Promise.resolve({ name: "newsletter.example.com" }),
+              Promise.resolve({
+                name: "newsletter.example.com",
+                zone_tag: "zone_1",
+                status: "pending",
+              }),
             ),
           },
         },
@@ -150,6 +162,8 @@ describe("ensureDomain", () => {
       "newsletter.example.com",
     );
     expect(result.created).toBe(true);
+    expect(result.zoneTag).toBe("zone_1");
+    expect(result.status).toBe("pending");
     expect(mockClient.pages.projects.domains.create).toHaveBeenCalledWith(
       "my-project",
       { account_id: "acc_123", name: "newsletter.example.com" },
@@ -158,6 +172,36 @@ describe("ensureDomain", () => {
 });
 
 describe("ensureDnsRecord", () => {
+  it("uses the Pages domain zone tag before falling back to zone lookup", async () => {
+    const mockClient = {
+      zones: {
+        list: mockPageResult([]),
+      },
+      dns: {
+        records: {
+          list: mockPageResult([
+            {
+              type: "CNAME",
+              name: "newsletter.example.com",
+              content: "my-project.pages.dev",
+            },
+          ]),
+          create: mock(() => Promise.resolve({})),
+        },
+      },
+    } as unknown as Cloudflare;
+
+    const result = await ensureDnsRecord(
+      mockClient,
+      "newsletter.example.com",
+      "my-project.pages.dev",
+      "zone_1",
+    );
+    expect(result.status).toBe("exists");
+    expect(mockClient.zones.list).not.toHaveBeenCalled();
+    expect(mockClient.dns.records.create).not.toHaveBeenCalled();
+  });
+
   it("returns external when zone not found", async () => {
     const mockClient = {
       zones: { list: mockPageResult([]) },

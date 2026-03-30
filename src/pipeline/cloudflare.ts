@@ -102,14 +102,24 @@ export async function ensureDomain(
     account_id: accountId,
   });
   for await (const d of domains) {
-    if (d.name === domain) return { created: false };
+    if (d.name === domain) {
+      return {
+        created: false,
+        zoneTag: d.zone_tag,
+        status: d.status,
+      };
+    }
   }
 
-  await client.pages.projects.domains.create(projectName, {
+  const createdDomain = await client.pages.projects.domains.create(projectName, {
     account_id: accountId,
     name: domain,
   });
-  return { created: true };
+  return {
+    created: true,
+    zoneTag: createdDomain?.zone_tag,
+    status: createdDomain?.status,
+  };
 }
 
 export type DnsResult =
@@ -122,14 +132,17 @@ export async function ensureDnsRecord(
   client: Cloudflare,
   domain: string,
   target: string,
+  zoneTag?: string,
 ): Promise<DnsResult> {
-  const apex = extractApexDomain(domain);
+  let zoneId = zoneTag;
 
-  // Find zone for the apex domain
-  let zoneId: string | undefined;
-  for await (const zone of client.zones.list({ name: apex })) {
-    zoneId = zone.id;
-    break;
+  if (!zoneId) {
+    const apex = extractApexDomain(domain);
+
+    for await (const zone of client.zones.list({ name: apex })) {
+      zoneId = zone.id;
+      break;
+    }
   }
 
   if (!zoneId) {

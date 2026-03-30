@@ -125,4 +125,24 @@ describe("runSetupWeb", () => {
     expect(logs.some((l) => l.includes("[!!]") && l.includes("not on Cloudflare DNS"))).toBe(true);
     expect(logs.some((l) => l.includes("CNAME"))).toBe(true);
   });
+
+  it("skips DNS inspection when the Pages custom domain is already active", async () => {
+    writeFileSync(
+      join(tmpDir, "laughing-man.yaml"),
+      minimalYaml({ domain: "newsletter.example.com" }),
+    );
+    mockEnsureDomain.mockReset().mockImplementation(() =>
+      Promise.resolve({
+        created: false,
+        status: "active",
+        zoneTag: "zone_1",
+      }),
+    );
+
+    await runSetupWeb({ configDir: tmpDir });
+
+    expect(mockEnsureDnsRecord).not.toHaveBeenCalled();
+    expect(logs.some((l) => l.includes("[ok]") && l.includes("is active on Pages"))).toBe(true);
+    expect(logs.some((l) => l.includes("Everything is already set up"))).toBe(true);
+  });
 });

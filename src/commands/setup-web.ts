@@ -54,9 +54,20 @@ export async function runSetupWeb(options: SetupWebOptions) {
     `[ok] Custom domain ${domain} ${domainResult.created ? "added to" : "already on"} Pages project "${projectName}"`,
   );
 
+  if (domainResult.status === "active") {
+    console.log(`[ok] Custom domain ${domain} is active on Pages`);
+    console.log(`\nNothing to do. Everything is already set up.`);
+    return;
+  }
+
   // Step 4: Ensure DNS
   const target = `${projectName}.pages.dev`;
-  const dnsResult = await ensureDnsRecord(client, domain, target);
+  const dnsResult = await ensureDnsRecord(
+    client,
+    domain,
+    target,
+    domainResult.zoneTag,
+  );
 
   if (dnsResult.status === "managed_conflict") {
     console.log(
