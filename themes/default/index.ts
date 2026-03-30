@@ -113,7 +113,12 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
         });
         const data = await res.json();
         if (data.ok) {
-          msg.textContent = 'Subscribed';
+          msg.textContent =
+            data.result === 'already_subscribed'
+              ? "You're already subscribed."
+              : data.result === 'resubscribed'
+                ? "Welcome back — you're subscribed again."
+                : 'Subscribed';
           msg.className = 'subscribe-message success';
           form.reset();
         } else {

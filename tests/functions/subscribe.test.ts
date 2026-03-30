@@ -24,6 +24,9 @@ describe("handleSubscribe", () => {
     const originalFetch = globalThis.fetch;
     try {
       const mockFetch = mock(async (url: string) => {
+        if (url === "https://api.resend.com/contacts/test%40example.com") {
+          return new Response("Not found", { status: 404 });
+        }
         if (url === "https://api.resend.com/segments") {
           return new Response(JSON.stringify({ data: [{ id: "seg_1", name: "General" }] }), { status: 200 });
         }
@@ -35,8 +38,16 @@ describe("handleSubscribe", () => {
       expect(res.status).toBe(200);
       const body = (await res.json()) as Record<string, unknown>;
       expect(body.ok).toBe(true);
+      expect(body.result).toBe("subscribed");
 
-      // First call: list segments
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.resend.com/contacts/test%40example.com",
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: "Bearer re_test_key" }),
+        })
+      );
+
+      // Second call: list segments
       expect(mockFetch).toHaveBeenCalledWith(
         "https://api.resend.com/segments",
         expect.objectContaining({
@@ -44,12 +55,75 @@ describe("handleSubscribe", () => {
         })
       );
 
-      // Second call: create contact with segment
+      // Third call: create contact with segment
       expect(mockFetch).toHaveBeenCalledWith(
         "https://api.resend.com/contacts",
         expect.objectContaining({
           method: "POST",
-          body: JSON.stringify({ email: "test@example.com", segments: [{ id: "seg_1" }] }),
+          body: JSON.stringify({
+            email: "test@example.com",
+            unsubscribed: false,
+            segments: [{ id: "seg_1" }],
+          }),
+        })
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it("returns already_subscribed when contact exists and is active", async () => {
+    const originalFetch = globalThis.fetch;
+    try {
+      const mockFetch = mock(async (url: string) => {
+        if (url === "https://api.resend.com/contacts/test%40example.com") {
+          return new Response(
+            JSON.stringify({ id: "contact_123", email: "test@example.com", unsubscribed: false }),
+            { status: 200 },
+          );
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      });
+      globalThis.fetch = mockFetch as unknown as typeof fetch;
+
+      const res = await handleSubscribe({ email: "test@example.com" }, mockEnv);
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as Record<string, unknown>;
+      expect(body.ok).toBe(true);
+      expect(body.result).toBe("already_subscribed");
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it("returns resubscribed when contact exists but is unsubscribed", async () => {
+    const originalFetch = globalThis.fetch;
+    try {
+      const mockFetch = mock(async (url: string, init?: RequestInit) => {
+        if (url === "https://api.resend.com/contacts/test%40example.com" && !init?.method) {
+          return new Response(
+            JSON.stringify({ id: "contact_123", email: "test@example.com", unsubscribed: true }),
+            { status: 200 },
+          );
+        }
+        if (url === "https://api.resend.com/contacts/test%40example.com" && init?.method === "PATCH") {
+          return new Response(JSON.stringify({ id: "contact_123" }), { status: 200 });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      });
+      globalThis.fetch = mockFetch as unknown as typeof fetch;
+
+      const res = await handleSubscribe({ email: "test@example.com" }, mockEnv);
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as Record<string, unknown>;
+      expect(body.ok).toBe(true);
+      expect(body.result).toBe("resubscribed");
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.resend.com/contacts/test%40example.com",
+        expect.objectContaining({
+          method: "PATCH",
+          body: JSON.stringify({ unsubscribed: false }),
         })
       );
     } finally {
@@ -60,9 +134,12 @@ describe("handleSubscribe", () => {
   it("returns 500 if segments API fails", async () => {
     const originalFetch = globalThis.fetch;
     try {
-      globalThis.fetch = mock(async () =>
-        new Response(JSON.stringify({ message: "Invalid API key" }), { status: 403 })
-      ) as unknown as typeof fetch;
+      globalThis.fetch = mock(async (url: string) => {
+        if (url === "https://api.resend.com/contacts/test%40example.com") {
+          return new Response("Not found", { status: 404 });
+        }
+        return new Response(JSON.stringify({ message: "Invalid API key" }), { status: 403 });
+      }) as unknown as typeof fetch;
 
       const res = await handleSubscribe({ email: "test@example.com" }, mockEnv);
       expect(res.status).toBe(500);
@@ -77,6 +154,9 @@ describe("handleSubscribe", () => {
     const originalFetch = globalThis.fetch;
     try {
       const mockFetch = mock(async (url: string) => {
+        if (url === "https://api.resend.com/contacts/test%40example.com") {
+          return new Response("Not found", { status: 404 });
+        }
         if (url === "https://api.resend.com/segments") {
           return new Response(JSON.stringify({ data: [{ id: "seg_1" }] }), { status: 200 });
         }
@@ -111,7 +191,7 @@ describe("onRequestPost", () => {
     } as unknown as Parameters<typeof onRequestPost>[0];
   }
 
-  it("returns JSON error when fetch throws a network error", async () => {
+  it("returns subscribe error when fetch throws a network error", async () => {
     const originalFetch = globalThis.fetch;
     try {
       globalThis.fetch = mock(async () => {
@@ -119,7 +199,7 @@ describe("onRequestPost", () => {
       }) as unknown as typeof fetch;
 
       const res = await onRequestPost(makeContext({ email: "test@example.com" }));
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(500);
       const body = (await res.json()) as Record<string, string>;
       expect(body.error).toBeDefined();
     } finally {

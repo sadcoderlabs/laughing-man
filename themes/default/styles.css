@@ -501,6 +501,28 @@ strong {
   background: linear-gradient(90deg, transparent, var(--line), transparent);
 }
 
+/* ─── Issue: Subscribe ─── */
+
+.issue-subscribe {
+  max-inline-size: var(--reading-width);
+  margin: 0 auto;
+  padding: clamp(2rem, 4vw, 3rem) clamp(1.25rem, 4vw, 2rem) 0;
+  text-align: center;
+  animation: fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both 0.16s;
+}
+
+.issue-subscribe-label {
+  margin-block-end: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+}
+
+.issue-subscribe-form {
+  margin-inline: auto;
+}
+
 /* ─── Issue: Body typography ─── */
 
 .issue-body {
@@ -696,6 +718,10 @@ del {
   .issue-reading-surface {
     border-radius: 1rem;
     padding-inline: 1rem;
+  }
+
+  .issue-subscribe {
+    padding-inline: 0.5rem;
   }
 
   .issue-body {

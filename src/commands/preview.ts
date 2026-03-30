@@ -2,6 +2,7 @@ import { watch, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { loadConfig } from "../pipeline/config.js";
 import { runBuild } from "./build.js";
+import { handleSubscribe } from "../../functions/api/subscribe.js";
 
 interface PreviewOptions {
   configDir: string;
@@ -86,6 +87,31 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
             Connection: "keep-alive",
           },
         });
+      }
+
+      if (url.pathname === "/api/subscribe") {
+        if (req.method !== "POST") {
+          return Response.json(
+            { error: "Method not allowed." },
+            { status: 405, headers: { Allow: "POST" } },
+          );
+        }
+
+        if (!config.env.RESEND_API_KEY) {
+          return Response.json(
+            { error: "RESEND_API_KEY is not configured for preview." },
+            { status: 500 },
+          );
+        }
+
+        try {
+          const body = await req.json();
+          return await handleSubscribe(body as { email?: string } | null, {
+            RESEND_API_KEY: config.env.RESEND_API_KEY,
+          });
+        } catch {
+          return Response.json({ error: "Invalid request." }, { status: 400 });
+        }
       }
 
       // Email preview: index page listing all email issues
