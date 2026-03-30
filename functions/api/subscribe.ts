@@ -31,6 +31,29 @@ export async function handleSubscribe(
     hasApiKey: !!env.RESEND_API_KEY,
   });
 
+  // Discover the first segment so the contact is included in broadcasts
+  const segRes = await fetch("https://api.resend.com/segments", {
+    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}` },
+  });
+
+  if (!segRes.ok) {
+    const segBody = await segRes.text();
+    console.error("[subscribe] failed to list segments", { status: segRes.status, body: segBody });
+    return Response.json(
+      { error: "Failed to subscribe. Please try again." },
+      { status: 500 }
+    );
+  }
+
+  const segData = (await segRes.json()) as { data?: { id: string }[] };
+  const segmentId = segData.data?.[0]?.id;
+
+  // Create contact, attaching to segment if one exists
+  const contactBody: Record<string, unknown> = { email };
+  if (segmentId) {
+    contactBody.segments = [{ id: segmentId }];
+  }
+
   const res = await fetch(
     "https://api.resend.com/contacts",
     {
@@ -39,7 +62,7 @@ export async function handleSubscribe(
         Authorization: `Bearer ${env.RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify(contactBody),
     }
   );
 
