@@ -376,6 +376,13 @@ strong {
 
 .feed-teaser {
   opacity: 0.5;
+  cursor: default;
+}
+
+.feed-teaser:hover .feed-marker,
+.feed-teaser:hover .feed-title {
+  color: inherit;
+  text-decoration: none;
 }
 
 .feed-end {
