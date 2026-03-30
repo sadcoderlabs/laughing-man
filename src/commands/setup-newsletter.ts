@@ -6,15 +6,58 @@ interface SetupNewsletterOptions {
 }
 
 function extractDomain(fromAddress: string): string {
-  // "Name <user@domain.com>" -> "domain.com"
-  const match = fromAddress.match(/@([^>]+)/);
+  const address =
+    fromAddress.match(/<\s*([^<>]+)\s*>/)?.[1]?.trim() ??
+    fromAddress.trim();
+
+  const match = address.match(/^[^@\s]+@([^@\s]+)$/);
   if (!match) {
     throw new Error(
       `Could not extract domain from email_hosting.from: "${fromAddress}". ` +
-        `Expected format: "Name <user@domain.com>"`,
+        `Expected format: "Name <user@domain.com>" or "user@domain.com"`,
     );
   }
-  return match[1];
+  return match[1].toLowerCase();
+}
+
+function requireSuccess<T>(
+  response: { data: T | null; error: { message: string } | null },
+  action: string,
+): T {
+  if (response.error) {
+    throw new Error(`Failed to ${action}: ${response.error.message}`);
+  }
+  if (!response.data) {
+    throw new Error(`Failed to ${action}: Resend returned no data`);
+  }
+  return response.data;
+}
+
+async function findDomainByName(
+  resend: Resend,
+  domainName: string,
+): Promise<{ id: string; name: string; status: string } | null> {
+  let after: string | undefined;
+
+  while (true) {
+    const page = requireSuccess(
+      await resend.domains.list(after ? { limit: 100, after } : { limit: 100 }),
+      "list Resend domains",
+    );
+
+    const existing = page.data.find(
+      (domain) => domain.name.toLowerCase() === domainName,
+    );
+    if (existing) {
+      return existing;
+    }
+
+    if (!page.has_more || page.data.length === 0) {
+      return null;
+    }
+
+    after = page.data[page.data.length - 1]!.id;
+  }
 }
 
 export async function runSetupNewsletter(
@@ -32,28 +75,15 @@ export async function runSetupNewsletter(
   const resend = new Resend(apiKey);
 
   // Step 1: Validate API key by listing segments
-  try {
-    await resend.segments.list();
-  } catch (err) {
-    throw new Error(
-      `Resend API key is invalid or lacks permissions. ${(err as Error).message}`,
-    );
-  }
+  requireSuccess(
+    await resend.segments.list({ limit: 1 }),
+    "validate Resend API key",
+  );
   console.log("[ok] Resend API key valid");
 
   // Step 2: Check/create sender domain
   const senderDomain = extractDomain(config.email_hosting.from);
-
-  const { data: domainsData, error: domainsError } =
-    await resend.domains.list();
-  if (domainsError) {
-    throw new Error(`Failed to list Resend domains: ${domainsError.message}`);
-  }
-
-  const domains = domainsData?.data ?? [];
-  const existing = domains.find(
-    (d) => d.name === senderDomain,
-  );
+  const existing = await findDomainByName(resend, senderDomain);
 
   let domainId: string;
   let domainStatus: string;
@@ -65,29 +95,23 @@ export async function runSetupNewsletter(
       `[ok] Sender domain "${senderDomain}" exists (status: ${domainStatus})`,
     );
   } else {
-    const { data: createData, error: createError } =
-      await resend.domains.create({ name: senderDomain });
-    if (createError) {
-      throw new Error(
-        `Failed to create sender domain "${senderDomain}": ${createError.message}`,
-      );
-    }
-    domainId = createData!.id;
-    domainStatus = createData!.status;
+    const createData = requireSuccess(
+      await resend.domains.create({ name: senderDomain }),
+      `create sender domain "${senderDomain}"`,
+    );
+    domainId = createData.id;
+    domainStatus = createData.status;
     console.log(`[ok] Sender domain "${senderDomain}" created`);
   }
 
   // Step 3: If not verified, fetch domain details and print DNS records
   if (domainStatus !== "verified") {
-    const { data: domainDetail, error: detailError } =
-      await resend.domains.get(domainId);
-    if (detailError) {
-      throw new Error(
-        `Failed to get domain details: ${detailError.message}`,
-      );
-    }
+    const domainDetail = requireSuccess(
+      await resend.domains.get(domainId),
+      `get sender domain "${senderDomain}"`,
+    );
 
-    const records = (domainDetail as any)?.records ?? [];
+    const records = domainDetail.records ?? [];
 
     if (records.length > 0) {
       console.log(
@@ -98,9 +122,9 @@ export async function runSetupNewsletter(
       );
       console.log(`     ${"─".repeat(8)}${"─".repeat(40)}${"─".repeat(40)}`);
       for (const r of records) {
-        const type = (r.type ?? r.record_type ?? "").toUpperCase();
-        const name = r.name ?? r.host ?? "";
-        const value = r.value ?? r.data ?? "";
+        const type = r.type.toUpperCase();
+        const name = r.name;
+        const value = r.value;
         const priority = r.priority != null ? ` (priority: ${r.priority})` : "";
         console.log(
           `     ${type.padEnd(8)}${name.padEnd(40)}${value}${priority}`,
@@ -117,22 +141,23 @@ export async function runSetupNewsletter(
     }
 
     // Trigger verification attempt
-    try {
-      await resend.domains.verify(domainId);
-      console.log(`     Verification check triggered.`);
-    } catch {
-      // Verification is async, ignore errors
+    const verifyResponse = await resend.domains.verify(domainId);
+    if (verifyResponse.error) {
+      throw new Error(
+        `Failed to trigger verification check for "${senderDomain}": ${verifyResponse.error.message}`,
+      );
     }
+    console.log(`     Verification check triggered.`);
   } else {
     console.log(`[ok] Sender domain "${senderDomain}" is verified`);
   }
 
   // Step 4: Check that at least one segment exists
-  const { data: segData, error: segError } = await resend.segments.list();
-  if (segError) {
-    throw new Error(`Failed to list segments: ${segError.message}`);
-  }
-  const segments = segData?.data ?? [];
+  const segData = requireSuccess(
+    await resend.segments.list({ limit: 100 }),
+    "list Resend segments",
+  );
+  const segments = segData.data ?? [];
 
   if (segments.length === 0) {
     console.log(
