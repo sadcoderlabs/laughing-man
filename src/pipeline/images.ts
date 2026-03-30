@@ -103,7 +103,7 @@ export async function processImages(
   }
 
   // Replace YouTube iframes with linked thumbnails in email HTML only
-  const iframePattern = /<iframe\b[^>]*\bsrc="https?:\/\/(?:www\.)?(?:youtube\.com|youtube-nocookie\.com)\/embed\/([^"?/]+)[^"]*"[^>]*><\/iframe>/g;
+  const iframePattern = /<iframe\b[^>]*\bsrc="https?:\/\/(?:www\.)?(?:youtube\.com|youtube-nocookie\.com)\/embed\/([A-Za-z0-9_-]+)[^"]*"[^>]*><\/iframe>/g;
   const iframeMatches = [...emailHtml.matchAll(iframePattern)];
 
   for (const match of iframeMatches) {
