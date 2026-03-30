@@ -51,6 +51,47 @@ export async function ensureProject(
   }
 }
 
+export async function upsertProjectSecret(
+  client: Cloudflare,
+  accountId: string,
+  projectName: string,
+  secretName: string,
+  secretValue: string,
+) {
+  let project;
+  try {
+    project = await client.pages.projects.get(projectName, {
+      account_id: accountId,
+    });
+  } catch (err) {
+    if (err instanceof Cloudflare.APIError && err.status === 404) {
+      throw new Error(`Pages project "${projectName}" not found`);
+    }
+    throw err;
+  }
+
+  const deploymentConfigs = project.deployment_configs ?? {};
+  const production = deploymentConfigs.production ?? {};
+  const productionEnvVars = production.env_vars ?? {};
+
+  await client.pages.projects.edit(projectName, {
+    account_id: accountId,
+    deployment_configs: {
+      ...deploymentConfigs,
+      production: {
+        ...production,
+        env_vars: {
+          ...productionEnvVars,
+          [secretName]: {
+            type: "secret_text",
+            value: secretValue,
+          },
+        },
+      },
+    },
+  });
+}
+
 export async function ensureDomain(
   client: Cloudflare,
   accountId: string,

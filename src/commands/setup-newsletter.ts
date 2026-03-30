@@ -1,5 +1,10 @@
 import { Resend } from "resend";
 import { loadConfig } from "../pipeline/config.js";
+import {
+  createClient,
+  discoverAccountId,
+  upsertProjectSecret,
+} from "../pipeline/cloudflare.js";
 
 interface SetupNewsletterOptions {
   configDir: string;
@@ -177,8 +182,39 @@ export async function runSetupNewsletter(
     }
   }
 
-  // Step 5: Remind about Pages secret
+  // Step 5: Set Pages secret when Cloudflare auth is available
   const project = config.web_hosting.project;
+  const cloudflareApiToken = config.env.CLOUDFLARE_API_TOKEN;
+
+  if (!cloudflareApiToken) {
+    console.log(
+      `\n[!!] CLOUDFLARE_API_TOKEN not found, so the Pages secret was not set automatically.`,
+    );
+  } else {
+    try {
+      const client = createClient(cloudflareApiToken);
+      const accountId = await discoverAccountId(client);
+      await upsertProjectSecret(
+        client,
+        accountId,
+        project,
+        "RESEND_API_KEY",
+        apiKey,
+      );
+      console.log(
+        `[ok] Pages secret RESEND_API_KEY set for project "${project}"`,
+      );
+      console.log(
+        `\nThis allows the subscribe form to work in production.`,
+      );
+      return;
+    } catch (err) {
+      console.log(
+        `\n[!!] Could not set Pages secret automatically: ${(err as Error).message}`,
+      );
+    }
+  }
+
   if (domainStatus === "verified") {
     console.log(
       `\nSetup complete. If you haven't already, set the Resend API key as a Pages secret:`,
