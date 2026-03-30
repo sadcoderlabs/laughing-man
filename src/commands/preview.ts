@@ -24,8 +24,10 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
 
   let rebuildTimer: Timer | null = null;
   let building = false;
+  let cooldown = false;
 
   function scheduleRebuild() {
+    if (building || cooldown) return;
     if (rebuildTimer) clearTimeout(rebuildTimer);
     rebuildTimer = setTimeout(async () => {
       if (building) return;
@@ -43,6 +45,8 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
         console.error("Rebuild failed:", err);
       }
       building = false;
+      cooldown = true;
+      setTimeout(() => { cooldown = false; }, 500);
     }, 300);
   }
 
