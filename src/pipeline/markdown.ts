@@ -24,8 +24,7 @@ const FrontmatterSchema = z.object({
   ).optional(),
 });
 
-export async function parseIssueFile(filePath: string): Promise<IssueData> {
-  const raw = readFileSync(filePath, "utf8");
+async function parseIssueRaw(filePath: string, raw: string): Promise<IssueData> {
   const { data, content } = matter(raw);
 
   const result = FrontmatterSchema.safeParse(data);
@@ -49,6 +48,10 @@ export async function parseIssueFile(filePath: string): Promise<IssueData> {
   };
 }
 
+export async function parseIssueFile(filePath: string): Promise<IssueData> {
+  return parseIssueRaw(filePath, readFileSync(filePath, "utf8"));
+}
+
 export async function scanIssuesDir(issuesDir: string): Promise<IssueData[]> {
   const files = readdirSync(issuesDir).filter((f) => extname(f) === ".md");
 
@@ -58,12 +61,16 @@ export async function scanIssuesDir(issuesDir: string): Promise<IssueData[]> {
     );
   }
 
-  // Check if ALL files are bare markdown (no frontmatter at all).
-  // If so, suggest `stamp` instead of throwing cryptic per-file errors.
-  const allBare = files.every((f) => {
-    const raw = readFileSync(join(issuesDir, f), "utf8");
-    return Object.keys(matter(raw).data).length === 0;
-  });
+  // Read all files once. If every file lacks frontmatter, suggest `stamp`
+  // instead of throwing cryptic per-file validation errors.
+  const rawContents = files.map((f) => ({
+    filePath: join(issuesDir, f),
+    raw: readFileSync(join(issuesDir, f), "utf8"),
+  }));
+
+  const allBare = rawContents.every(
+    ({ raw }) => Object.keys(matter(raw).data).length === 0,
+  );
 
   if (allBare) {
     throw new Error(
@@ -71,6 +78,5 @@ export async function scanIssuesDir(issuesDir: string): Promise<IssueData[]> {
     );
   }
 
-  // Normal path: parse all files, let individual errors surface
-  return Promise.all(files.map((f) => parseIssueFile(join(issuesDir, f))));
+  return Promise.all(rawContents.map(({ filePath, raw }) => parseIssueRaw(filePath, raw)));
 }
