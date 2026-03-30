@@ -4,7 +4,7 @@ Turn your Markdown into a newsletter.
 
 You write Markdown files with whatever apps/tools you like (Obsidian, Logseq, VSCode, etc.). The `laughing-man` CLI builds them into a browsable archive website and send-ready email newsletter. Deploy the site to Cloudflare Pages, send issues to subscribers via Resend. Fully self-hosted and free (within Resend and Cloudflare free tiers). No CMS, no database, no code — just you and your Markdown files.
 
-> Named after the Laughing Man from Kenji Kamiyama's *Ghost in the Shell: Stand Alone Complex* — an elite hacker who broadcasts information by hijacking digital perceptions across the network.
+> Named after the Laughing Man from Kenji Kamiyama's _Ghost in the Shell: Stand Alone Complex_ — an elite hacker who broadcasts information by hijacking digital perceptions across the network.
 
 ## Installation
 
@@ -54,6 +54,13 @@ Set up Cloudflare Pages (project + custom domain + DNS) and deploy:
 laughing-man setup web          # Create Cloudflare Pages project + custom domain + DNS
 laughing-man deploy             # Deploy to Cloudflare Pages
 ```
+
+Cloudflare API token permissions for `setup web`:
+
+- `Account | Cloudflare Pages | Edit`
+- `Zone | DNS | Edit` for the specific custom domain zone when `web_hosting.domain` is set
+
+Scope the token to the specific account and, for DNS, the specific zone. Avoid `All zones` unless you intentionally want one token to manage DNS across every zone in the account.
 
 Set up Resend and send an issue:
 

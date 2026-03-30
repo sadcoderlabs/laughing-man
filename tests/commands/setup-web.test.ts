@@ -2,6 +2,7 @@ import { describe, expect, it, beforeEach, afterEach, mock, spyOn } from "bun:te
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import os from "node:os";
+import Cloudflare from "cloudflare";
 
 // Mock the cloudflare module before importing setup-web
 const mockDiscoverAccountId = mock(() => Promise.resolve("acc_123"));
@@ -126,7 +127,21 @@ describe("runSetupWeb", () => {
     expect(logs.some((l) => l.includes("CNAME"))).toBe(true);
   });
 
-  it("skips DNS inspection when the Pages custom domain is already active", async () => {
+  it("throws a clear DNS permission error for custom domains", async () => {
+    writeFileSync(
+      join(tmpDir, "laughing-man.yaml"),
+      minimalYaml({ domain: "newsletter.example.com" }),
+    );
+    mockEnsureDnsRecord.mockReset().mockImplementation(() =>
+      Promise.reject(new Cloudflare.APIError(403, undefined, "Forbidden", undefined)),
+    );
+
+    await expect(runSetupWeb({ configDir: tmpDir })).rejects.toThrow(
+      /Custom domain setup for "newsletter\.example\.com" requires Zone > DNS > Edit/,
+    );
+  });
+
+  it("continues to DNS verification when the Pages custom domain is already active", async () => {
     writeFileSync(
       join(tmpDir, "laughing-man.yaml"),
       minimalYaml({ domain: "newsletter.example.com" }),
@@ -141,8 +156,7 @@ describe("runSetupWeb", () => {
 
     await runSetupWeb({ configDir: tmpDir });
 
-    expect(mockEnsureDnsRecord).not.toHaveBeenCalled();
+    expect(mockEnsureDnsRecord).toHaveBeenCalledTimes(1);
     expect(logs.some((l) => l.includes("[ok]") && l.includes("is active on Pages"))).toBe(true);
-    expect(logs.some((l) => l.includes("Everything is already set up"))).toBe(true);
   });
 });
