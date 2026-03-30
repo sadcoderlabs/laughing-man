@@ -97,7 +97,7 @@ Walk the user through creating an API key and audience:
    - Go to https://resend.com/domains
    - "Add Domain" > enter a **subdomain** (e.g., `send.example.com` or `newsletter.example.com`), not the root domain. Using a subdomain isolates your sending reputation so that bounces or spam complaints from the newsletter don't affect your root domain's email deliverability.
    - Region: pick the one closest to your subscribers (e.g., `ap-northeast-1` for Asia, `us-east-1` for US). This controls where Resend's email infrastructure processes and dispatches emails, not where the API call originates from.
-   - Add the DNS records Resend provides (SPF, DKIM, DMARC)
+   - Add the DNS records Resend provides (SPF, DKIM, DMARC). If the domain's DNS is on Cloudflare, Resend offers an "Auto configure" button that adds the records via Cloudflare's API (OAuth flow). Otherwise, "Manual setup" shows the records to add by hand.
    - Wait for verification (usually a few minutes, can take up to 48h)
    - The `email_hosting.from` address in `laughing-man.yaml` must use this verified subdomain
 3. **Create an API key:**
