@@ -28,7 +28,6 @@ email_hosting:
   provider: resend
 env:
   resend_api_key: "re_test"
-  resend_audience_id: "aud_test"
 `.trim();
     writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
 
@@ -54,20 +53,16 @@ email_hosting:
   provider: resend
 env:
   resend_api_key: "re_from_config"
-  resend_audience_id: "aud_from_config"
 `.trim();
     writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
 
     process.env.RESEND_API_KEY = "re_from_env";
-    process.env.RESEND_AUDIENCE_ID = "aud_from_env";
 
     try {
       const config = await loadConfig(tmpDir);
       expect(config.env.resend_api_key).toBe("re_from_env");
-      expect(config.env.resend_audience_id).toBe("aud_from_env");
     } finally {
       delete process.env.RESEND_API_KEY;
-      delete process.env.RESEND_AUDIENCE_ID;
     }
   });
 
@@ -85,12 +80,11 @@ email_hosting:
 env: {}
 `.trim();
     writeFileSync(join(tmpDir, "laughing-man.yaml"), yaml);
-    writeFileSync(join(tmpDir, ".env"), "RESEND_API_KEY=re_from_dotenv\nRESEND_AUDIENCE_ID=aud_from_dotenv\n");
+    writeFileSync(join(tmpDir, ".env"), "RESEND_API_KEY=re_from_dotenv\n");
 
     const config = await loadConfig(tmpDir);
 
     expect(config.env.resend_api_key).toBe("re_from_dotenv");
-    expect(config.env.resend_audience_id).toBe("aud_from_dotenv");
   });
 
   it("throws if laughing-man.yaml is missing", async () => {

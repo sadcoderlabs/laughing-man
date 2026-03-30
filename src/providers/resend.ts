@@ -1,5 +1,10 @@
 import type { Resend } from "resend";
 
+export interface SegmentSummary {
+  id: string;
+  name: string;
+}
+
 export interface BroadcastSummary {
   id: string;
   name: string;
@@ -7,7 +12,7 @@ export interface BroadcastSummary {
 }
 
 export interface CreateBroadcastParams {
-  audienceId: string;
+  segmentId: string;
   from: string;
   replyTo?: string;
   subject: string;
@@ -16,6 +21,7 @@ export interface CreateBroadcastParams {
 }
 
 export interface ResendProvider {
+  listSegments(): Promise<SegmentSummary[]>;
   listBroadcasts(): Promise<BroadcastSummary[]>;
   createBroadcast(params: CreateBroadcastParams): Promise<string>;
   sendBroadcast(broadcastId: string): Promise<void>;
@@ -23,6 +29,12 @@ export interface ResendProvider {
 
 export function createResendProvider(client: Resend): ResendProvider {
   return {
+    async listSegments(): Promise<SegmentSummary[]> {
+      const { data, error } = await client.segments.list();
+      if (error) throw new Error(`Resend error: ${error.message}`);
+      return (data?.data ?? []).map((s) => ({ id: s.id, name: s.name }));
+    },
+
     async listBroadcasts(): Promise<BroadcastSummary[]> {
       const { data, error } = await client.broadcasts.list();
       if (error) throw new Error(`Resend error: ${error.message}`);
@@ -31,7 +43,7 @@ export function createResendProvider(client: Resend): ResendProvider {
 
     async createBroadcast(params: CreateBroadcastParams): Promise<string> {
       const { data, error } = await client.broadcasts.create({
-        audienceId: params.audienceId,
+        segmentId: params.segmentId,
         from: params.from,
         replyTo: params.replyTo,
         subject: params.subject,

@@ -4,7 +4,6 @@ import { handleSubscribe, onRequestPost } from "../../functions/api/subscribe";
 describe("handleSubscribe", () => {
   const mockEnv = {
     RESEND_API_KEY: "re_test_key",
-    RESEND_AUDIENCE_ID: "aud_test_id",
   };
 
   it("returns 400 if email is missing", async () => {
@@ -24,22 +23,33 @@ describe("handleSubscribe", () => {
   it("returns 200 on successful subscribe", async () => {
     const originalFetch = globalThis.fetch;
     try {
-      globalThis.fetch = mock(async () =>
-        new Response(JSON.stringify({ id: "contact_123" }), { status: 200 })
-      ) as unknown as typeof fetch;
+      const mockFetch = mock(async (url: string) => {
+        if (url === "https://api.resend.com/segments") {
+          return new Response(JSON.stringify({ data: [{ id: "seg_1", name: "General" }] }), { status: 200 });
+        }
+        return new Response(JSON.stringify({ id: "contact_123" }), { status: 200 });
+      });
+      globalThis.fetch = mockFetch as unknown as typeof fetch;
 
       const res = await handleSubscribe({ email: "test@example.com" }, mockEnv);
       expect(res.status).toBe(200);
       const body = (await res.json()) as Record<string, unknown>;
       expect(body.ok).toBe(true);
 
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        "https://api.resend.com/audiences/aud_test_id/contacts",
+      // First call: list segments
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.resend.com/segments",
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: "Bearer re_test_key" }),
+        })
+      );
+
+      // Second call: create contact with segment
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.resend.com/contacts",
         expect.objectContaining({
           method: "POST",
-          headers: expect.objectContaining({
-            Authorization: "Bearer re_test_key",
-          }),
+          body: JSON.stringify({ email: "test@example.com", segments: [{ id: "seg_1" }] }),
         })
       );
     } finally {
@@ -47,12 +57,32 @@ describe("handleSubscribe", () => {
     }
   });
 
-  it("returns 500 if Resend API returns an error", async () => {
+  it("returns 500 if segments API fails", async () => {
     const originalFetch = globalThis.fetch;
     try {
       globalThis.fetch = mock(async () =>
         new Response(JSON.stringify({ message: "Invalid API key" }), { status: 403 })
       ) as unknown as typeof fetch;
+
+      const res = await handleSubscribe({ email: "test@example.com" }, mockEnv);
+      expect(res.status).toBe(500);
+      const body = (await res.json()) as Record<string, string>;
+      expect(body.error).toBeDefined();
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it("returns 500 if contacts API fails", async () => {
+    const originalFetch = globalThis.fetch;
+    try {
+      const mockFetch = mock(async (url: string) => {
+        if (url === "https://api.resend.com/segments") {
+          return new Response(JSON.stringify({ data: [{ id: "seg_1" }] }), { status: 200 });
+        }
+        return new Response(JSON.stringify({ message: "Bad request" }), { status: 400 });
+      });
+      globalThis.fetch = mockFetch as unknown as typeof fetch;
 
       const res = await handleSubscribe({ email: "test@example.com" }, mockEnv);
       expect(res.status).toBe(500);
@@ -70,7 +100,7 @@ describe("handleSubscribe", () => {
 });
 
 describe("onRequestPost", () => {
-  function makeContext(body: unknown, env = { RESEND_API_KEY: "re_test", RESEND_AUDIENCE_ID: "aud_test" }) {
+  function makeContext(body: unknown, env = { RESEND_API_KEY: "re_test" }) {
     return {
       request: new Request("https://example.com/api/subscribe", {
         method: "POST",

@@ -35,7 +35,6 @@ export interface SiteConfig {
     cloudflare_api_token?: string;
     cloudflare_account_id?: string;
     resend_api_key?: string;
-    resend_audience_id?: string;
   };
   // Internal: resolved at load time
   configDir: string;            // Directory containing laughing-man.yaml

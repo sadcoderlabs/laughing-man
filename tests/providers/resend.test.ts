@@ -29,6 +29,34 @@ describe("createResendProvider", () => {
     await expect(provider.listBroadcasts()).rejects.toThrow("Unauthorized");
   });
 
+  it("calls resend.segments.list and returns segment data", async () => {
+    const mockList = mock(async () => ({
+      data: { data: [{ id: "seg_1", name: "General", created_at: "2026-01-01" }] },
+      error: null,
+    }));
+
+    const fakeResend = { segments: { list: mockList } } as any;
+    const provider = createResendProvider(fakeResend);
+
+    const segments = await provider.listSegments();
+    expect(mockList).toHaveBeenCalledTimes(1);
+    expect(segments).toHaveLength(1);
+    expect(segments[0].id).toBe("seg_1");
+    expect(segments[0].name).toBe("General");
+  });
+
+  it("throws if resend.segments.list returns an error", async () => {
+    const mockList = mock(async () => ({
+      data: null,
+      error: { message: "Unauthorized" },
+    }));
+
+    const fakeResend = { segments: { list: mockList } } as any;
+    const provider = createResendProvider(fakeResend);
+
+    await expect(provider.listSegments()).rejects.toThrow("Unauthorized");
+  });
+
   it("calls resend.broadcasts.create with correct params", async () => {
     const mockCreate = mock(async () => ({
       data: { id: "b-new" },
@@ -39,7 +67,7 @@ describe("createResendProvider", () => {
     const provider = createResendProvider(fakeResend);
 
     const id = await provider.createBroadcast({
-      audienceId: "aud_123",
+      segmentId: "seg_123",
       from: "Test <test@example.com>",
       subject: "Issue #1: My First Issue",
       html: "<h1>Hello</h1>",
@@ -49,7 +77,7 @@ describe("createResendProvider", () => {
     expect(mockCreate).toHaveBeenCalledTimes(1);
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        audienceId: "aud_123",
+        segmentId: "seg_123",
         from: "Test <test@example.com>",
         subject: "Issue #1: My First Issue",
         html: "<h1>Hello</h1>",

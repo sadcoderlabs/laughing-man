@@ -23,7 +23,6 @@ const ConfigSchema = z.object({
     cloudflare_api_token: z.string().optional(),
     cloudflare_account_id: z.string().optional(),
     resend_api_key: z.string().optional(),
-    resend_audience_id: z.string().optional(),
   }).default({}),
 });
 
@@ -65,11 +64,6 @@ export async function loadConfig(configDir: string): Promise<SiteConfig> {
     dotEnvVars.RESEND_API_KEY ??
     parsed.env.resend_api_key;
 
-  const resend_audience_id =
-    process.env.RESEND_AUDIENCE_ID ??
-    dotEnvVars.RESEND_AUDIENCE_ID ??
-    parsed.env.resend_audience_id;
-
   const cloudflare_api_token =
     process.env.CLOUDFLARE_API_TOKEN ??
     dotEnvVars.CLOUDFLARE_API_TOKEN ??
@@ -88,7 +82,7 @@ export async function loadConfig(configDir: string): Promise<SiteConfig> {
     ...parsed,
     issues_dir: resolvePath(parsed.issues_dir),
     attachments_dir: parsed.attachments_dir ? resolvePath(parsed.attachments_dir) : undefined,
-    env: { cloudflare_api_token, cloudflare_account_id, resend_api_key, resend_audience_id },
+    env: { cloudflare_api_token, cloudflare_account_id, resend_api_key },
     configDir,
   };
 }
