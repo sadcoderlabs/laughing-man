@@ -12,6 +12,8 @@ interface SendOptions {
   testAddress?: string;
 }
 
+const TEST_UNSUBSCRIBE_URL = "https://example.com/unsubscribe-test";
+
 export async function runSend(options: SendOptions): Promise<void> {
   const { configDir, issueNumber, yes, testAddress } = options;
 
@@ -41,12 +43,13 @@ export async function runSend(options: SendOptions): Promise<void> {
   const html = readFileSync(emailHtmlPath, "utf8");
 
   if (testAddress) {
+    const testHtml = html.replaceAll("{{{RESEND_UNSUBSCRIBE_URL}}}", TEST_UNSUBSCRIBE_URL);
     await provider.sendEmail({
       to: testAddress,
       from: config.email_hosting.from,
       replyTo: config.email_hosting.reply_to,
       subject: issue.title,
-      html,
+      html: testHtml,
     });
     console.log(`Test email for issue #${issueNumber} sent to ${testAddress}`);
     return;
