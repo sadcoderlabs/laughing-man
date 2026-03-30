@@ -31,6 +31,10 @@ export async function runBuild(options: BuildOptions): Promise<void> {
     ? allIssues
     : allIssues.filter((i) => i.status === "ready");
 
+  const draftIssueNumbers = includeDrafts
+    ? []
+    : allIssues.filter((i) => i.status === "draft").map((i) => i.issue);
+
   const sorted = [...issues].sort((a, b) => a.issue - b.issue);
 
   const outputDir = join(configDir, "output");
@@ -71,7 +75,7 @@ export async function runBuild(options: BuildOptions): Promise<void> {
     writeFileSync(join(emailDir, `${issue.issue}.html`), emailHtml, "utf8");
   }
 
-  const indexHtml = IndexPage({ issues: sorted, config });
+  const indexHtml = IndexPage({ issues: sorted, draftIssueNumbers, config });
   writeFileSync(join(websiteDir, "index.html"), indexHtml, "utf8");
 
   // Copy Pages Functions into output/ so wrangler can find them

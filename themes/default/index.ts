@@ -6,13 +6,14 @@ import { laughingManLogo } from "./logo.js";
 
 interface IndexProps {
   issues: IssueData[];
+  draftIssueNumbers?: number[];
   config: SiteConfig;
 }
 
 const stylesPath = new URL("styles.css", import.meta.url).pathname;
 const faviconPath = new URL("favicon.svg", import.meta.url).pathname;
 
-export function IndexPage({ issues, config }: IndexProps): string {
+export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps): string {
   const styles = readFileSync(stylesPath, "utf8");
   const favicon = readFileSync(faviconPath, "utf8");
   const faviconDataUri = `data:image/svg+xml,${encodeURIComponent(favicon)}`;
@@ -31,6 +32,22 @@ export function IndexPage({ issues, config }: IndexProps): string {
     </li>`,
     )
     .join("\n");
+
+  const teaserItems = [...draftIssueNumbers]
+    .sort((a, b) => b - a)
+    .map(
+      (num) => `
+    <li>
+      <div class="feed-row feed-teaser">
+        <span class="feed-marker">&nbsp;</span>
+        <span class="feed-issue">${String(num).padStart(2, "0")}</span>
+        <span class="feed-title"><em>Issue #${String(num).padStart(2, "0")} coming soon</em></span>
+      </div>
+    </li>`,
+    )
+    .join("\n");
+
+  const allItems = teaserItems + feedItems;
 
   return `<!DOCTYPE html>
 <html lang="zh-Hant">
@@ -73,7 +90,7 @@ export function IndexPage({ issues, config }: IndexProps): string {
     <section id="archive" class="feed">
       <p class="feed-label" aria-hidden="true">Archives</p>
       <ul class="feed-list" aria-label="Published issues">
-        ${feedItems || '<li class="feed-empty">No published issues yet. Subscribe to get notified.</li>'}
+        ${allItems || '<li class="feed-empty">No published issues yet. Subscribe to get notified.</li>'}
       </ul>
       ${feedItems ? '<p class="feed-end">End of Archives</p>' : ""}
     </section>

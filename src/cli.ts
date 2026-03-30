@@ -8,73 +8,106 @@ import { runSetupWeb } from "./commands/setup-web.js";
 
 const args = process.argv.slice(2);
 const configDir = process.cwd();
+const wantsHelp = args.includes("--help") || args.includes("-h");
+
+function showHelp(text: string): never {
+  console.log(text);
+  process.exit(0);
+}
 
 async function main(): Promise<void> {
   const command = args[0];
 
   if (!command || command === "--help" || command === "-h") {
-    console.log(`laughing-man -- Turn your Markdown into a newsletter.
+    showHelp(`laughing-man -- Turn your Markdown into a newsletter.
 
 Commands:
   init              Generate laughing-man.yaml in the current directory
   setup web         Create Cloudflare Pages project + custom domain + DNS
   build             Validate + build site and email HTML
   preview           Build (including drafts) + start local preview server
-    --no-drafts     Exclude drafts (show only published issues)
   deploy            Deploy output/website/ to Cloudflare Pages
   send <issue>      Send an issue via Resend Broadcast
-    --yes           Skip confirmation prompt (for CI)
 
-Examples:
-  laughing-man init
-  laughing-man setup web
-  laughing-man build
-  laughing-man preview
-  laughing-man deploy
-  laughing-man send 1
-  laughing-man send 1 --yes
+Run 'laughing-man <command> --help' for command-specific options.
 `);
-    process.exit(0);
   }
 
   try {
     switch (command) {
       case "init": {
+        if (wantsHelp) {
+          showHelp(`Usage: laughing-man init
+
+Generate a laughing-man.yaml config file in the current directory.
+`);
+        }
         await runInit(configDir);
         break;
       }
 
       case "build": {
+        if (wantsHelp) {
+          showHelp(`Usage: laughing-man build
+
+Validate all issues and generate site + email HTML.
+Drafts are excluded from the output.
+`);
+        }
         await runBuild({ configDir, includeDrafts: false });
         break;
       }
 
       case "preview": {
-        const noDrafts = args.includes("--no-drafts");
+        if (wantsHelp) {
+          showHelp(`Usage: laughing-man preview [options]
+
+Build (including drafts) and start a local preview server.
+
+Options:
+  --production    Build as production (exclude drafts, show teasers)
+  --no-drafts     Alias for --production
+`);
+        }
+        const noDrafts = args.includes("--no-drafts") || args.includes("--production");
         await runPreview({ configDir, includeDrafts: !noDrafts });
         break;
       }
 
       case "deploy": {
+        if (wantsHelp) {
+          showHelp(`Usage: laughing-man deploy
+
+Deploy output/website/ to Cloudflare Pages.
+Runs a clean build first to ensure drafts are never included.
+`);
+        }
         await runDeploy({ configDir });
         break;
       }
 
       case "setup": {
         const subcommand = args[1];
-        if (subcommand !== "web") {
-          console.error(
-            subcommand
-              ? `Unknown setup subcommand: ${subcommand}`
-              : "Usage: laughing-man setup web",
-          );
-          process.exit(1);
+        if (wantsHelp || subcommand !== "web") {
+          showHelp(`Usage: laughing-man setup web
+
+Create a Cloudflare Pages project with custom domain and DNS.
+`);
         }
         await runSetupWeb({ configDir });
         break;
       }
 
       case "send": {
+        if (wantsHelp) {
+          showHelp(`Usage: laughing-man send <issue-number> [options]
+
+Send an issue via Resend Broadcast.
+
+Options:
+  --yes           Skip confirmation prompt (for CI)
+`);
+        }
         const issueArg = args[1];
         if (!issueArg || !/^\d+$/.test(issueArg)) {
           console.error("Usage: laughing-man send <issue-number> [--yes]");
