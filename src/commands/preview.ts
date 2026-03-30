@@ -1,4 +1,4 @@
-import { watch } from "node:fs";
+import { watch, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { loadConfig } from "../pipeline/config.js";
 import { runBuild } from "./build.js";
@@ -86,12 +86,14 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
 
       // Email preview: index page listing all email issues
       if (url.pathname === "/email/" || url.pathname === "/email") {
-        const emailFiles = (await Array.fromAsync(new Bun.Glob("*.html").scan(emailDir)))
-          .sort((a, b) => {
-            const numA = parseInt(a.replace(".html", ""), 10);
-            const numB = parseInt(b.replace(".html", ""), 10);
-            return numA - numB;
-          });
+        const emailFiles = existsSync(emailDir)
+          ? (await Array.fromAsync(new Bun.Glob("*.html").scan(emailDir)))
+              .sort((a, b) => {
+                const numA = parseInt(a.replace(".html", ""), 10);
+                const numB = parseInt(b.replace(".html", ""), 10);
+                return numA - numB;
+              })
+          : [];
 
         const links = emailFiles
           .map((f) => {
