@@ -100,4 +100,51 @@ describe("createResendProvider", () => {
 
     expect(mockSend).toHaveBeenCalledWith("b-new");
   });
+
+  it("calls resend.emails.send with correct params", async () => {
+    const mockSend = mock(async () => ({
+      data: { id: "email-123" },
+      error: null,
+    }));
+
+    const fakeResend = { emails: { send: mockSend } } as any;
+    const provider = createResendProvider(fakeResend);
+
+    const id = await provider.sendEmail({
+      to: "user@example.com",
+      from: "Test <test@example.com>",
+      replyTo: "reply@example.com",
+      subject: "Test Issue #1",
+      html: "<h1>Hello</h1>",
+    });
+
+    expect(mockSend).toHaveBeenCalledTimes(1);
+    expect(mockSend).toHaveBeenCalledWith({
+      to: "user@example.com",
+      from: "Test <test@example.com>",
+      replyTo: "reply@example.com",
+      subject: "Test Issue #1",
+      html: "<h1>Hello</h1>",
+    });
+    expect(id).toBe("email-123");
+  });
+
+  it("throws if resend.emails.send returns an error", async () => {
+    const mockSend = mock(async () => ({
+      data: null,
+      error: { message: "Invalid email" },
+    }));
+
+    const fakeResend = { emails: { send: mockSend } } as any;
+    const provider = createResendProvider(fakeResend);
+
+    await expect(
+      provider.sendEmail({
+        to: "bad",
+        from: "Test <test@example.com>",
+        subject: "Test",
+        html: "<p>hi</p>",
+      })
+    ).rejects.toThrow("Invalid email");
+  });
 });

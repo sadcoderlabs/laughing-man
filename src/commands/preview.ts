@@ -1,7 +1,8 @@
-import { watch } from "node:fs";
+import { watch, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { loadConfig } from "../pipeline/config.js";
 import { runBuild } from "./build.js";
+import { handleSubscribe } from "../../functions/api/subscribe.js";
 
 interface PreviewOptions {
   configDir: string;
@@ -15,6 +16,7 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
 
   const config = await loadConfig(configDir);
   const websiteDir = resolve(configDir, "output", "website");
+  const emailDir = resolve(configDir, "output", "email");
   const themesDir = resolve(import.meta.dirname, "../../themes/default");
   const encoder = new TextEncoder();
 
@@ -23,8 +25,10 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
 
   let rebuildTimer: Timer | null = null;
   let building = false;
+  let cooldown = false;
 
   function scheduleRebuild() {
+    if (building || cooldown) return;
     if (rebuildTimer) clearTimeout(rebuildTimer);
     rebuildTimer = setTimeout(async () => {
       if (building) return;
@@ -42,6 +46,8 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
         console.error("Rebuild failed:", err);
       }
       building = false;
+      cooldown = true;
+      setTimeout(() => { cooldown = false; }, 500);
     }, 300);
   }
 
@@ -83,6 +89,82 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
         });
       }
 
+      if (url.pathname === "/api/subscribe") {
+        if (req.method !== "POST") {
+          return Response.json(
+            { error: "Method not allowed." },
+            { status: 405, headers: { Allow: "POST" } },
+          );
+        }
+
+        if (!config.env.RESEND_API_KEY) {
+          return Response.json(
+            { error: "RESEND_API_KEY is not configured for preview." },
+            { status: 500 },
+          );
+        }
+
+        try {
+          const body = await req.json();
+          return await handleSubscribe(body as { email?: string } | null, {
+            RESEND_API_KEY: config.env.RESEND_API_KEY,
+          });
+        } catch {
+          return Response.json({ error: "Invalid request." }, { status: 400 });
+        }
+      }
+
+      // Email preview: index page listing all email issues
+      if (url.pathname === "/email/" || url.pathname === "/email") {
+        const emailFiles = existsSync(emailDir)
+          ? (await Array.fromAsync(new Bun.Glob("*.html").scan(emailDir)))
+              .sort((a, b) => {
+                const numA = parseInt(a.replace(".html", ""), 10);
+                const numB = parseInt(b.replace(".html", ""), 10);
+                return numA - numB;
+              })
+          : [];
+
+        const links = emailFiles
+          .map((f) => {
+            const num = f.replace(".html", "");
+            return `<li><a href="/email/${f}">Issue #${num}</a></li>`;
+          })
+          .join("\n");
+
+        const indexHtml = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Email Preview</title>
+<style>body{font-family:system-ui,sans-serif;max-width:600px;margin:40px auto;padding:0 20px}
+a{color:#005577}li{margin:8px 0}</style></head>
+<body><h1>Email Preview</h1>
+<p><a href="/">&larr; Back to website preview</a></p>
+<ul>${links}</ul>
+${reloadScript}
+</body></html>`;
+
+        return new Response(indexHtml, {
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        });
+      }
+
+      // Email preview: individual email HTML files
+      if (url.pathname.startsWith("/email/") && url.pathname.endsWith(".html")) {
+        const emailFilePath = resolve(join(emailDir, url.pathname.replace("/email/", "")));
+        if (!emailFilePath.startsWith(emailDir)) {
+          return new Response("Forbidden", { status: 403 });
+        }
+        const emailFile = Bun.file(emailFilePath);
+        if (await emailFile.exists()) {
+          const html = await emailFile.text();
+          return new Response(
+            html.replace("</body>", `${reloadScript}</body>`),
+            { headers: { "Content-Type": "text/html; charset=utf-8" } },
+          );
+        }
+        return new Response("Not found", { status: 404 });
+      }
+
       let pathname = url.pathname;
       if (pathname.endsWith("/")) pathname += "index.html";
 
@@ -109,6 +191,7 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
   });
 
   console.log(`Preview server running at http://localhost:${server.port}/`);
+  console.log(`Email preview at http://localhost:${server.port}/email/`);
   console.log("Watching for changes...");
   console.log("Press Ctrl+C to stop.");
 }

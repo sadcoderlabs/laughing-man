@@ -20,11 +20,20 @@ export interface CreateBroadcastParams {
   name: string;
 }
 
+export interface SendEmailParams {
+  to: string;
+  from: string;
+  replyTo?: string;
+  subject: string;
+  html: string;
+}
+
 export interface ResendProvider {
   listSegments(): Promise<SegmentSummary[]>;
   listBroadcasts(): Promise<BroadcastSummary[]>;
   createBroadcast(params: CreateBroadcastParams): Promise<string>;
   sendBroadcast(broadcastId: string): Promise<void>;
+  sendEmail(params: SendEmailParams): Promise<string>;
 }
 
 export function createResendProvider(client: Resend): ResendProvider {
@@ -58,6 +67,19 @@ export function createResendProvider(client: Resend): ResendProvider {
     async sendBroadcast(broadcastId: string): Promise<void> {
       const { error } = await client.broadcasts.send(broadcastId);
       if (error) throw new Error(`Resend error: ${error.message}`);
+    },
+
+    async sendEmail(params: SendEmailParams): Promise<string> {
+      const { data, error } = await client.emails.send({
+        to: params.to,
+        from: params.from,
+        replyTo: params.replyTo,
+        subject: params.subject,
+        html: params.html,
+      });
+      if (error) throw new Error(`Resend error: ${error.message}`);
+      if (!data?.id) throw new Error("Resend returned no email id");
+      return data.id;
     },
   };
 }

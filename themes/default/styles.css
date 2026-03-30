@@ -221,6 +221,12 @@ strong {
   gap: 0.5rem;
   max-inline-size: 24rem;
   inline-size: 100%;
+  transition: box-shadow 0.24s ease, transform 0.24s ease;
+}
+
+.subscribe-form.is-targeted {
+  box-shadow: 0 0 0 6px rgba(0, 85, 119, 0.1);
+  transform: translateY(-2px);
 }
 
 .subscribe-form input[type="email"] {
@@ -397,9 +403,9 @@ strong {
 /* ─── Issue: Back link ─── */
 
 .issue-back {
-  max-inline-size: var(--content-width);
+  max-inline-size: var(--reading-width);
   margin-inline: auto;
-  padding: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 4vw, 2.5rem);
+  padding: clamp(1.5rem, 3vw, 2.5rem) clamp(1.25rem, 4vw, 2rem) 0;
   text-align: center;
 }
 
@@ -436,7 +442,7 @@ strong {
 /* ─── Issue: Hero ─── */
 
 .issue-main {
-  padding-block-end: 2rem;
+  padding: 0 clamp(1.25rem, 4vw, 2.5rem) 3rem;
 }
 
 .issue-hero {
@@ -446,8 +452,14 @@ strong {
   text-align: center;
   max-inline-size: var(--content-width);
   margin-inline: auto;
-  padding-block: clamp(3rem, 8vw, 6rem) clamp(2rem, 4vw, 3rem);
+  padding-block: clamp(3.5rem, 8vw, 6.5rem) clamp(1.5rem, 3vw, 2.5rem);
   animation: fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.issue-emblem {
+  inline-size: clamp(6.25rem, 14vw, 8.75rem);
+  margin-block-end: 1.5rem;
+  opacity: 0.95;
 }
 
 .issue-meta {
@@ -465,17 +477,56 @@ strong {
   color: var(--text);
   letter-spacing: -0.02em;
   line-height: 1.15;
+  white-space: nowrap;
 }
 
 /* ─── Issue: Reading surface ─── */
 
 .issue-reading-surface {
-  max-inline-size: var(--content-width);
+  position: relative;
+  max-inline-size: calc(var(--reading-width) + clamp(2rem, 5vw, 5rem));
   margin-inline: auto;
-  padding: clamp(1.5rem, 4vw, 2.5rem);
-  border-radius: 0.5rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--line);
+  padding: clamp(1.25rem, 3vw, 2rem) clamp(1.25rem, 3vw, 2.5rem)
+    clamp(2rem, 4vw, 3rem);
+  border-radius: 1.5rem;
+  background:
+    linear-gradient(180deg, rgba(250, 251, 252, 0.84), rgba(250, 251, 252, 0.92));
+  border: 1px solid rgba(0, 85, 119, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 16px 40px rgba(30, 45, 61, 0.05);
+  backdrop-filter: blur(8px);
+}
+
+.issue-reading-surface::before {
+  content: "";
+  display: block;
+  inline-size: min(7rem, 20vw);
+  block-size: 1px;
+  margin: 0 auto clamp(1.5rem, 3vw, 2rem);
+  background: linear-gradient(90deg, transparent, var(--line), transparent);
+}
+
+/* ─── Issue: Subscribe ─── */
+
+.issue-subscribe {
+  max-inline-size: var(--reading-width);
+  margin: 0 auto;
+  padding: clamp(2rem, 4vw, 3rem) clamp(1.25rem, 4vw, 2rem) 0;
+  text-align: center;
+  animation: fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both 0.16s;
+}
+
+.issue-subscribe-label {
+  margin-block-end: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+}
+
+.issue-subscribe-form {
+  margin-inline: auto;
 }
 
 /* ─── Issue: Body typography ─── */
@@ -483,9 +534,15 @@ strong {
 .issue-body {
   max-inline-size: var(--reading-width);
   margin-inline: auto;
-  font-family: sans-serif;
+  font-family: var(--font-sans);
   font-size: 1.125rem;
   line-height: 1.75;
+}
+
+.issue-body > p:first-of-type {
+  font-size: clamp(1.18rem, 1.6vw, 1.35rem);
+  line-height: 1.7;
+  color: var(--text);
 }
 
 .issue-body > h1:first-of-type {
@@ -496,7 +553,7 @@ strong {
   margin-block: 2.5rem 0.75rem;
   font-size: clamp(1.625rem, 3vw, 1.875rem);
   font-weight: 700;
-  color: var(--text);
+  color: color-mix(in srgb, var(--accent) 70%, var(--text) 30%);
   line-height: 1.2;
 }
 
@@ -504,7 +561,7 @@ strong {
   margin-block: 2rem 0.6rem;
   font-size: 1.375rem;
   font-weight: 600;
-  color: var(--text);
+  color: color-mix(in srgb, var(--accent) 38%, var(--text) 62%);
   line-height: 1.3;
 }
 
@@ -658,6 +715,32 @@ del {
 
   .feed-row {
     gap: 0.5rem;
+  }
+
+  .issue-main {
+    padding-inline: 0.875rem;
+  }
+
+  .issue-reading-surface {
+    border-radius: 1rem;
+    padding-inline: 1rem;
+  }
+
+  .issue-subscribe {
+    padding-inline: 0.5rem;
+  }
+
+  .issue-body {
+    font-size: 1rem;
+  }
+
+  .issue-hero h1 {
+    white-space: normal;
+  }
+
+  .issue-emblem {
+    inline-size: 5.5rem;
+    margin-block-end: 1.1rem;
   }
 }
 

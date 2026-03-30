@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, writeFileSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync, statSync, type Stats } from "node:fs";
 import { join, extname, basename } from "node:path";
 import matter from "@11ty/gray-matter";
 
@@ -48,6 +48,22 @@ function extractHeading(content: string): string {
   return match ? match[1].trim() : "";
 }
 
+function getCreationOrderTime(stat: Stats): Date {
+  const birthtimeMs = stat.birthtime.getTime();
+  if (!Number.isFinite(birthtimeMs) || birthtimeMs <= 0) {
+    return stat.mtime;
+  }
+
+  // On some filesystems Node reports `birthtime` as `ctime` when true
+  // creation time is unavailable. In that case prefer `mtime`, which our
+  // tests can control deterministically with `utimesSync`.
+  if (birthtimeMs === stat.ctime.getTime() && birthtimeMs !== stat.mtime.getTime()) {
+    return stat.mtime;
+  }
+
+  return stat.birthtime;
+}
+
 export async function runStamp(issuesDir: string): Promise<StampOutput> {
   const files = readdirSync(issuesDir)
     .filter((f) => extname(f) === ".md");
@@ -77,7 +93,7 @@ export async function runStamp(issuesDir: string): Promise<StampOutput> {
     toStamp.push({
       filename,
       content: raw,
-      birthtime: stat.birthtime,
+      birthtime: getCreationOrderTime(stat),
       inferred,
     });
   }

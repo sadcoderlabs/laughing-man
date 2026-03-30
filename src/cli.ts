@@ -137,7 +137,8 @@ All stamped issues are set to 'draft' status.
 Send an issue via Resend Broadcast.
 
 Options:
-  --yes           Skip confirmation prompt (for CI)
+  --yes                Skip confirmation prompt (for CI)
+  --test <address>     Send a test email to this address instead of broadcasting
 `);
         }
         const issueArg = args[1];
@@ -146,10 +147,17 @@ Options:
           process.exit(1);
         }
         const yes = args.includes("--yes");
+        const testIdx = args.indexOf("--test");
+        const testAddress = testIdx !== -1 ? args[testIdx + 1] : undefined;
+        if (testIdx !== -1 && !testAddress) {
+          console.error("--test requires an email address. Usage: laughing-man send <N> --test <address>");
+          process.exit(1);
+        }
         await runSend({
           configDir,
           issueNumber: parseInt(issueArg, 10),
           yes,
+          testAddress,
         });
         break;
       }

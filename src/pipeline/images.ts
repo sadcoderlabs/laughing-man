@@ -15,6 +15,8 @@ interface ProcessImagesResult {
   emailHtml: string;
 }
 
+const EMAIL_IMAGE_STYLE = "display:block;max-width:100%;height:auto;";
+
 function resolveImagePath(
   src: string,
   markdownFilePath: string,
@@ -38,6 +40,29 @@ function resolveImagePath(
   }
 
   return null;
+}
+
+function appendInlineStyle(tag: string, styleToAppend: string): string {
+  const styleAttr = tag.match(/\sstyle="([^"]*)"/i);
+  if (!styleAttr) {
+    return tag.replace(/<img\b/i, `<img style="${styleToAppend}"`);
+  }
+
+  const existing = styleAttr[1].trim();
+  const separator = existing.length > 0 && !existing.endsWith(";") ? ";" : "";
+  return tag.replace(styleAttr[0], ` style="${existing}${separator}${styleToAppend}"`);
+}
+
+function makeEmailImagesResponsive(html: string): string {
+  return html.replace(/<img\b[^>]*>/gi, (tag) => {
+    let responsiveTag = tag;
+
+    if (!/\swidth\s*=/i.test(responsiveTag)) {
+      responsiveTag = responsiveTag.replace(/<img\b/i, '<img width="100%"');
+    }
+
+    return appendInlineStyle(responsiveTag, EMAIL_IMAGE_STYLE);
+  });
 }
 
 export async function processImages(
@@ -101,6 +126,23 @@ export async function processImages(
     webHtml = webHtml.replace(fullTag, webTag);
     emailHtml = emailHtml.replace(fullTag, emailTag);
   }
+
+  // Replace YouTube iframes with linked thumbnails in email HTML only
+  const iframePattern = /<iframe\b[^>]*\bsrc="https?:\/\/(?:www\.)?(?:youtube\.com|youtube-nocookie\.com)\/embed\/([A-Za-z0-9_-]+)[^"]*"[^>]*><\/iframe>/g;
+  const iframeMatches = [...emailHtml.matchAll(iframePattern)];
+
+  for (const match of iframeMatches) {
+    const [fullTag, videoId] = match;
+    const titleMatch = fullTag.match(/\btitle="([^"]*)"/);
+    const rawAlt = titleMatch ? titleMatch[1] : "YouTube video";
+    const alt = rawAlt.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+    const thumbnail = `<a href="https://www.youtube.com/watch?v=${videoId}" target="_blank"><img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="${alt}" width="100%" style="width:100%;max-width:100%;border-radius:8px;" /></a>`;
+
+    emailHtml = emailHtml.replace(fullTag, thumbnail);
+  }
+
+  emailHtml = makeEmailImagesResponsive(emailHtml);
 
   return { webHtml, emailHtml };
 }
