@@ -1,6 +1,6 @@
-import { readFileSync } from "node:fs";
 import { marked } from "marked";
 import type { SiteConfig, IssueData } from "../../src/types.js";
+import { styles, faviconDataUri } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 import { laughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
@@ -12,13 +12,7 @@ interface IndexProps {
   config: SiteConfig;
 }
 
-const stylesPath = new URL("styles.css", import.meta.url).pathname;
-const faviconPath = new URL("favicon.svg", import.meta.url).pathname;
-
 export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps): string {
-  const styles = readFileSync(stylesPath, "utf8");
-  const favicon = readFileSync(faviconPath, "utf8");
-  const faviconDataUri = `data:image/svg+xml,${encodeURIComponent(favicon)}`;
   const sorted = [...issues].sort((a, b) => b.issue - a.issue);
 
   const feedItems = sorted

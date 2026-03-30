@@ -1,17 +1,11 @@
-import { readFileSync } from "node:fs";
 import type { IssueProps } from "../../src/types.js";
+import { styles, faviconDataUri } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 import { laughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
 import { subscribeScript } from "./subscribe.js";
 
-const stylesPath = new URL("styles.css", import.meta.url).pathname;
-const faviconPath = new URL("favicon.svg", import.meta.url).pathname;
-
 export function WebPage({ title, issue, content, config }: IssueProps): string {
-  const styles = readFileSync(stylesPath, "utf8");
-  const favicon = readFileSync(faviconPath, "utf8");
-  const faviconDataUri = `data:image/svg+xml,${encodeURIComponent(favicon)}`;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
