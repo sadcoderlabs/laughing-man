@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import type { IssueProps } from "../../src/types.js";
 import { escapeHtml } from "./escape.js";
 import { laughingManLogo } from "./logo.js";
+import { siteHeader, siteFooter } from "./layout.js";
 import { subscribeScript } from "./subscribe.js";
 
 const stylesPath = new URL("styles.css", import.meta.url).pathname;
@@ -24,13 +25,7 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
   <style>${styles}</style>
 </head>
 <body class="issue-page">
-  <header class="site-header">
-    <a class="site-name" href="/">${escapeHtml(config.name)}</a>
-    <nav class="site-nav">
-      <a href="#subscribe">Subscribe</a>
-      <a href="/#archive">Archives</a>
-    </nav>
-  </header>
+  ${siteHeader(config.name, "/#archive")}
   <main class="issue-main">
     <section class="issue-hero">
       <div class="issue-emblem" aria-hidden="true">
@@ -57,13 +52,7 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
       <a href="/#archive">&lt; Back to Archives</a>
     </nav>
   </main>
-  <footer class="site-footer">
-    <p class="footer-name">${escapeHtml(config.name)}</p>
-    <p class="footer-credit">
-      Created with
-      <a href="https://github.com/sadcoderlabs/laughing-man" target="_blank" rel="noopener noreferrer">laughing-man</a>
-    </p>
-  </footer>
+  ${siteFooter(config.name)}
   ${subscribeScript({ formId: "issue-subscribe-form", inputId: "issue-email", messageId: "issue-subscribe-message" })}
 </body>
 </html>`;

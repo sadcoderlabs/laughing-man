@@ -3,6 +3,7 @@ import { marked } from "marked";
 import type { SiteConfig, IssueData } from "../../src/types.js";
 import { escapeHtml } from "./escape.js";
 import { laughingManLogo } from "./logo.js";
+import { siteHeader, siteFooter } from "./layout.js";
 import { subscribeScript } from "./subscribe.js";
 
 interface IndexProps {
@@ -63,13 +64,7 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
   <style>${styles}</style>
 </head>
 <body>
-  <header class="site-header">
-    <a class="site-name" href="/">${escapeHtml(config.name)}</a>
-    <nav class="site-nav">
-      <a href="#subscribe">Subscribe</a>
-      <a href="#archive">Archives</a>
-    </nav>
-  </header>
+  ${siteHeader(config.name, "#archive")}
   <main>
     <section class="hero">
       <div class="hero-emblem" aria-hidden="true">
@@ -96,13 +91,7 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
       ${feedItems ? '<p class="feed-end">End of Archives</p>' : ""}
     </section>
   </main>
-  <footer class="site-footer">
-    <p class="footer-name">${escapeHtml(config.name)}</p>
-    <p class="footer-credit">
-      Created with
-      <a href="https://github.com/sadcoderlabs/laughing-man" target="_blank" rel="noopener noreferrer">laughing-man</a>
-    </p>
-  </footer>
+  ${siteFooter(config.name)}
   ${subscribeScript({ formId: "subscribe-form", inputId: "email", messageId: "subscribe-message" })}
 </body>
 </html>`;
