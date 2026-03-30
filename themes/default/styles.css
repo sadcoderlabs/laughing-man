@@ -374,6 +374,10 @@ strong {
   padding: 2rem 0;
 }
 
+.feed-teaser {
+  opacity: 0.5;
+}
+
 .feed-end {
   margin: 1.25rem 0 0;
   font-family: var(--font-mono);
