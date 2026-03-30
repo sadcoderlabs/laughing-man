@@ -138,4 +138,74 @@ describe("processImages", () => {
       })
     ).rejects.toThrow("Filename collision");
   });
+
+  it("replaces YouTube iframe with linked thumbnail in email HTML", async () => {
+    const html = `<p>Watch this:</p><iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=abc123" title="YouTube video player" frameborder="0" allowfullscreen></iframe>`;
+    const result = await processImages({
+      html,
+      issueNumber: 1,
+      markdownFilePath: join(tmpDir, "issues", "issue-1.md"),
+      attachmentsDir: undefined,
+      outputDir,
+      siteUrl: "https://example.com",
+    });
+
+    // Web HTML keeps the iframe untouched
+    expect(result.webHtml).toContain("<iframe");
+    expect(result.webHtml).toContain("youtube.com/embed/dQw4w9WgXcQ");
+
+    // Email HTML replaces with linked thumbnail
+    expect(result.emailHtml).not.toContain("<iframe");
+    expect(result.emailHtml).toContain('href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"');
+    expect(result.emailHtml).toContain('src="https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg"');
+    expect(result.emailHtml).toContain('alt="YouTube video player"');
+  });
+
+  it("handles youtube-nocookie.com iframe", async () => {
+    const html = `<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/WB-ik-Bpl0c?si=fsCLzM9Ll" title="My Video" frameborder="0" allowfullscreen></iframe>`;
+    const result = await processImages({
+      html,
+      issueNumber: 1,
+      markdownFilePath: join(tmpDir, "issues", "issue-1.md"),
+      attachmentsDir: undefined,
+      outputDir,
+      siteUrl: "https://example.com",
+    });
+
+    expect(result.webHtml).toContain("<iframe");
+    expect(result.emailHtml).not.toContain("<iframe");
+    expect(result.emailHtml).toContain('href="https://www.youtube.com/watch?v=WB-ik-Bpl0c"');
+    expect(result.emailHtml).toContain('src="https://img.youtube.com/vi/WB-ik-Bpl0c/hqdefault.jpg"');
+    expect(result.emailHtml).toContain('alt="My Video"');
+  });
+
+  it("uses default alt text when iframe has no title", async () => {
+    const html = `<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0"></iframe>`;
+    const result = await processImages({
+      html,
+      issueNumber: 1,
+      markdownFilePath: join(tmpDir, "issues", "issue-1.md"),
+      attachmentsDir: undefined,
+      outputDir,
+      siteUrl: "https://example.com",
+    });
+
+    expect(result.emailHtml).toContain('alt="YouTube video"');
+  });
+
+  it("does not touch non-YouTube iframes", async () => {
+    const html = `<iframe src="https://open.spotify.com/embed/track/abc"></iframe>`;
+    const result = await processImages({
+      html,
+      issueNumber: 1,
+      markdownFilePath: join(tmpDir, "issues", "issue-1.md"),
+      attachmentsDir: undefined,
+      outputDir,
+      siteUrl: "https://example.com",
+    });
+
+    // Both keep the original iframe (email clients will strip it, but we don't transform it)
+    expect(result.webHtml).toContain("spotify.com");
+    expect(result.emailHtml).toContain("spotify.com");
+  });
 });

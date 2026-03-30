@@ -102,5 +102,19 @@ export async function processImages(
     emailHtml = emailHtml.replace(fullTag, emailTag);
   }
 
+  // Replace YouTube iframes with linked thumbnails in email HTML only
+  const iframePattern = /<iframe\b[^>]*\bsrc="https?:\/\/(?:www\.)?(?:youtube\.com|youtube-nocookie\.com)\/embed\/([^"?/]+)[^"]*"[^>]*><\/iframe>/g;
+  const iframeMatches = [...emailHtml.matchAll(iframePattern)];
+
+  for (const match of iframeMatches) {
+    const [fullTag, videoId] = match;
+    const titleMatch = fullTag.match(/\btitle="([^"]*)"/);
+    const alt = titleMatch ? titleMatch[1] : "YouTube video";
+
+    const thumbnail = `<a href="https://www.youtube.com/watch?v=${videoId}" target="_blank"><img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="${alt}" width="560" style="max-width:100%;border-radius:8px;" /></a>`;
+
+    emailHtml = emailHtml.replace(fullTag, thumbnail);
+  }
+
   return { webHtml, emailHtml };
 }
