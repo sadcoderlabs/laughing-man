@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync, writeFileSync, statSync, type Stats } from "node:fs";
 import { join, extname, basename } from "node:path";
 import matter from "@11ty/gray-matter";
+import { extractHeading } from "../pipeline/heading.js";
 
 interface InferResult {
   issue: number;
@@ -40,12 +41,6 @@ interface StampResult {
 interface StampOutput {
   stamped: StampResult[];
   skipped: Array<{ filename: string }>;
-}
-
-function extractHeading(content: string): string {
-  const stripped = content.replace(/^```[\s\S]*?^```/gm, "");
-  const match = stripped.match(/^#\s+(.+)$/m);
-  return match ? match[1].trim() : "";
 }
 
 function getCreationOrderTime(stat: Stats): Date {

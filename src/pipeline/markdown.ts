@@ -4,6 +4,7 @@ import matter from "@11ty/gray-matter";
 import { marked } from "marked";
 import { z } from "zod";
 import type { IssueData } from "../types.js";
+import { extractHeading } from "./heading.js";
 
 const FrontmatterSchema = z.object({
   issue: z.number({
@@ -23,12 +24,6 @@ const FrontmatterSchema = z.object({
   ).optional(),
 });
 
-function extractTitle(markdown: string): string {
-  const stripped = markdown.replace(/^```[\s\S]*?^```/gm, "");
-  const match = stripped.match(/^#\s+(.+)$/m);
-  return match ? match[1].trim() : "";
-}
-
 export async function parseIssueFile(filePath: string): Promise<IssueData> {
   const raw = readFileSync(filePath, "utf8");
   const { data, content } = matter(raw);
@@ -40,7 +35,7 @@ export async function parseIssueFile(filePath: string): Promise<IssueData> {
   }
 
   const { issue, status, date } = result.data;
-  const title = result.data.title ?? extractTitle(content);
+  const title = result.data.title ?? extractHeading(content);
   const html = await marked(content);
 
   return {
@@ -59,7 +54,7 @@ export async function scanIssuesDir(issuesDir: string): Promise<IssueData[]> {
 
   if (files.length === 0) {
     throw new Error(
-      "No issues found. Run `laughing-man stamp` to add frontmatter to your .md files."
+      "No issues found. Run 'laughing-man stamp' to add frontmatter to your .md files."
     );
   }
 
@@ -72,7 +67,7 @@ export async function scanIssuesDir(issuesDir: string): Promise<IssueData[]> {
 
   if (allBare) {
     throw new Error(
-      "No issues found. Run `laughing-man stamp` to add frontmatter to your .md files."
+      "No issues found. Run 'laughing-man stamp' to add frontmatter to your .md files."
     );
   }
 
