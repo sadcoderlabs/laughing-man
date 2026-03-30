@@ -1,6 +1,6 @@
-import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { loadConfig } from "../pipeline/config.js";
+import { runBuild } from "./build.js";
 
 interface DeployOptions {
   configDir: string;
@@ -9,15 +9,11 @@ interface DeployOptions {
 export async function runDeploy(options: DeployOptions): Promise<void> {
   const { configDir } = options;
 
+  await runBuild({ configDir, includeDrafts: false });
+
   const config = await loadConfig(configDir);
 
   const outputDir = join(configDir, "output");
-  const websiteDir = join(outputDir, "website");
-  if (!existsSync(websiteDir)) {
-    throw new Error(
-      `output/website/ not found. Run 'laughing-man build' first.`
-    );
-  }
 
   console.log(`Deploying to Cloudflare Pages (${config.web_hosting.project})...`);
 
