@@ -55,6 +55,18 @@ describe("EmailPage", () => {
     expect(html).toContain("Issue #42");
   });
 
+  it("links the Read in browser button to the website issue page", () => {
+    const html = EmailPage({
+      title: "My First Issue",
+      issue: 42,
+      content: "<p>Hello world</p>",
+      config: testConfig,
+    });
+
+    expect(html).toContain("Read in browser");
+    expect(html).toContain('href="https://example.com/issues/42/"');
+  });
+
   it("contains rendered content", () => {
     const html = EmailPage({
       title: "My First Issue",

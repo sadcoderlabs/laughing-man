@@ -16,10 +16,16 @@ function assertNoMjInclude(html: string): void {
   }
 }
 
+function buildIssueUrl(siteUrl: string, issue: number): string {
+  const baseUrl = siteUrl.endsWith("/") ? siteUrl : `${siteUrl}/`;
+  return new URL(`issues/${issue}/`, baseUrl).toString();
+}
+
 export function EmailPage({ title, issue, content, config }: IssueProps): string {
   const escapedTitle = escapeHtml(title);
   const name = escapeHtml(config.name);
   const url = escapeHtml(config.url);
+  const issueUrl = escapeHtml(buildIssueUrl(config.url, issue));
   const bodyContent = stripFirstHeading(content);
 
   assertNoMjInclude(bodyContent);
@@ -152,6 +158,19 @@ export function EmailPage({ title, issue, content, config }: IssueProps): string
         <mj-text align="center" padding="0 12px 28px" font-size="44px" line-height="1.1" font-weight="700" color="#1e2d3d">
           ${escapedTitle}
         </mj-text>
+        <mj-button
+          href="${issueUrl}"
+          align="center"
+          background-color="#005577"
+          color="#ffffff"
+          font-size="14px"
+          font-weight="700"
+          inner-padding="14px 28px"
+          border-radius="999px"
+          padding="0 0 28px"
+        >
+          Read in browser
+        </mj-button>
       </mj-column>
     </mj-section>
 
