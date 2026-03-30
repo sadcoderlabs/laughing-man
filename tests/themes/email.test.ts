@@ -113,6 +113,18 @@ describe("EmailPage", () => {
     expect(html).toContain('style="width:680px;"');
   });
 
+  it("keeps a single modest horizontal gutter for the content column", () => {
+    const html = EmailPage({
+      title: "My First Issue",
+      issue: 1,
+      content: "<p>Hello</p>",
+      config: testConfig,
+    });
+
+    expect(html).toContain("padding:32px 16px 0");
+    expect(html).toContain('padding:0;word-break:break-word;');
+  });
+
   it("escapes HTML in config name and URL", () => {
     const evilConfig = {
       ...testConfig,
