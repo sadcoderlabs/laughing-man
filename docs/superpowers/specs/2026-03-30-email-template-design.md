@@ -106,7 +106,7 @@ This function already produces separate `webHtml` and `emailHtml` by rewriting i
 | `/email/<N>.html` | The compiled email HTML for issue N |
 | `/*` (existing) | Website output (unchanged) |
 
-**Email index page:** A simple HTML page generated at request time by reading the `output/email/` directory. Lists each issue as a clickable link. Styled minimally (does not need to match the newsletter theme, it is a dev tool).
+**Email index page:** A simple HTML page generated at request time by the preview server (not written to disk). Lists each issue as a clickable link. Styled minimally (does not need to match the newsletter theme, it is a dev tool). This page only exists in the preview server. It is never written to `output/` and is not part of the deployed website.
 
 **Hot reload:** Already works. The existing file watcher triggers a full rebuild on changes to markdown, theme files, or config. Email HTML is regenerated as part of `runBuild()`. The SSE reload event fires, and the browser refreshes. No new watcher logic needed.
 
