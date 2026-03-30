@@ -3,6 +3,7 @@ import { marked } from "marked";
 import type { SiteConfig, IssueData } from "../../src/types.js";
 import { escapeHtml } from "./escape.js";
 import { laughingManLogo } from "./logo.js";
+import { subscribeScript } from "./subscribe.js";
 
 interface IndexProps {
   issues: IssueData[];
@@ -102,66 +103,7 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
       <a href="https://github.com/sadcoderlabs/laughing-man" target="_blank" rel="noopener noreferrer">laughing-man</a>
     </p>
   </footer>
-  <script>
-    const subscribeSection = document.getElementById('subscribe');
-    const subscribeForm = document.getElementById('subscribe-form');
-    const subscribeInput = document.getElementById('email');
-
-    function focusSubscribe() {
-      window.history.replaceState(null, '', '#subscribe');
-      const previousScrollBehavior = document.documentElement.style.scrollBehavior;
-      document.documentElement.style.scrollBehavior = 'auto';
-      subscribeSection.scrollIntoView({ block: 'center' });
-      document.documentElement.style.scrollBehavior = previousScrollBehavior;
-      subscribeInput.focus({ preventScroll: true });
-      subscribeInput.select();
-      subscribeForm.classList.remove('is-targeted');
-      void subscribeForm.offsetWidth;
-      subscribeForm.classList.add('is-targeted');
-      setTimeout(() => subscribeForm.classList.remove('is-targeted'), 1200);
-    }
-
-    document.querySelectorAll('a[href="#subscribe"]').forEach((link) => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        focusSubscribe();
-      });
-    });
-
-    subscribeForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const msg = document.getElementById('subscribe-message');
-      const email = form.email.value;
-      form.querySelector('button').disabled = true;
-      try {
-        const res = await fetch('/api/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-        });
-        const data = await res.json();
-        if (data.ok) {
-          msg.textContent =
-            data.result === 'already_subscribed'
-              ? "You're already subscribed."
-              : data.result === 'resubscribed'
-                ? "Welcome back — you're subscribed again."
-                : 'Subscribed';
-          msg.className = 'subscribe-message success';
-          form.reset();
-        } else {
-          msg.textContent = data.error || 'something went wrong';
-          msg.className = 'subscribe-message error';
-        }
-      } catch {
-        msg.textContent = 'Something went wrong';
-        msg.className = 'subscribe-message error';
-      }
-      msg.hidden = false;
-      form.querySelector('button').disabled = false;
-    });
-  </script>
+  ${subscribeScript({ formId: "subscribe-form", inputId: "email", messageId: "subscribe-message" })}
 </body>
 </html>`;
 }
