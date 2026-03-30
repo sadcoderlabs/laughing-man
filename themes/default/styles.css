@@ -376,7 +376,6 @@ strong {
 
 .feed-teaser {
   opacity: 0.5;
-  cursor: default;
 }
 
 .feed-teaser:hover .feed-marker,
