@@ -221,6 +221,12 @@ strong {
   gap: 0.5rem;
   max-inline-size: 24rem;
   inline-size: 100%;
+  transition: box-shadow 0.24s ease, transform 0.24s ease;
+}
+
+.subscribe-form.is-targeted {
+  box-shadow: 0 0 0 6px rgba(0, 85, 119, 0.1);
+  transform: translateY(-2px);
 }
 
 .subscribe-form input[type="email"] {

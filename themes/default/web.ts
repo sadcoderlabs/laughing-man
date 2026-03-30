@@ -60,7 +60,32 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
     <p class="footer-name">${escapeHtml(config.name)}</p>
   </footer>
   <script>
-    document.getElementById('issue-subscribe-form').addEventListener('submit', async (e) => {
+    const subscribeSection = document.getElementById('subscribe');
+    const subscribeForm = document.getElementById('issue-subscribe-form');
+    const subscribeInput = document.getElementById('issue-email');
+
+    function focusSubscribe() {
+      window.history.replaceState(null, '', '#subscribe');
+      const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+      document.documentElement.style.scrollBehavior = 'auto';
+      subscribeSection.scrollIntoView({ block: 'center' });
+      document.documentElement.style.scrollBehavior = previousScrollBehavior;
+      subscribeInput.focus({ preventScroll: true });
+      subscribeInput.select();
+      subscribeForm.classList.remove('is-targeted');
+      void subscribeForm.offsetWidth;
+      subscribeForm.classList.add('is-targeted');
+      setTimeout(() => subscribeForm.classList.remove('is-targeted'), 1200);
+    }
+
+    document.querySelectorAll('a[href="#subscribe"]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        focusSubscribe();
+      });
+    });
+
+    subscribeForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.target;
       const msg = document.getElementById('issue-subscribe-message');
