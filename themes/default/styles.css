@@ -553,7 +553,7 @@ strong {
   margin-block: 2.5rem 0.75rem;
   font-size: clamp(1.625rem, 3vw, 1.875rem);
   font-weight: 700;
-  color: var(--text);
+  color: color-mix(in srgb, var(--accent) 70%, var(--text) 30%);
   line-height: 1.2;
 }
 
@@ -561,7 +561,7 @@ strong {
   margin-block: 2rem 0.6rem;
   font-size: 1.375rem;
   font-weight: 600;
-  color: var(--text);
+  color: color-mix(in srgb, var(--accent) 38%, var(--text) 62%);
   line-height: 1.3;
 }
 
