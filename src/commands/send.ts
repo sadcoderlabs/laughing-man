@@ -33,12 +33,34 @@ export async function runSend(options: SendOptions): Promise<void> {
   }
 
   const apiKey = config.env.resend_api_key;
-  const audienceId = config.env.resend_audience_id;
   if (!apiKey) throw new Error("resend_api_key is not configured. Set RESEND_API_KEY env var or add it to laughing-man.yaml.");
-  if (!audienceId) throw new Error("resend_audience_id is not configured. Set RESEND_AUDIENCE_ID env var or add it to laughing-man.yaml.");
 
   const resend = new Resend(apiKey);
   const provider = createResendProvider(resend);
+
+  // Auto-discover segment
+  const segments = await provider.listSegments();
+  if (segments.length === 0) {
+    throw new Error("No segments found in your Resend account. Create one at https://resend.com/audiences");
+  }
+
+  let segmentId: string;
+  let segmentName: string;
+
+  if (segments.length === 1) {
+    segmentId = segments[0].id;
+    segmentName = segments[0].name;
+  } else {
+    console.log("Multiple segments found:");
+    segments.forEach((s, i) => console.log(`  ${i + 1}. ${s.name} (${s.id})`));
+    const answer = prompt(`Select segment [1-${segments.length}]: `);
+    const idx = Number(answer) - 1;
+    if (isNaN(idx) || idx < 0 || idx >= segments.length) {
+      throw new Error("Invalid selection. Aborted.");
+    }
+    segmentId = segments[idx].id;
+    segmentName = segments[idx].name;
+  }
 
   const broadcastName = `Issue #${issueNumber}`;
   const existing = await provider.listBroadcasts();
@@ -53,7 +75,7 @@ export async function runSend(options: SendOptions): Promise<void> {
 
   if (!yes) {
     const answer = prompt(
-      `Send issue #${issueNumber} "${issue.title}" to audience ${audienceId}? [y/N] `
+      `Send issue #${issueNumber} "${issue.title}" to segment "${segmentName}"? [y/N] `
     );
     if (answer?.toLowerCase() !== "y") {
       console.log("Aborted.");
@@ -62,7 +84,7 @@ export async function runSend(options: SendOptions): Promise<void> {
   }
 
   const broadcastId = await provider.createBroadcast({
-    audienceId,
+    segmentId,
     from: config.email_hosting.from,
     replyTo: config.email_hosting.reply_to,
     subject: `${issue.title}`,
