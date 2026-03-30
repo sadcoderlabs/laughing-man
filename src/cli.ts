@@ -65,10 +65,11 @@ Drafts are excluded from the output.
 Build (including drafts) and start a local preview server.
 
 Options:
-  --no-drafts     Exclude drafts (show only published issues)
+  --production    Build as production (exclude drafts, show teasers)
+  --no-drafts     Alias for --production
 `);
         }
-        const noDrafts = args.includes("--no-drafts");
+        const noDrafts = args.includes("--no-drafts") || args.includes("--production");
         await runPreview({ configDir, includeDrafts: !noDrafts });
         break;
       }
