@@ -1,9 +1,20 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { createInterface } from "node:readline";
 import { Resend } from "resend";
 import { loadConfig } from "../pipeline/config.js";
 import { scanIssuesDir } from "../pipeline/markdown.js";
 import { createResendProvider } from "../providers/resend.js";
+
+function askQuestion(question: string) {
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise<string>((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer);
+    });
+  });
+}
 
 interface SendOptions {
   configDir: string;
@@ -70,7 +81,7 @@ export async function runSend(options: SendOptions): Promise<void> {
   } else {
     console.log("Multiple segments found:");
     segments.forEach((s, i) => console.log(`  ${i + 1}. ${s.name} (${s.id})`));
-    const answer = prompt(`Select segment [1-${segments.length}]: `);
+    const answer = await askQuestion(`Select segment [1-${segments.length}]: `);
     const idx = Number(answer) - 1;
     if (isNaN(idx) || idx < 0 || idx >= segments.length) {
       throw new Error("Invalid selection. Aborted.");
@@ -89,10 +100,10 @@ export async function runSend(options: SendOptions): Promise<void> {
   }
 
   if (!yes) {
-    const answer = prompt(
+    const answer = await askQuestion(
       `Send issue #${issueNumber} "${issue.title}" to segment "${segmentName}"? [y/N] `
     );
-    if (answer?.toLowerCase() !== "y") {
+    if (answer.toLowerCase() !== "y") {
       console.log("Aborted.");
       return;
     }

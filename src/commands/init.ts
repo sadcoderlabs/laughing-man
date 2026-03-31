@@ -6,7 +6,7 @@ import {
   mkdirSync,
   copyFileSync,
 } from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, resolve } from "node:path";
 
 const CONFIG_TEMPLATE = `
 name: Your Newsletter Name
@@ -68,8 +68,9 @@ export async function runInit(targetDir: string): Promise<void> {
   }
 
   // Copy bundled skill file
-  const skillSrc = join(
-    dirname(import.meta.dir),
+  const skillSrc = resolve(
+    import.meta.dirname,
+    "..",
     "..",
     "skills",
     "laughing-man",

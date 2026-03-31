@@ -3,10 +3,30 @@
   "version": "0.1.0",
   "description": "Turn your Markdown into a newsletter",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./dist/src/cli.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "license": "MIT",
+  "keywords": [
+    "newsletter",
+    "markdown",
+    "email",
+    "cli",
+    "cloudflare-pages",
+    "resend"
+  ],
   "bin": {
-    "laughing-man": "./src/cli.ts"
+    "laughing-man": "./dist/src/cli.js"
   },
   "scripts": {
+    "build": "tsc --project tsconfig.build.json && cp themes/default/*.css themes/default/*.svg dist/themes/default/ && node -e \"var fs=require('fs'),f='dist/src/cli.js';fs.writeFileSync(f,'#!/usr/bin/env node\\n'+fs.readFileSync(f,'utf8'))\"",
+    "prepublishOnly": "bun run build",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
   },
@@ -25,5 +45,13 @@
     "@types/mjml": "4.7.4",
     "@types/node": "25.5.0",
     "typescript": "6.0.2"
+  },
+  "peerDependencies": {
+    "wrangler": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "wrangler": {
+      "optional": true
+    }
   }
 }
