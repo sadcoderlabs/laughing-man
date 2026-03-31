@@ -11,6 +11,7 @@
   --content-width: 75rem;
   --reading-width: 64rem;
   --header-height: 3.5rem;
+  --on-accent: var(--bg-surface);
   --code-bg: #1e2d3d;
   --code-text: #e0e6ed;
   --code-inline-bg: rgba(0, 0, 0, 0.05);
@@ -272,7 +273,7 @@ strong {
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.06em;
-  color: var(--bg-surface);
+  color: var(--on-accent);
   background: var(--accent);
   border: none;
   border-radius: 0.25rem;
@@ -546,13 +547,13 @@ strong {
 }
 
 .not-found-action-primary {
-  color: var(--bg-surface);
+  color: var(--on-accent);
   background: var(--accent);
   border-color: transparent;
 }
 
 .not-found-action-primary:hover {
-  color: var(--bg-surface);
+  color: var(--on-accent);
   background: color-mix(in srgb, var(--accent) 88%, black);
 }
 
@@ -861,7 +862,7 @@ del {
   font-family: var(--font-mono);
   font-size: 0.82rem;
   letter-spacing: 0.06em;
-  color: var(--bg-surface);
+  color: var(--on-accent);
   background: var(--accent);
   border-radius: 0.25rem;
 }
@@ -1037,6 +1038,7 @@ del {
     --accent: #2299bb;
     --success: #2ebd5c;
     --danger: #e04848;
+    --on-accent: #f0f4f8;
     --code-bg: #0a1520;
     --code-text: #d8dee6;
     --code-inline-bg: rgba(255, 255, 255, 0.08);
