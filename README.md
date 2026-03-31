@@ -11,13 +11,13 @@ You write Markdown files with whatever apps/tools you like (Obsidian, Logseq, VS
 Requires [Bun](https://bun.sh/) and a domain name.
 
 ```bash
-bun add -g @sadcoder/laughing-man
+bun add -g @sadcoderlabs/laughing-man
 ```
 
 Or run without installing:
 
 ```bash
-bunx @sadcoder/laughing-man --help
+bunx @sadcoderlabs/laughing-man --help
 ```
 
 ## Usage

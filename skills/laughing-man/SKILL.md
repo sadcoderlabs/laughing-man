@@ -31,7 +31,7 @@ Tell the user which steps you're skipping and why, then start from the first inc
 Run this if no `laughing-man.yaml` exists in the working directory:
 
 ```bash
-bunx @sadcoder/laughing-man init
+bunx @sadcoderlabs/laughing-man init
 ```
 
 Creates `laughing-man.yaml` with placeholder values.
@@ -125,7 +125,7 @@ Paste the value when prompted. No redeployment is needed. Secrets take effect im
 ### 7. Run setup web
 
 ```bash
-bunx @sadcoder/laughing-man setup web
+bunx @sadcoderlabs/laughing-man setup web
 ```
 
 Expected output (all green):
@@ -166,7 +166,7 @@ Docs:
 ### 7b. Run setup newsletter
 
 ```bash
-bunx @sadcoder/laughing-man setup newsletter
+bunx @sadcoderlabs/laughing-man setup newsletter
 ```
 
 Expected output:
@@ -208,15 +208,15 @@ The `status` field controls visibility:
 ### 9. Build and deploy
 
 ```bash
-bunx @sadcoder/laughing-man build
-bunx @sadcoder/laughing-man deploy
+bunx @sadcoderlabs/laughing-man build
+bunx @sadcoderlabs/laughing-man deploy
 ```
 
 To preview locally before deploying:
 
 ```bash
-bunx @sadcoder/laughing-man preview             # includes drafts
-bunx @sadcoder/laughing-man preview --no-drafts  # published issues only
+bunx @sadcoderlabs/laughing-man preview             # includes drafts
+bunx @sadcoderlabs/laughing-man preview --no-drafts  # published issues only
 ```
 
 ### 10. Verify

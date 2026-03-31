@@ -18,8 +18,8 @@ laughing-man deploy            # Deploy to Cloudflare Pages via wrangler
 laughing-man send <N>          # Send issue N via Resend Broadcast
 ```
 
-Install from npm: `bun add -g @sadcoder/laughing-man`
-Or run without installing: `bunx @sadcoder/laughing-man <command>`
+Install from npm: `bun add -g @sadcoderlabs/laughing-man`
+Or run without installing: `bunx @sadcoderlabs/laughing-man <command>`
 
 ## Tech Stack
 
