@@ -1,5 +1,6 @@
-import { watch, existsSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { watch, existsSync, readFileSync, readdirSync, createReadStream, statSync } from "node:fs";
+import { join, resolve, extname } from "node:path";
+import { createServer } from "node:http";
 import { runBuild } from "./build.js";
 import { handleSubscribe } from "../../functions/api/subscribe.js";
 
@@ -8,6 +9,22 @@ interface PreviewOptions {
   includeDrafts: boolean;
 }
 
+const MIME_TYPES: Record<string, string> = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css",
+  ".js": "application/javascript",
+  ".json": "application/json",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+  ".webp": "image/webp",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+};
+
 export async function runPreview(options: PreviewOptions): Promise<void> {
   const { configDir, includeDrafts } = options;
 
@@ -15,12 +32,11 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
   const websiteDir = resolve(configDir, "output", "website");
   const emailDir = resolve(configDir, "output", "email");
   const themesDir = resolve(import.meta.dirname, "../../themes/default");
-  const encoder = new TextEncoder();
 
-  const clients = new Set<ReadableStreamDefaultController>();
+  const clients = new Set<{ write: (data: string) => void; end: () => void }>();
   const reloadScript = `<script>new EventSource("/__reload").onmessage=()=>location.reload()</script>`;
 
-  let rebuildTimer: Timer | null = null;
+  let rebuildTimer: ReturnType<typeof setTimeout> | null = null;
   let building = false;
   let cooldown = false;
 
@@ -34,7 +50,7 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
         await runBuild({ configDir, includeDrafts });
         for (const client of clients) {
           try {
-            client.enqueue(encoder.encode("data: reload\n\n"));
+            client.write("data: reload\n\n");
           } catch {
             clients.delete(client);
           }
@@ -60,61 +76,62 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
   watch(themesDir, { recursive: true }, () => scheduleRebuild());
   watch(join(configDir, "laughing-man.yaml"), () => scheduleRebuild());
 
-  const server = Bun.serve({
-    port: 4000,
-    async fetch(req, server) {
-      const url = new URL(req.url);
+  const server = createServer(async (req, res) => {
+    const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost:4000"}`);
 
+    try {
+      // SSE endpoint for live reload
       if (url.pathname === "/__reload") {
-        server.timeout(req, 0);
-        let ctrl: ReadableStreamDefaultController | undefined;
-        const stream = new ReadableStream({
-          start(controller) {
-            ctrl = controller;
-            clients.add(controller);
-          },
-          cancel() {
-            if (ctrl) clients.delete(ctrl);
-          },
+        res.writeHead(200, {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          "Connection": "keep-alive",
         });
-        return new Response(stream, {
-          headers: {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache",
-            Connection: "keep-alive",
-          },
-        });
+        const client = {
+          write: (data: string) => res.write(data),
+          end: () => res.end(),
+        };
+        clients.add(client);
+        req.on("close", () => clients.delete(client));
+        return;
       }
 
+      // Subscribe API
       if (url.pathname === "/api/subscribe") {
         if (req.method !== "POST") {
-          return Response.json(
-            { error: "Method not allowed." },
-            { status: 405, headers: { Allow: "POST" } },
-          );
+          res.writeHead(405, { "Content-Type": "application/json", "Allow": "POST" });
+          res.end(JSON.stringify({ error: "Method not allowed." }));
+          return;
         }
 
         if (!config.env.RESEND_API_KEY) {
-          return Response.json(
-            { error: "RESEND_API_KEY is not configured for preview." },
-            { status: 500 },
-          );
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "RESEND_API_KEY is not configured for preview." }));
+          return;
         }
 
         try {
-          const body = await req.json();
-          return await handleSubscribe(body as { email?: string } | null, {
+          const chunks: Buffer[] = [];
+          for await (const chunk of req) chunks.push(chunk as Buffer);
+          const body = JSON.parse(Buffer.concat(chunks).toString());
+          const response = await handleSubscribe(body as { email?: string } | null, {
             RESEND_API_KEY: config.env.RESEND_API_KEY,
           });
+          const responseBody = await response.text();
+          res.writeHead(response.status, { "Content-Type": "application/json" });
+          res.end(responseBody);
         } catch {
-          return Response.json({ error: "Invalid request." }, { status: 400 });
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Invalid request." }));
         }
+        return;
       }
 
       // Email preview: index page listing all email issues
       if (url.pathname === "/email/" || url.pathname === "/email") {
         const emailFiles = existsSync(emailDir)
-          ? (await Array.fromAsync(new Bun.Glob("*.html").scan(emailDir)))
+          ? readdirSync(emailDir)
+              .filter((f) => f.endsWith(".html"))
               .sort((a, b) => {
                 const numA = parseInt(a.replace(".html", ""), 10);
                 const numB = parseInt(b.replace(".html", ""), 10);
@@ -140,55 +157,69 @@ a{color:#005577}li{margin:8px 0}</style></head>
 ${reloadScript}
 </body></html>`;
 
-        return new Response(indexHtml, {
-          headers: { "Content-Type": "text/html; charset=utf-8" },
-        });
+        res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+        res.end(indexHtml);
+        return;
       }
 
       // Email preview: individual email HTML files
       if (url.pathname.startsWith("/email/") && url.pathname.endsWith(".html")) {
         const emailFilePath = resolve(join(emailDir, url.pathname.replace("/email/", "")));
         if (!emailFilePath.startsWith(emailDir)) {
-          return new Response("Forbidden", { status: 403 });
+          res.writeHead(403);
+          res.end("Forbidden");
+          return;
         }
-        const emailFile = Bun.file(emailFilePath);
-        if (await emailFile.exists()) {
-          const html = await emailFile.text();
-          return new Response(
-            html.replace("</body>", `${reloadScript}</body>`),
-            { headers: { "Content-Type": "text/html; charset=utf-8" } },
-          );
+        if (existsSync(emailFilePath)) {
+          const html = readFileSync(emailFilePath, "utf8");
+          res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+          res.end(html.replace("</body>", `${reloadScript}</body>`));
+          return;
         }
-        return new Response("Not found", { status: 404 });
+        res.writeHead(404);
+        res.end("Not found");
+        return;
       }
 
+      // Static file serving for website preview
       let pathname = url.pathname;
       if (pathname.endsWith("/")) pathname += "index.html";
 
       const filePath = resolve(join(websiteDir, pathname));
       if (!filePath.startsWith(websiteDir)) {
-        return new Response("Forbidden", { status: 403 });
+        res.writeHead(403);
+        res.end("Forbidden");
+        return;
       }
 
-      const file = Bun.file(filePath);
+      if (!existsSync(filePath)) {
+        res.writeHead(404);
+        res.end("Not found");
+        return;
+      }
 
       if (filePath.endsWith(".html")) {
-        const html = await file.text();
-        return new Response(
-          html.replace("</body>", `${reloadScript}</body>`),
-          { headers: { "Content-Type": "text/html; charset=utf-8" } },
-        );
+        const html = readFileSync(filePath, "utf8");
+        res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+        res.end(html.replace("</body>", `${reloadScript}</body>`));
+        return;
       }
 
-      return new Response(file);
-    },
-    error() {
-      return new Response("Not found", { status: 404 });
-    },
+      const ext = extname(filePath);
+      const contentType = MIME_TYPES[ext] ?? "application/octet-stream";
+      const stat = statSync(filePath);
+      res.writeHead(200, { "Content-Type": contentType, "Content-Length": stat.size });
+      createReadStream(filePath).pipe(res);
+    } catch {
+      res.writeHead(404);
+      res.end("Not found");
+    }
   });
 
-  console.log(`Preview server running at http://localhost:${server.port}/`);
-  console.log(`Email preview at http://localhost:${server.port}/email/`);
-  console.log("Watching for changes...");
-  console.log("Press Ctrl+C to stop.");
+  server.listen(4000, () => {
+    console.log("Preview server running at http://localhost:4000/");
+    console.log("Email preview at http://localhost:4000/email/");
+    console.log("Watching for changes...");
+    console.log("Press Ctrl+C to stop.");
+  });
 }
