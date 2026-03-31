@@ -38,10 +38,3 @@ export interface SiteConfig {
   // Internal: resolved at load time
   configDir: string;            // Directory containing laughing-man.yaml
 }
-
-export interface IssueProps {
-  title: string;
-  issue: number;
-  content: string;    // Rendered HTML (image src already rewritten)
-  config: SiteConfig;
-}

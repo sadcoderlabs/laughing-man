@@ -4,6 +4,7 @@ import { readStyles, readFaviconDataUri } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 import { readLaughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
+import { ogMetaTags } from "./meta.js";
 import { subscribeScript } from "./subscribe.js";
 
 interface IndexProps {
@@ -45,12 +46,16 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
 
   const allItems = teaserItems + feedItems;
 
+  const description = config.description ?? "New issues arrive by email. The archive stays open.";
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(config.name)}</title>
+  <link rel="canonical" href="${escapeHtml(config.url)}/">
+  ${ogMetaTags({ title: config.name, description, url: `${config.url}/`, siteName: config.name, type: "website" })}
   <link rel="icon" type="image/svg+xml" href="${readFaviconDataUri()}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
