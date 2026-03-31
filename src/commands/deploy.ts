@@ -25,7 +25,7 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
 
   const result = spawnSync(
     "npx",
-    ["--yes", "wrangler", "pages", "deploy", "website", `--project-name=${project}`],
+    ["--yes", "wrangler", "pages", "deploy", "website", `--project-name=${project}`, "--commit-dirty=true"],
     {
       cwd: outputDir,
       stdio: "inherit",
