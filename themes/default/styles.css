@@ -224,6 +224,10 @@ strong {
   transition: box-shadow 0.24s ease, transform 0.24s ease;
 }
 
+.hero .subscribe-form {
+  max-inline-size: calc(100% - 2.5rem);
+}
+
 .subscribe-form.is-targeted {
   box-shadow: 0 0 0 6px rgba(0, 85, 119, 0.1);
   transform: translateY(-2px);
