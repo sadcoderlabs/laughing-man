@@ -22,13 +22,13 @@ npx @sadcoderlabs/laughing-man --help
 
 ## Usage
 
-### Ask Your Agent
+If you're too busy to read the manual, try:
 
 ```prompt
 How do I use this tool? Read https://raw.githubusercontent.com/sadcoderlabs/laughing-man/main/skills/laughing-man/SKILL.md
 ```
 
-### Do It Yourself
+### Initiate
 
 Generate `laughing-man.yaml` in any folder:
 
@@ -37,45 +37,19 @@ cd /path/to/your/markdown/folder/
 laughing-man init
 ```
 
-Preview your newsletter website with the local server:
+### Preview
+
+Preview your newsletter website (and email template) with the local server:
 
 ```bash
 newsletter/
-  001-your-first-issue.md
-  002-another-one.md
+  your-first-newsletter-issue.md
   laughing-man.yaml
 
 laughing-man preview
 ```
 
-`preview` writes local artifacts to `preview/`. Production `build` and `deploy` continue to use `output/`.
-
-Set up Cloudflare Pages (project + custom domain + DNS) and deploy:
-
-```bash
-laughing-man setup web          # Create Cloudflare Pages project + custom domain + DNS
-laughing-man deploy             # Deploy to Cloudflare Pages
-```
-
-Cloudflare API token permissions for `setup web`:
-
-- `Account | Cloudflare Pages | Edit`
-- `Zone | DNS | Edit` for the specific custom domain zone when `web_hosting.domain` is set
-
-Scope the token to the specific account and, for DNS, the specific zone. Avoid `All zones` unless you intentionally want one token to manage DNS across every zone in the account.
-
-Set up Resend and send an issue:
-
-```bash
-laughing-man setup newsletter          # Verify Resend API key + sender domain + DNS
-laughing-man send <issue-number>       # Send an issue via Resend Broadcast
-```
-
-`send` runs a fresh production build before it sends, so draft issues stay excluded.
-
-## Configurations
-
-`laughing-man init` generates a `laughing-man.yaml` in your newsletter directory.
+### Configure
 
 ```yaml
 name: Your Newsletter Name
@@ -86,7 +60,7 @@ attachments_dir: .
 web_hosting:
   provider: cloudflare-pages
   project: your-newsletter-name
-  # domain: example.com
+  domain: example.com
 
 email_hosting:
   provider: resend
@@ -96,4 +70,28 @@ email_hosting:
 env:
   CLOUDFLARE_API_TOKEN: "cf_xxxxx" # or set CLOUDFLARE_API_TOKEN env var
   RESEND_API_KEY: "re_xxxxx" # or set RESEND_API_KEY env var
+```
+
+- Get your Cloudflare API token from [dash.cloudflare.com/profile/api-tokens](https://dash.cloudflare.com/profile/api-tokens)
+  - Permissions:
+    - `Account | Cloudflare Pages | Edit`
+    - `Zone | DNS | Edit` for the specific custom domain zone when `web_hosting.domain` is set
+  - Scope the token to the specific account and, for DNS, the specific zone. Avoid `All zones` unless you intentionally want one token to manage DNS across every zone in the account.
+- Get your Resend API key from [resend.com/api-keys](https://resend.com/api-keys)
+  - Permission: **Full access** (required because the subscribe function creates contacts, not just sends email)
+
+### Deploy
+
+Set up Cloudflare Pages (project + custom domain + DNS) and deploy:
+
+```bash
+laughing-man setup web          # Create Cloudflare Pages project + custom domain + DNS
+laughing-man deploy             # Deploy to Cloudflare Pages
+```
+
+Set up Resend and send an issue:
+
+```bash
+laughing-man setup newsletter          # Verify Resend API key + sender domain + DNS
+laughing-man send <issue-number>       # Send an issue via Resend Broadcast
 ```
