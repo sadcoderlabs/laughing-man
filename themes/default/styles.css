@@ -413,12 +413,15 @@ strong {
   font-family: var(--font-mono);
   font-size: 0.82rem;
   letter-spacing: 0.06em;
-  color: var(--text-muted);
-  transition: color 0.2s ease;
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  text-underline-offset: 0.16em;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
 .issue-back a:hover {
-  color: var(--accent);
+  text-decoration-color: var(--accent);
 }
 
 /* ─── Footer ─── */
