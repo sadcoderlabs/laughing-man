@@ -1,0 +1,42 @@
+import type { SiteConfig } from "../../src/types.js";
+import { readStyles, readFaviconDataUri } from "./assets.js";
+import { escapeHtml } from "./escape.js";
+import { readLaughingManLogo } from "./logo.js";
+import { siteHeader, siteFooter } from "./layout.js";
+
+interface NotFoundProps {
+  config: SiteConfig;
+}
+
+export function NotFoundPage({ config }: NotFoundProps): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - ${escapeHtml(config.name)}</title>
+  <link rel="icon" type="image/svg+xml" href="${readFaviconDataUri()}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>${readStyles()}</style>
+</head>
+<body class="not-found-page">
+  ${siteHeader(config.name, { archiveHref: "/#archive", subscribeHref: "/#subscribe" })}
+  <main class="not-found-main">
+    <section class="not-found-hero" aria-labelledby="not-found-title">
+      <p class="not-found-kicker">404</p>
+      <div class="not-found-emblem" aria-hidden="true">
+        ${readLaughingManLogo()}
+      </div>
+      <p class="not-found-code">Page not found</p>
+      <h1 id="not-found-title">This page does not exist.</h1>
+      <div class="not-found-actions">
+        <a class="not-found-action not-found-action-primary" href="/">Go to homepage</a>
+      </div>
+    </section>
+  </main>
+  ${siteFooter(config.name)}
+</body>
+</html>`;
+}

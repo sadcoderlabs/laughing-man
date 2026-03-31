@@ -1,11 +1,17 @@
 import { escapeHtml } from "./escape.js";
 
-export function siteHeader(name: string, isIssuePage = false): string {
-  const archiveHref = isIssuePage ? "/#archive" : "#archive";
+interface SiteHeaderOptions {
+  archiveHref?: string;
+  subscribeHref?: string;
+}
+
+export function siteHeader(name: string, options: SiteHeaderOptions = {}): string {
+  const archiveHref = options.archiveHref ?? "#archive";
+  const subscribeHref = options.subscribeHref ?? "#subscribe";
   return `<header class="site-header">
     <a class="site-name" href="/">${escapeHtml(name)}</a>
     <nav class="site-nav">
-      <a href="#subscribe">Subscribe</a>
+      <a href="${subscribeHref}">Subscribe</a>
       <a href="${archiveHref}">Archives</a>
     </nav>
   </header>`;

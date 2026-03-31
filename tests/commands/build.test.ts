@@ -29,7 +29,7 @@ env: {}
     rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it("generates index.html and issue pages", async () => {
+  it("generates index.html, 404.html, and issue pages", async () => {
     writeFileSync(
       join(tmpDir, "issues", "issue-1.md"),
       "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Issue One\n\nHello.\n"
@@ -38,6 +38,7 @@ env: {}
     await runBuild({ configDir: tmpDir, includeDrafts: false });
 
     expect(existsSync(join(tmpDir, "output", "website", "index.html"))).toBe(true);
+    expect(existsSync(join(tmpDir, "output", "website", "404.html"))).toBe(true);
     expect(existsSync(join(tmpDir, "output", "website", "issues", "1", "index.html"))).toBe(true);
     expect(existsSync(join(tmpDir, "output", "email", "1.html"))).toBe(true);
   });
@@ -114,6 +115,22 @@ env: {}
     expect(indexHtml).toContain('href="https://github.com/sadcoderlabs/laughing-man"');
     expect(issueHtml).toContain("Created with");
     expect(issueHtml).toContain('href="https://github.com/sadcoderlabs/laughing-man"');
+  });
+
+  it("404.html uses general recovery copy and links back into the site", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Hello World\n\nContent.\n"
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const notFoundHtml = readFileSync(join(tmpDir, "output", "website", "404.html"), "utf8");
+    expect(notFoundHtml).toContain("This page does not exist.");
+    expect(notFoundHtml).toContain("Go to homepage");
+    expect(notFoundHtml).toContain('href="/"');
+    expect(notFoundHtml).toContain("Browse archives");
+    expect(notFoundHtml).toContain('href="/#archive"');
   });
 
   it("production build shows coming-soon teasers for draft issues", async () => {

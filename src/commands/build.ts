@@ -27,10 +27,11 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const bust = `?v=${Date.now()}`;
   const themeUrl = (name: string) =>
     `${pathToFileURL(join(themesDir, `${name}.${ext}`))}${bust}`;
-  const [{ EmailPage }, { WebPage }, { IndexPage }] = await Promise.all([
+  const [{ EmailPage }, { WebPage }, { IndexPage }, { NotFoundPage }] = await Promise.all([
     import(themeUrl("email")),
     import(themeUrl("web")),
     import(themeUrl("index")),
+    import(themeUrl("not-found")),
   ]);
 
   const config = await loadConfig(configDir);
@@ -88,6 +89,9 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
   const indexHtml = IndexPage({ issues: sorted, draftIssueNumbers, config });
   writeFileSync(join(websiteDir, "index.html"), indexHtml, "utf8");
+
+  const notFoundHtml = NotFoundPage({ config });
+  writeFileSync(join(websiteDir, "404.html"), notFoundHtml, "utf8");
 
   // Copy Pages Functions into output/ so wrangler can find them
   const functionsSource = resolve(import.meta.dirname, "../../functions");
