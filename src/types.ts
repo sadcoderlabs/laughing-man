@@ -42,6 +42,7 @@ export interface SiteConfig {
 export interface IssueProps {
   title: string;
   issue: number;
+  date?: string;      // YYYY-MM-DD, present for "ready" issues
   content: string;    // Rendered HTML (image src already rewritten)
   config: SiteConfig;
 }

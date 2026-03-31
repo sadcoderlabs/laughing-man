@@ -3,15 +3,21 @@ import { readStyles, readFaviconDataUri } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 import { readLaughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
+import { ogMetaTags, plainTextExcerpt } from "./meta.js";
 import { subscribeScript } from "./subscribe.js";
 
-export function WebPage({ title, issue, content, config }: IssueProps): string {
+export function WebPage({ title, issue, date, content, config }: IssueProps): string {
+  const description = plainTextExcerpt(content);
+  const canonicalUrl = `${config.url}/issues/${issue}/`;
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)} - ${escapeHtml(config.name)}</title>
+  <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
+  ${ogMetaTags({ title, description, url: canonicalUrl, siteName: config.name, type: "article", publishedTime: date })}
   <link rel="icon" type="image/svg+xml" href="${readFaviconDataUri()}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

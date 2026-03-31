@@ -76,6 +76,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     const webPage = WebPage({
       title: issue.title,
       issue: issue.issue,
+      date: issue.date,
       content: contentWeb,
       config,
     });
