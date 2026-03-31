@@ -25,7 +25,7 @@
     "laughing-man": "./dist/src/cli.js"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.build.json && cp themes/default/*.css themes/default/*.svg dist/themes/default/ && node -e \"var fs=require('fs'),f='dist/src/cli.js';fs.writeFileSync(f,'#!/usr/bin/env node\\n'+fs.readFileSync(f,'utf8'))\"",
+    "build": "tsc --project tsconfig.build.json && cp themes/default/*.css themes/default/*.svg dist/themes/default/ && node -e \"var fs=require('fs'),f='dist/src/cli.js';fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace(/^#!.*\\n/,'#!/usr/bin/env node\\n'))\"",
     "prepublishOnly": "bun run build",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
