@@ -1,4 +1,4 @@
-import type { IssueProps } from "../../src/types.js";
+import type { SiteConfig } from "../../src/types.js";
 import { readStyles, readFaviconDataUri } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 import { readLaughingManLogo } from "./logo.js";
@@ -6,8 +6,13 @@ import { siteHeader, siteFooter } from "./layout.js";
 import { ogMetaTags, plainTextExcerpt } from "./meta.js";
 import { subscribeScript } from "./subscribe.js";
 
-interface WebPageProps extends IssueProps {
+interface WebPageProps {
+  title: string;
+  issue: number;
+  date?: string;
   rawContent: string;
+  content: string;
+  config: SiteConfig;
 }
 
 export function WebPage({ title, issue, date, rawContent, content, config }: WebPageProps): string {
