@@ -1,18 +1,21 @@
+import { marked, type Token, type Tokens } from "marked";
 import { escapeHtml } from "./escape.js";
 
-/**
- * Strip HTML tags and collapse whitespace to extract a plain-text excerpt.
- * Returns the first `maxLength` characters, broken at a word boundary.
- */
-export function plainTextExcerpt(html: string, maxLength = 200): string {
-  const text = html
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
+function collectText(token: Token): string {
+  if ("tokens" in token && token.tokens) {
+    return token.tokens.map(collectText).join("");
+  }
+  if ("text" in token) return (token as Tokens.Text).text;
+  return "";
+}
+
+export function plainTextExcerpt(markdown: string, maxLength = 200): string {
+  const tokens = marked.lexer(markdown);
+
+  const text = tokens
+    .filter((t) => !(t.type === "heading" && (t as Tokens.Heading).depth === 1))
+    .map(collectText)
+    .join(" ")
     .replace(/\s+/g, " ")
     .trim();
 
