@@ -444,7 +444,7 @@ strong {
 .footer-credit {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: 0.74rem;
+  font-size: 0.62rem;
   color: var(--text-muted);
 }
 
