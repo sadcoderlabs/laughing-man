@@ -1,6 +1,13 @@
 import mjml2html from "mjml";
-import type { IssueProps } from "../../src/types.js";
+import type { SiteConfig } from "../../src/types.js";
 import { escapeHtml } from "./escape.js";
+
+interface EmailPageProps {
+  title: string;
+  issue: number;
+  content: string;
+  config: SiteConfig;
+}
 
 const EMAIL_BODY_WIDTH = 680;
 
@@ -21,7 +28,7 @@ function buildIssueUrl(siteUrl: string, issue: number): string {
   return new URL(`issues/${issue}/`, baseUrl).toString();
 }
 
-export function EmailPage({ title, issue, content, config }: IssueProps): string {
+export function EmailPage({ title, issue, content, config }: EmailPageProps): string {
   const escapedTitle = escapeHtml(title);
   const name = escapeHtml(config.name);
   const url = escapeHtml(config.url);
