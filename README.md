@@ -22,7 +22,7 @@ npx @sadcoderlabs/laughing-man --help
 
 ## Usage
 
-If you're too busy to read the manual, try:
+If you're the type who doesn't read the manual:
 
 ```prompt
 How do I use this tool? Read https://raw.githubusercontent.com/sadcoderlabs/laughing-man/main/skills/laughing-man/SKILL.md
