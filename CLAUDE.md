@@ -8,11 +8,14 @@ laughing-man is a CLI tool that turns a folder of Markdown files into a newslett
 ## Commands
 
 ```
-laughing-man init       # Generate laughing-man.yaml
-laughing-man build      # Validate + generate site + email HTML
-laughing-man preview    # Build (including drafts) + local server
-laughing-man deploy     # Deploy to Cloudflare Pages via wrangler
-laughing-man send <N>   # Send issue N via Resend Broadcast
+laughing-man init              # Generate laughing-man.yaml
+laughing-man setup web         # Create Cloudflare Pages project + custom domain + DNS
+laughing-man setup newsletter  # Verify Resend API key + sender domain + DNS records
+laughing-man build             # Validate + generate site + email HTML (excludes drafts)
+laughing-man preview           # Build (including drafts) + local server with live reload
+laughing-man stamp             # Add frontmatter to .md files that don't have it
+laughing-man deploy            # Deploy to Cloudflare Pages via wrangler
+laughing-man send <N>          # Send issue N via Resend Broadcast
 ```
 
 Install from npm: `bun add -g @sadcoder/laughing-man`
@@ -22,10 +25,11 @@ Or run without installing: `bunx @sadcoder/laughing-man <command>`
 
 - **Runtime:** Bun (required, no Node/npx support)
 - **Language:** TypeScript (strict mode)
-- **Dependencies:** zod, @11ty/gray-matter, marked, resend
+- **Dependencies:** zod, @11ty/gray-matter, marked, mjml, resend, cloudflare
 - **Config parsing:** `Bun.YAML.parse()` (built-in, no yaml package)
 - **Deployment:** wrangler (peer dependency, user installs separately)
 - **Templates:** Plain TypeScript functions returning HTML strings (no React, no JSX)
+- **Email:** MJML for responsive email HTML
 
 ## Development
 
