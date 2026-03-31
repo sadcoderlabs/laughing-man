@@ -244,11 +244,23 @@ describe("scanIssuesDir", () => {
     expect(issues.map((i) => i.issue).sort()).toEqual([1, 2]);
   });
 
-  it("throws suggesting stamp when all .md files lack valid frontmatter", async () => {
+  it("auto-assigns issue numbers to bare .md files", async () => {
     writeFileSync(join(tmpDir, "hello.md"), "# Just markdown\n\nNo frontmatter.\n");
     writeFileSync(join(tmpDir, "world.md"), "# Another file\n");
 
-    await expect(scanIssuesDir(tmpDir)).rejects.toThrow("laughing-man stamp");
+    const issues = await scanIssuesDir(tmpDir);
+    expect(issues).toHaveLength(2);
+    expect(issues.every((i) => i.status === "draft")).toBe(true);
+    expect(new Set(issues.map((i) => i.issue)).size).toBe(2);
+  });
+
+  it("does not duplicate issue numbers with frontmatter files", async () => {
+    writeFileSync(join(tmpDir, "issue-1.md"), "---\nissue: 1\nstatus: ready\n---\n# Issue One\n");
+    writeFileSync(join(tmpDir, "bare.md"), "# Bare file\n");
+
+    const issues = await scanIssuesDir(tmpDir);
+    expect(issues).toHaveLength(2);
+    expect(new Set(issues.map((i) => i.issue)).size).toBe(2);
   });
 
   it("throws suggesting stamp when directory has no .md files", async () => {
