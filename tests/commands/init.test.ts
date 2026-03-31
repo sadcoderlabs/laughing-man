@@ -42,6 +42,29 @@ describe("runInit", () => {
     expect(content).toContain("laughing-man");
   });
 
+  it("creates first issue template", async () => {
+    await runInit(tmpDir);
+
+    const content = readFileSync(
+      join(tmpDir, "your-first-newsletter-issue.md"),
+      "utf8",
+    );
+    expect(content).toContain("status: draft");
+    expect(content).toContain("issue: 1");
+  });
+
+  it("does not overwrite existing first issue file", async () => {
+    writeFileSync(join(tmpDir, "your-first-newsletter-issue.md"), "my issue");
+
+    await runInit(tmpDir);
+
+    const content = readFileSync(
+      join(tmpDir, "your-first-newsletter-issue.md"),
+      "utf8",
+    );
+    expect(content).toBe("my issue");
+  });
+
   it("does not overwrite existing skill file", async () => {
     const skillDir = join(tmpDir, ".claude", "skills", "laughing-man");
     mkdirSync(skillDir, { recursive: true });
