@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 import { runInit } from "./commands/init.js";
 import { runBuild } from "./commands/build.js";
 import { runPreview } from "./commands/preview.js";
