@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join, resolve, isAbsolute } from "node:path";
 import { z } from "zod";
+import { parse as parseYaml } from "yaml";
 import type { SiteConfig } from "../types.js";
 
 const ConfigSchema = z.object({
@@ -46,7 +47,7 @@ export async function loadConfig(configDir: string): Promise<SiteConfig> {
     throw new Error(`laughing-man.yaml not found in ${configDir}`);
   }
 
-  const raw = Bun.YAML.parse(readFileSync(yamlPath, "utf8"));
+  const raw = parseYaml(readFileSync(yamlPath, "utf8"));
   const parsed = ConfigSchema.parse(raw);
 
   // Load .env from config dir
