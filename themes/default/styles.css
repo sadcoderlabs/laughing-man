@@ -471,7 +471,6 @@ strong {
 }
 
 .not-found-kicker,
-.not-found-code,
 .not-found-trace {
   position: relative;
   z-index: 1;
@@ -490,13 +489,6 @@ strong {
   z-index: 1;
   inline-size: clamp(7.5rem, 16vw, 10rem);
   margin-block-end: 1.25rem;
-}
-
-.not-found-code {
-  margin: 0 0 1rem;
-  font-size: 0.76rem;
-  letter-spacing: 0.2em;
-  color: var(--accent);
 }
 
 .not-found-hero h1 {

@@ -29,8 +29,7 @@ export function NotFoundPage({ config }: NotFoundProps): string {
       <div class="not-found-emblem" aria-hidden="true">
         ${readLaughingManLogo()}
       </div>
-      <p class="not-found-code">Page not found</p>
-      <h1 id="not-found-title">This page does not exist</h1>
+      <h1 id="not-found-title">Page not found</h1>
       <div class="not-found-actions">
         <a class="not-found-action not-found-action-primary" href="/">Go to homepage</a>
       </div>
