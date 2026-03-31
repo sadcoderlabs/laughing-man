@@ -2,7 +2,7 @@ import { marked } from "marked";
 import type { SiteConfig, IssueData } from "../../src/types.js";
 import { readStyles, readFaviconDataUri } from "./assets.js";
 import { escapeHtml } from "./escape.js";
-import { laughingManLogo } from "./logo.js";
+import { readLaughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
 import { subscribeScript } from "./subscribe.js";
 
@@ -62,7 +62,7 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
   <main>
     <section class="hero">
       <div class="hero-emblem" aria-hidden="true">
-        ${laughingManLogo}
+        ${readLaughingManLogo()}
       </div>
       <h1>${escapeHtml(config.name)}</h1>
       <div class="hero-summary">

@@ -1,7 +1,7 @@
 import type { IssueProps } from "../../src/types.js";
 import { readStyles, readFaviconDataUri } from "./assets.js";
 import { escapeHtml } from "./escape.js";
-import { laughingManLogo } from "./logo.js";
+import { readLaughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
 import { subscribeScript } from "./subscribe.js";
 
@@ -23,7 +23,7 @@ export function WebPage({ title, issue, content, config }: IssueProps): string {
   <main class="issue-main">
     <section class="issue-hero">
       <div class="issue-emblem" aria-hidden="true">
-        ${laughingManLogo}
+        ${readLaughingManLogo()}
       </div>
       <p class="issue-meta">Issue #${issue}</p>
       <h1>${escapeHtml(title)}</h1>
