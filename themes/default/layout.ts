@@ -13,10 +13,9 @@ export function siteHeader(name: string, isIssuePage = false): string {
 
 export function siteFooter(name: string): string {
   return `<footer class="site-footer">
-    <p class="footer-name">${escapeHtml(name)}</p>
-    <p class="footer-credit">
-      Created with
-      <a href="https://github.com/sadcoderlabs/laughing-man" target="_blank" rel="noopener noreferrer">laughing-man</a>
-    </p>
+    <span class="footer-name">${escapeHtml(name)}</span>
+    <span class="footer-sep" aria-hidden="true">/</span>
+    <span class="footer-credit">Created with
+      <a href="https://github.com/sadcoderlabs/laughing-man" target="_blank" rel="noopener noreferrer">laughing-man</a></span>
   </footer>`;
 }
