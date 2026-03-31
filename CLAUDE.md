@@ -4,7 +4,6 @@
 
 laughing-man is a CLI tool that turns a folder of Markdown files into a newsletter: a static archive site on Cloudflare Pages and email delivery via Resend Broadcasts. Built with Bun + TypeScript.
 
-
 ## Commands
 
 ```
@@ -52,6 +51,17 @@ laughing-man --help            # Works from any directory
 ```
 
 Re-run `bun link` after Bun upgrades or if `laughing-man` stops resolving.
+
+### Releasing a new version
+
+1. Bump the version in `package.json`
+2. Commit the version bump and push to `main`
+3. Tag the commit and push the tag:
+   ```bash
+   git tag v<version>
+   git push origin v<version>
+   ```
+4. The `publish.yml` workflow runs on `v*` tags: typechecks, tests, verifies the tag matches `package.json` version, then publishes to npm with provenance via Trusted Publishing (OIDC).
 
 ## External Tool Documentation
 
