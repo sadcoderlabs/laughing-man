@@ -568,12 +568,6 @@ strong {
   text-autospace: normal;
 }
 
-.issue-body > p:first-of-type {
-  font-size: clamp(1.18rem, 1.6vw, 1.35rem);
-  line-height: 1.7;
-  color: var(--text);
-}
-
 .issue-body > h1:first-of-type {
   display: none;
 }
