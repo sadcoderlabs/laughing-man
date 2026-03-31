@@ -24,8 +24,8 @@ Or run without installing: `npx @sadcoderlabs/laughing-man <command>`
 
 - **Runtime:** Bun (required, no Node/npx support)
 - **Language:** TypeScript (strict mode)
-- **Dependencies:** zod, @11ty/gray-matter, marked, mjml, resend, cloudflare
-- **Config parsing:** `Bun.YAML.parse()` (built-in, no yaml package)
+- **Dependencies:** zod, yaml, @11ty/gray-matter, marked, mjml, resend, cloudflare
+- **Config parsing:** `yaml` package (`parse` from "yaml")
 - **Deployment:** wrangler (peer dependency, user installs separately)
 - **Templates:** Plain TypeScript functions returning HTML strings (no React, no JSX)
 - **Email:** MJML for responsive email HTML

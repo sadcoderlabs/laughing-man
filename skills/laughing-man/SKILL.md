@@ -14,7 +14,7 @@ Check current state and skip completed steps:
 - `laughing-man.yaml` exists with real values (not placeholders)? Skip steps 1-2.
 - `.env` has `CLOUDFLARE_API_TOKEN`? Skip steps 3-4.
 - `.env` has `RESEND_API_KEY` and Pages secret is set? Skip steps 5-6. Run `setup newsletter` to verify domain status.
-- `.md` issue files already exist? Skip step 8.
+- `.md` issue files already exist with real content (not the init template)? Skip step 8.
 
 Tell the user which steps you're skipping and why, then start from the first incomplete step.
 
@@ -34,7 +34,11 @@ Run this if no `laughing-man.yaml` exists in the working directory:
 npx @sadcoderlabs/laughing-man init
 ```
 
-Creates `laughing-man.yaml` with placeholder values.
+Creates:
+- `laughing-man.yaml` with placeholder values
+- `your-first-newsletter-issue.md` (a sample draft issue)
+- `.gitignore` entries for `output/` and `preview/`
+- `.claude/skills/laughing-man/SKILL.md` (this skill file)
 
 ### 2. Collect configuration
 
@@ -43,6 +47,7 @@ Ask the user for each value, then edit `laughing-man.yaml`:
 | Field                    | Ask                            | Example                          |
 | ------------------------ | ------------------------------ | -------------------------------- |
 | `name`                   | Newsletter name?               | "The Laughing Man"               |
+| `description`            | Short description? (optional)  | "A newsletter by [Name](url)"   |
 | `web_hosting.project`    | Cloudflare Pages project name? | "my-newsletter"                  |
 | `web_hosting.domain`     | Custom domain? (optional)      | "newsletter.example.com"         |
 | `email_hosting.from`     | Sender name and email?         | "Vinta <hello@example.com>"      |
@@ -131,11 +136,11 @@ npx @sadcoderlabs/laughing-man setup web
 Expected output (all green):
 
 ```
-[ok] Cloudflare API token valid
-[ok] Pages project "..." created
-[ok] Custom domain ... added to Pages project "..."   # only if domain configured
-[ok] Custom domain ... is active on Pages             # when already verified/working
-[ok] DNS CNAME record created (... -> ....pages.dev)   # only if domain on Cloudflare DNS
+[ok] Cloudflare API token valid (account: ...)
+[ok] Pages project "..." created                       # or "exists" if already created
+[ok] Custom domain ... added to Pages project "..."    # only if domain configured
+[ok] Custom domain ... is active on Pages              # when already verified/working
+[ok] DNS CNAME record created (... -> ....pages.dev)   # or "exists" if already set up
 ```
 
 If output shows `[!!]`:
@@ -173,12 +178,17 @@ Expected output:
 
 ```
 [ok] Resend API key valid
-[ok] Sender domain "send.example.com" exists (status: verified)
-[ok] Segment "General" found (seg_xxxxx)
-[ok] Pages secret RESEND_API_KEY set for project "<project>"   # when CLOUDFLARE_API_TOKEN is available
+[ok] Sender domain "send.example.com" exists (status: verified)   # or "created" if new
+[ok] Sender domain "send.example.com" is verified                  # when already verified
+[ok] Segment "General" found (seg_xxxxx)                           # or "[ok] N segments found" if multiple
+[ok] Pages secret RESEND_API_KEY set for project "<project>"       # when CLOUDFLARE_API_TOKEN is available
 
 This allows the subscribe form to work in production.
 ```
+
+If no segments are found, the command prints a warning: `[!!] No segments found`. The `send` command needs at least one segment.
+
+If `CLOUDFLARE_API_TOKEN` is not available, the command prints `[!!] CLOUDFLARE_API_TOKEN not found` and falls back to printing the manual `wrangler pages secret put` command.
 
 If the domain is not yet verified, the command prints the DNS records you need to add (SPF, DKIM, DMARC) and triggers a verification check. Re-run the command after adding the records.
 
@@ -188,7 +198,7 @@ If Cloudflare auth is missing or the Pages secret update fails, the command fall
 
 ### 8. Write the first issue
 
-Create a Markdown file (e.g., `001.md`) in the newsletter directory:
+If you ran `init`, a sample `your-first-newsletter-issue.md` already exists as a draft. Edit it or create a new Markdown file in the newsletter directory:
 
 ```markdown
 ---
