@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
 import { Resend } from "resend";
-import { loadConfig } from "../pipeline/config.js";
+import { runBuild } from "./build.js";
 import { scanIssuesDir } from "../pipeline/markdown.js";
 import { createResendProvider } from "../providers/resend.js";
 
@@ -28,14 +28,10 @@ const TEST_UNSUBSCRIBE_URL = "https://example.com/unsubscribe-test";
 export async function runSend(options: SendOptions): Promise<void> {
   const { configDir, issueNumber, yes, testAddress } = options;
 
-  const config = await loadConfig(configDir);
-
-  const emailHtmlPath = join(configDir, "output", "email", `${issueNumber}.html`);
-  if (!existsSync(emailHtmlPath)) {
-    throw new Error(
-      `output/email/${issueNumber}.html not found. Run 'laughing-man build' first.`
-    );
-  }
+  const { config } = await runBuild({
+    configDir,
+    includeDrafts: false,
+  });
 
   const issues = await scanIssuesDir(config.issues_dir);
   const issue = issues.find((i) => i.issue === issueNumber);
@@ -44,6 +40,13 @@ export async function runSend(options: SendOptions): Promise<void> {
   }
   if (issue.status === "draft") {
     throw new Error(`Issue #${issueNumber} has status 'draft'. Set status to 'ready' before sending.`);
+  }
+
+  const emailHtmlPath = join(configDir, "output", "email", `${issueNumber}.html`);
+  if (!existsSync(emailHtmlPath)) {
+    throw new Error(
+      `Production email HTML for issue #${issueNumber} was not generated at output/email/${issueNumber}.html.`
+    );
   }
 
   const apiKey = config.env.RESEND_API_KEY;

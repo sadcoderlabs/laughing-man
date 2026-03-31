@@ -155,6 +155,7 @@ All stamped issues are set to 'draft' status.
           showHelp(`Usage: laughing-man send <issue-number> [options]
 
 Send an issue via Resend Broadcast.
+Runs a production build first.
 
 Options:
   --yes                Skip confirmation prompt (for CI)

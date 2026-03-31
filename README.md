@@ -71,6 +71,8 @@ laughing-man setup newsletter          # Verify Resend API key + sender domain +
 laughing-man send <issue-number>       # Send an issue via Resend Broadcast
 ```
 
+`send` runs a fresh production build before it sends, so draft issues stay excluded.
+
 ## Configurations
 
 `laughing-man init` generates a `laughing-man.yaml` in your newsletter directory.
