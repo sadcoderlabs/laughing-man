@@ -3,7 +3,7 @@
   --bg-surface: #fafbfc;
   --text: #1e2d3d;
   --text-muted: #607080;
-  --text-faint: #8a93a0;
+  --text-faint: #6e7a88;
   --accent: #005577;
   --line: rgba(0, 85, 119, 0.18);
   --success: #1a7a3a;
@@ -386,13 +386,13 @@ strong {
 }
 
 .feed-teaser {
-  opacity: 0.5;
+  color: var(--text-faint);
 }
 
-.feed-teaser:hover .feed-marker,
-.feed-teaser:hover .feed-title {
-  color: inherit;
-  text-decoration: none;
+.feed-teaser .feed-marker,
+.feed-teaser .feed-issue,
+.feed-teaser .feed-title {
+  color: var(--text-faint);
 }
 
 .feed-end {
@@ -400,9 +400,8 @@ strong {
   font-family: var(--font-mono);
   font-size: 0.76rem;
   letter-spacing: 0.04em;
-  color: var(--text-muted);
+  color: var(--text-faint);
   text-align: center;
-  opacity: 0.6;
 }
 
 /* ─── Issue: Back link ─── */
