@@ -885,6 +885,42 @@ del {
 /* ─── Responsive ─── */
 
 @media (max-width: 640px) {
+  :root {
+    --header-height: 5.5rem;
+  }
+
+  .site-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 0.55rem;
+    padding-block: 0.7rem 0.85rem;
+    text-align: center;
+  }
+
+  .site-name {
+    inline-size: 100%;
+    font-size: 0.92rem;
+    line-height: 1.4;
+    letter-spacing: 0.08em;
+  }
+
+  .site-nav {
+    inline-size: 100%;
+    justify-content: center;
+    gap: 0.9rem;
+    padding-block-start: 0.45rem;
+    border-block-start: 1px solid color-mix(in srgb, var(--line) 88%, white);
+  }
+
+  .site-nav a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-block-size: 2rem;
+    padding-inline: 0.25rem;
+  }
+
   .subscribe-form {
     flex-direction: column;
   }
@@ -942,6 +978,29 @@ del {
 
   .not-found-action {
     inline-size: 100%;
+  }
+
+  .site-footer {
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.35rem;
+    text-align: center;
+  }
+
+  .footer-name {
+    inline-size: 100%;
+    font-size: 0.92rem;
+    line-height: 1.4;
+    letter-spacing: 0.08em;
+  }
+
+  .footer-sep {
+    display: none;
+  }
+
+  .footer-credit {
+    font-size: 0.68rem;
+    line-height: 1.5;
   }
 }
 
