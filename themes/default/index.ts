@@ -1,6 +1,6 @@
 import { marked } from "marked";
 import type { SiteConfig, IssueData } from "../../src/types.js";
-import { styles, faviconDataUri } from "./assets.js";
+import { readStyles, readFaviconDataUri } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 import { laughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
@@ -51,11 +51,11 @@ export function IndexPage({ issues, config, draftIssueNumbers = [] }: IndexProps
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(config.name)}</title>
-  <link rel="icon" type="image/svg+xml" href="${faviconDataUri}">
+  <link rel="icon" type="image/svg+xml" href="${readFaviconDataUri()}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>${styles}</style>
+  <style>${readStyles()}</style>
 </head>
 <body>
   ${siteHeader(config.name)}
