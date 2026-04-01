@@ -1,4 +1,5 @@
 import type { SiteConfig, IssueData } from "../../src/types.js";
+import { faviconPngUrl } from "./assets.js";
 import { plainTextExcerpt } from "./meta.js";
 
 /** Maximum number of items in the feed to avoid bloat. */
@@ -99,6 +100,7 @@ export function generateRssFeed({ config, issues }: RssFeedOptions): string {
   const description = config.description
     ? stripMarkdownInline(config.description)
     : config.name;
+  const channelImageUrl = faviconPngUrl(config.url);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
@@ -106,6 +108,11 @@ export function generateRssFeed({ config, issues }: RssFeedOptions): string {
     <title>${escapeXml(config.name)}</title>
     <link>${escapeXml(config.url)}/</link>
     <description>${escapeXml(description)}</description>
+    <image>
+      <url>${escapeXml(channelImageUrl)}</url>
+      <title>${escapeXml(config.name)}</title>
+      <link>${escapeXml(config.url)}/</link>
+    </image>
     <lastBuildDate>${lastBuildDate}</lastBuildDate>
     <generator>laughing-man</generator>
     <docs>https://cyber.harvard.edu/rss/rss.html</docs>

@@ -1,11 +1,13 @@
 import { mkdirSync, writeFileSync, rmSync, cpSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { createHash } from "node:crypto";
 import { loadConfig } from "../pipeline/config.js";
 import { scanIssuesDir } from "../pipeline/markdown.js";
 import { backfillDates, validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
 import type { SiteConfig, IssueData } from "../types.js";
+import { faviconFileNames, readStyles } from "../../themes/default/assets.js";
 
 const themesDir = resolve(import.meta.dirname, "../../themes/default");
 
@@ -60,11 +62,20 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const outputDir = join(configDir, outputDirName);
   const websiteDir = join(outputDir, "website");
   const emailDir = join(outputDir, "email");
+  const websiteImagesDir = join(websiteDir, "images");
 
   rmSync(outputDir, { recursive: true, force: true });
 
   mkdirSync(websiteDir, { recursive: true });
   mkdirSync(emailDir, { recursive: true });
+  mkdirSync(websiteImagesDir, { recursive: true });
+
+  const styles = readStyles();
+  const stylesheetHash = createHash("sha256").update(styles).digest("hex").slice(0, 10);
+  const stylesheetFileName = `styles.${stylesheetHash}.css`;
+  const stylesheetHref = `/${stylesheetFileName}`;
+
+  writeFileSync(join(websiteDir, stylesheetFileName), styles, "utf8");
 
   for (const issue of sorted) {
     const { webHtml: contentWeb, emailHtml: contentEmail } = await processImages({
@@ -83,6 +94,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       rawContent: issue.rawContent,
       content: contentWeb,
       config,
+      stylesheetHref,
     });
     const issueDir = join(websiteDir, "issues", String(issue.issue));
     mkdirSync(issueDir, { recursive: true });
@@ -102,16 +114,23 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     });
   }
 
-  const indexHtml = IndexPage({ issues: sorted, draftIssueNumbers, config });
+  const indexHtml = IndexPage({ issues: sorted, draftIssueNumbers, config, stylesheetHref });
   writeFileSync(join(websiteDir, "index.html"), indexHtml, "utf8");
 
-  const notFoundHtml = NotFoundPage({ config });
+  const notFoundHtml = NotFoundPage({ config, stylesheetHref });
   writeFileSync(join(websiteDir, "404.html"), notFoundHtml, "utf8");
 
-  // Copy static assets (OG image) into website root
+  // Copy static assets into website root.
+  for (const assetName of faviconFileNames()) {
+    const assetSource = resolve(import.meta.dirname, `../../themes/default/${assetName}`);
+    if (existsSync(assetSource)) {
+      cpSync(assetSource, join(websiteDir, assetName));
+    }
+  }
+
   const ogImageSource = resolve(import.meta.dirname, "../../themes/default/laughing-man.png");
   if (existsSync(ogImageSource)) {
-    cpSync(ogImageSource, join(websiteDir, "laughing-man.png"));
+    cpSync(ogImageSource, join(websiteImagesDir, "laughing-man.png"));
   }
 
   // Only route /api/* through Pages Functions; serve everything else as
@@ -134,6 +153,9 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       "",
       "/feed.xml",
       "  Content-Type: application/rss+xml; charset=utf-8",
+      "",
+      `/${stylesheetFileName}`,
+      "  Cache-Control: public, max-age=31536000, immutable",
       "",
     ].join("\n"),
     "utf8",

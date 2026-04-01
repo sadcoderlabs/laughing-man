@@ -3,6 +3,7 @@ import { runBuild } from "../../src/commands/build";
 import {
   mkdtempSync,
   mkdirSync,
+  readdirSync,
   writeFileSync,
   rmSync,
   existsSync,
@@ -151,6 +152,8 @@ env: {}
       "utf8",
     );
     expect(indexHtml).toContain("Hello World");
+    expect(indexHtml).toMatch(/href="\/styles\.[0-9a-f]{10}\.css"/);
+    expect(indexHtml).not.toContain("<style>:root");
   });
 
   it("includes laughing-man credit in generated website footers", async () => {
@@ -213,6 +216,50 @@ env: {}
     expect(headers).toContain("X-Content-Type-Options: nosniff");
     expect(headers).toContain("X-Frame-Options: DENY");
     expect(headers).toContain("Referrer-Policy: strict-origin-when-cross-origin");
+  });
+
+  it("copies favicon assets and links to them from generated pages", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Hello World\n\nContent.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    expect(existsSync(join(tmpDir, "output", "website", "favicon.ico"))).toBe(true);
+    expect(existsSync(join(tmpDir, "output", "website", "favicon-32x32.png"))).toBe(true);
+    expect(existsSync(join(tmpDir, "output", "website", "favicon-144x144.png"))).toBe(true);
+    expect(existsSync(join(tmpDir, "output", "website", "favicon.svg"))).toBe(true);
+
+    const indexHtml = readFileSync(
+      join(tmpDir, "output", "website", "index.html"),
+      "utf8",
+    );
+    expect(indexHtml).toContain('href="https://my-newsletter.pages.dev/favicon.ico"');
+    expect(indexHtml).toContain('href="https://my-newsletter.pages.dev/favicon-32x32.png"');
+    expect(indexHtml).toContain('href="https://my-newsletter.pages.dev/favicon-144x144.png"');
+    expect(indexHtml).toContain('href="https://my-newsletter.pages.dev/favicon.svg"');
+  });
+
+  it("writes a hashed stylesheet and marks it immutable", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Hello World\n\nContent.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const websiteFiles = readdirSync(join(tmpDir, "output", "website"));
+    const stylesheetFile = websiteFiles.find((name) => /^styles\.[0-9a-f]{10}\.css$/.test(name));
+
+    expect(stylesheetFile).toBeDefined();
+
+    const headers = readFileSync(
+      join(tmpDir, "output", "website", "_headers"),
+      "utf8",
+    );
+    expect(headers).toContain(`/${stylesheetFile}`);
+    expect(headers).toContain("Cache-Control: public, max-age=31536000, immutable");
   });
 
   it("404.html uses general recovery copy and links back into the site", async () => {
@@ -337,7 +384,7 @@ env: {}
     expect(issueHtml).toContain('"@type": "Article"');
     expect(issueHtml).toContain('"headline": "Issue One"');
     expect(issueHtml).toContain('"datePublished": "2026-03-15"');
-    expect(issueHtml).toContain("laughing-man.png");
+    expect(issueHtml).toContain("/images/laughing-man.png");
   });
 
   it("generates sitemap.xml with index and issue URLs", async () => {

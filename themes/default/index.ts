@@ -1,6 +1,6 @@
 import { marked } from "marked";
 import type { SiteConfig, IssueData } from "../../src/types.js";
-import { readStyles, readFaviconDataUri } from "./assets.js";
+import { faviconLinkTags } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 import { readLaughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
@@ -11,12 +11,14 @@ interface IndexProps {
   issues: IssueData[];
   draftIssueNumbers?: number[];
   config: SiteConfig;
+  stylesheetHref: string;
 }
 
 export function IndexPage({
   issues,
   config,
   draftIssueNumbers = [],
+  stylesheetHref,
 }: IndexProps): string {
   const sorted = [...issues].sort((a, b) => b.issue - a.issue);
 
@@ -63,12 +65,12 @@ export function IndexPage({
   <link rel="canonical" href="${escapeHtml(config.url)}/">
   ${ogMetaTags({ title: config.name, description, url: `${config.url}/`, siteName: config.name, type: "website" })}
   ${websiteJsonLd({ name: config.name, url: `${config.url}/`, description: config.description })}
-  <link rel="icon" type="image/svg+xml" href="${readFaviconDataUri()}">
+  ${faviconLinkTags(config.url)}
   <link rel="alternate" type="application/rss+xml" title="${escapeHtml(config.name)}" href="${escapeHtml(config.url)}/feed.xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>${readStyles()}</style>
+  <link rel="stylesheet" href="${escapeHtml(stylesheetHref)}">
 </head>
 <body>
   ${siteHeader(config.name)}

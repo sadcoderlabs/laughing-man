@@ -1,25 +1,26 @@
 import type { SiteConfig } from "../../src/types.js";
-import { readStyles, readFaviconDataUri } from "./assets.js";
+import { faviconLinkTags } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 import { readLaughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
 
 interface NotFoundProps {
   config: SiteConfig;
+  stylesheetHref: string;
 }
 
-export function NotFoundPage({ config }: NotFoundProps): string {
+export function NotFoundPage({ config, stylesheetHref }: NotFoundProps): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>404 - ${escapeHtml(config.name)}</title>
-  <link rel="icon" type="image/svg+xml" href="${readFaviconDataUri()}">
+  ${faviconLinkTags(config.url)}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>${readStyles()}</style>
+  <link rel="stylesheet" href="${escapeHtml(stylesheetHref)}">
 </head>
 <body class="not-found-page">
   ${siteHeader(config.name, { archiveHref: "/#archive", subscribeHref: "/#subscribe" })}

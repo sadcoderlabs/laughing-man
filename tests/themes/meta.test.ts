@@ -55,7 +55,7 @@ describe("articleJsonLd", () => {
       datePublished: "2026-03-15",
       url: "https://example.com/issues/1/",
       description: "First 200 chars of plain text",
-      imageUrl: "https://example.com/laughing-man.png",
+      imageUrl: "https://example.com/images/laughing-man.png",
       siteName: "My Newsletter",
       siteUrl: "https://example.com/",
     });
@@ -71,7 +71,7 @@ describe("articleJsonLd", () => {
     expect(json.datePublished).toBe("2026-03-15");
     expect(json.url).toBe("https://example.com/issues/1/");
     expect(json.description).toBe("First 200 chars of plain text");
-    expect(json.image).toBe("https://example.com/laughing-man.png");
+    expect(json.image).toBe("https://example.com/images/laughing-man.png");
     expect(json.isPartOf).toEqual({
       "@type": "WebSite",
       name: "My Newsletter",
@@ -85,7 +85,7 @@ describe("articleJsonLd", () => {
       datePublished: "2026-03-15",
       url: "https://example.com/issues/1/",
       description: "Description with </script> attempt",
-      imageUrl: "https://example.com/laughing-man.png",
+      imageUrl: "https://example.com/images/laughing-man.png",
       siteName: "My Newsletter",
       siteUrl: "https://example.com/",
     });
