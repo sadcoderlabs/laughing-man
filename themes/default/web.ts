@@ -3,7 +3,7 @@ import { readStyles, readFaviconDataUri } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 import { readLaughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
-import { ogMetaTags, plainTextExcerpt } from "./meta.js";
+import { ogMetaTags, plainTextExcerpt, articleJsonLd } from "./meta.js";
 import { subscribeScript } from "./subscribe.js";
 
 interface WebPageProps {
@@ -27,6 +27,7 @@ export function WebPage({ title, issue, date, rawContent, content, config }: Web
   <title>${escapeHtml(title)} - ${escapeHtml(config.name)}</title>
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
   ${ogMetaTags({ title, description, url: canonicalUrl, siteName: config.name, type: "article", publishedTime: date })}
+  ${articleJsonLd({ headline: title, datePublished: date ?? "", url: canonicalUrl, description, imageUrl: `${new URL(config.url).origin}/laughing-man.png`, siteName: config.name, siteUrl: `${config.url}/` })}
   <link rel="icon" type="image/svg+xml" href="${readFaviconDataUri()}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -28,11 +28,12 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const bust = `?v=${Date.now()}`;
   const themeUrl = (name: string) =>
     `${pathToFileURL(join(themesDir, `${name}.${ext}`))}${bust}`;
-  const [{ EmailPage }, { WebPage }, { IndexPage }, { NotFoundPage }] = await Promise.all([
+  const [{ EmailPage }, { WebPage }, { IndexPage }, { NotFoundPage }, { generateSitemap, generateRobotsTxt }] = await Promise.all([
     import(themeUrl("email")),
     import(themeUrl("web")),
     import(themeUrl("index")),
     import(themeUrl("not-found")),
+    import(themeUrl("seo")),
   ]);
 
   const config = await loadConfig(configDir);
@@ -125,6 +126,18 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       "  X-Frame-Options: DENY",
       "",
     ].join("\n"),
+    "utf8",
+  );
+
+  writeFileSync(
+    join(websiteDir, "sitemap.xml"),
+    generateSitemap(config.url, sorted),
+    "utf8",
+  );
+
+  writeFileSync(
+    join(websiteDir, "robots.txt"),
+    generateRobotsTxt(config.url),
     "utf8",
   );
 

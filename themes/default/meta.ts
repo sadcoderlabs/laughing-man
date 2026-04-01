@@ -58,3 +58,68 @@ export function ogMetaTags({ title, description, url, siteName, type, publishedT
 
   return tags.join("\n  ");
 }
+
+function stripMarkdown(text: string): string {
+  const tokens = marked.lexer(text);
+  return tokens.map(collectText).join(" ").replace(/\s+/g, " ").trim();
+}
+
+function jsonLdScript(data: Record<string, unknown>): string {
+  // Use JSON.stringify replacer to escape </script> sequences in values
+  const json = JSON.stringify(data, null, 2).replace(/<\//g, "<\\/");
+  return `<script type="application/ld+json">${json}</script>`;
+}
+
+interface WebsiteJsonLdInput {
+  name: string;
+  url: string;
+  description?: string;
+}
+
+export function websiteJsonLd({ name, url, description }: WebsiteJsonLdInput): string {
+  const data: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name,
+    url,
+  };
+  if (description) {
+    data.description = stripMarkdown(description);
+  }
+  return jsonLdScript(data);
+}
+
+interface ArticleJsonLdInput {
+  headline: string;
+  datePublished: string;
+  url: string;
+  description: string;
+  imageUrl: string;
+  siteName: string;
+  siteUrl: string;
+}
+
+export function articleJsonLd({
+  headline,
+  datePublished,
+  url,
+  description,
+  imageUrl,
+  siteName,
+  siteUrl,
+}: ArticleJsonLdInput): string {
+  return jsonLdScript({
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline,
+    datePublished,
+    url,
+    description,
+    image: imageUrl,
+    isPartOf: {
+      "@type": "WebSite",
+      name: siteName,
+      url: siteUrl,
+    },
+  });
+}
