@@ -243,7 +243,7 @@ npx @sadcoderlabs/laughing-man preview --no-drafts  # published issues only
 | "API token lacks required permissions"  | Token needs Account > Cloudflare Pages > Edit. If `web_hosting.domain` is set, also add Zone > DNS > Edit for that specific zone. |
 | "Pages project name X is not available" | Change `web_hosting.project` in laughing-man.yaml                                        |
 | "A DNS record managed by Workers already exists" | Another Workers/Pages project owns a record on that host. Managed records can't be deleted from the DNS page directly. Delete the Worker or Pages project that owns the record under Workers & Pages in the dashboard, or use a different domain/subdomain. |
-| Deploy fails with "wrangler not found"  | Run `bun add -D wrangler`                                                                |
+| Deploy fails with "wrangler not found"  | Reinstall `@sadcoderlabs/laughing-man` so the bundled Wrangler binary is restored        |
 | Custom domain shows 522 error           | Wait for DNS propagation (up to 48h), verify CNAME is correct                            |
 | "Resend API key is invalid"                 | Regenerate at resend.com/api-keys. Must have "Full access" permission.                   |
 | `setup newsletter` shows "not yet verified" | Add the DNS records printed by the command, wait a few minutes, re-run.                  |
