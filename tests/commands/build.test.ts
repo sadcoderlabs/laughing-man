@@ -340,6 +340,89 @@ env: {}
     expect(issueHtml).toContain("laughing-man.png");
   });
 
+  it("generates sitemap.xml with index and issue URLs", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Issue One\n\nHello.\n",
+    );
+    writeFileSync(
+      join(tmpDir, "issues", "issue-2.md"),
+      "---\nissue: 2\nstatus: ready\ndate: 2026-03-20\n---\n# Issue Two\n\nWorld.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const sitemap = readFileSync(
+      join(tmpDir, "output", "website", "sitemap.xml"),
+      "utf8",
+    );
+    expect(sitemap).toContain('<?xml version="1.0" encoding="UTF-8"?>');
+    expect(sitemap).toContain("https://my-newsletter.pages.dev/</loc>");
+    expect(sitemap).toContain("https://my-newsletter.pages.dev/issues/1/</loc>");
+    expect(sitemap).toContain("https://my-newsletter.pages.dev/issues/2/</loc>");
+    expect(sitemap).toContain("<lastmod>2026-03-15</lastmod>");
+    expect(sitemap).toContain("<lastmod>2026-03-20</lastmod>");
+    // Index page lastmod = most recent issue date
+    expect(sitemap).toContain(
+      "<loc>https://my-newsletter.pages.dev/</loc>\n    <lastmod>2026-03-20</lastmod>",
+    );
+  });
+
+  it("sitemap.xml excludes draft issues", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Issue One\n\nHello.\n",
+    );
+    writeFileSync(
+      join(tmpDir, "issues", "issue-2.md"),
+      "---\nissue: 2\nstatus: draft\n---\n# Issue Two\n\nDraft.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const sitemap = readFileSync(
+      join(tmpDir, "output", "website", "sitemap.xml"),
+      "utf8",
+    );
+    expect(sitemap).toContain("issues/1/");
+    expect(sitemap).not.toContain("issues/2/");
+  });
+
+  it("sitemap.xml with no published issues contains only index", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: draft\n---\n# Draft Only\n\nWIP.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const sitemap = readFileSync(
+      join(tmpDir, "output", "website", "sitemap.xml"),
+      "utf8",
+    );
+    expect(sitemap).toContain("https://my-newsletter.pages.dev/</loc>");
+    expect(sitemap).not.toContain("/issues/");
+  });
+
+  it("generates robots.txt with sitemap reference", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Issue One\n\nHello.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const robots = readFileSync(
+      join(tmpDir, "output", "website", "robots.txt"),
+      "utf8",
+    );
+    expect(robots).toContain("User-agent: *");
+    expect(robots).toContain("Allow: /");
+    expect(robots).toContain(
+      "Sitemap: https://my-newsletter.pages.dev/sitemap.xml",
+    );
+  });
+
   it("preview mode shows drafts as full entries with no teasers", async () => {
     writeFileSync(
       join(tmpDir, "issues", "issue-1.md"),

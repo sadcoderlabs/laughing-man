@@ -1,0 +1,49 @@
+interface SitemapEntry {
+  url: string;
+  lastmod: string;
+}
+
+export function generateSitemap(
+  siteUrl: string,
+  issues: readonly { issue: number; date?: string }[],
+): string {
+  const today = new Date().toISOString().slice(0, 10);
+  const mostRecentDate =
+    issues.length > 0
+      ? issues.reduce(
+          (latest, i) => (i.date && i.date > latest ? i.date : latest),
+          issues[0].date ?? today,
+        )
+      : today;
+
+  const entries: SitemapEntry[] = [
+    { url: `${siteUrl}/`, lastmod: mostRecentDate },
+    ...issues.map((i) => ({
+      url: `${siteUrl}/issues/${i.issue}/`,
+      lastmod: i.date ?? today,
+    })),
+  ];
+
+  const urls = entries
+    .map(
+      (e) => `  <url>
+    <loc>${e.url}</loc>
+    <lastmod>${e.lastmod}</lastmod>
+  </url>`,
+    )
+    .join("\n");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>
+`;
+}
+
+export function generateRobotsTxt(siteUrl: string): string {
+  return `User-agent: *
+Allow: /
+
+Sitemap: ${siteUrl}/sitemap.xml
+`;
+}
