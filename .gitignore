@@ -139,6 +139,7 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 # Git worktrees
+.claude/worktrees/
 .worktrees/
 
 # Build output
