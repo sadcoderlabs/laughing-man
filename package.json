@@ -32,7 +32,8 @@
     "laughing-man": "dist/src/cli.js"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.build.json && cp themes/default/*.css themes/default/*.svg themes/default/*.png themes/default/*.ico dist/themes/default/ && mkdir -p dist/skills/laughing-man && cp skills/laughing-man/SKILL.md dist/skills/laughing-man/",
+    "clean": "rm -rf dist",
+    "build": "bun run clean && tsc --project tsconfig.build.json && mkdir -p dist/skills/laughing-man && cp -R themes/default/assets dist/themes/default/ && cp skills/laughing-man/SKILL.md dist/skills/laughing-man/",
     "prepublishOnly": "bun run build",
     "test": "bun test",
     "typecheck": "tsc --noEmit"

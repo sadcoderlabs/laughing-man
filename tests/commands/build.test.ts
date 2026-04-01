@@ -218,7 +218,7 @@ env: {}
     expect(headers).toContain("Referrer-Policy: strict-origin-when-cross-origin");
   });
 
-  it("copies favicon assets and links to them from generated pages", async () => {
+  it("copies favicon.svg and links to it from generated pages", async () => {
     writeFileSync(
       join(tmpDir, "issues", "issue-1.md"),
       "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Hello World\n\nContent.\n",
@@ -226,18 +226,12 @@ env: {}
 
     await runBuild({ configDir: tmpDir, includeDrafts: false });
 
-    expect(existsSync(join(tmpDir, "output", "website", "favicon.ico"))).toBe(true);
-    expect(existsSync(join(tmpDir, "output", "website", "favicon-32x32.png"))).toBe(true);
-    expect(existsSync(join(tmpDir, "output", "website", "favicon-144x144.png"))).toBe(true);
     expect(existsSync(join(tmpDir, "output", "website", "favicon.svg"))).toBe(true);
 
     const indexHtml = readFileSync(
       join(tmpDir, "output", "website", "index.html"),
       "utf8",
     );
-    expect(indexHtml).toContain('href="https://my-newsletter.pages.dev/favicon.ico"');
-    expect(indexHtml).toContain('href="https://my-newsletter.pages.dev/favicon-32x32.png"');
-    expect(indexHtml).toContain('href="https://my-newsletter.pages.dev/favicon-144x144.png"');
     expect(indexHtml).toContain('href="https://my-newsletter.pages.dev/favicon.svg"');
   });
 

@@ -7,7 +7,7 @@ import { scanIssuesDir } from "../pipeline/markdown.js";
 import { backfillDates, validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
 import type { SiteConfig, IssueData } from "../types.js";
-import { faviconFileNames, readStyles } from "../../themes/default/assets.js";
+import { faviconFileName, readStyles } from "../../themes/default/assets.js";
 
 const themesDir = resolve(import.meta.dirname, "../../themes/default");
 
@@ -121,14 +121,12 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   writeFileSync(join(websiteDir, "404.html"), notFoundHtml, "utf8");
 
   // Copy static assets into website root.
-  for (const assetName of faviconFileNames()) {
-    const assetSource = resolve(import.meta.dirname, `../../themes/default/${assetName}`);
-    if (existsSync(assetSource)) {
-      cpSync(assetSource, join(websiteDir, assetName));
-    }
+  const faviconSource = resolve(import.meta.dirname, `../../themes/default/assets/${faviconFileName()}`);
+  if (existsSync(faviconSource)) {
+    cpSync(faviconSource, join(websiteDir, faviconFileName()));
   }
 
-  const ogImageSource = resolve(import.meta.dirname, "../../themes/default/laughing-man.png");
+  const ogImageSource = resolve(import.meta.dirname, "../../themes/default/assets/laughing-man.png");
   if (existsSync(ogImageSource)) {
     cpSync(ogImageSource, join(websiteImagesDir, "laughing-man.png"));
   }
