@@ -304,6 +304,42 @@ env: {}
     expect(indexHtml).not.toContain("End of Archives");
   });
 
+  it("index.html contains WebSite JSON-LD", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Issue One\n\nHello.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const indexHtml = readFileSync(
+      join(tmpDir, "output", "website", "index.html"),
+      "utf8",
+    );
+    expect(indexHtml).toContain('<script type="application/ld+json">');
+    expect(indexHtml).toContain('"@type": "WebSite"');
+    expect(indexHtml).toContain('"name": "Test Newsletter"');
+  });
+
+  it("issue pages contain Article JSON-LD", async () => {
+    writeFileSync(
+      join(tmpDir, "issues", "issue-1.md"),
+      "---\nissue: 1\nstatus: ready\ndate: 2026-03-15\n---\n# Issue One\n\nHello world this is a test.\n",
+    );
+
+    await runBuild({ configDir: tmpDir, includeDrafts: false });
+
+    const issueHtml = readFileSync(
+      join(tmpDir, "output", "website", "issues", "1", "index.html"),
+      "utf8",
+    );
+    expect(issueHtml).toContain('<script type="application/ld+json">');
+    expect(issueHtml).toContain('"@type": "Article"');
+    expect(issueHtml).toContain('"headline": "Issue One"');
+    expect(issueHtml).toContain('"datePublished": "2026-03-15"');
+    expect(issueHtml).toContain("laughing-man.png");
+  });
+
   it("preview mode shows drafts as full entries with no teasers", async () => {
     writeFileSync(
       join(tmpDir, "issues", "issue-1.md"),

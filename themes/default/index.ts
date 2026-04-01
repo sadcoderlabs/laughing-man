@@ -4,7 +4,7 @@ import { readStyles, readFaviconDataUri } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 import { readLaughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
-import { ogMetaTags } from "./meta.js";
+import { ogMetaTags, websiteJsonLd } from "./meta.js";
 import { subscribeScript } from "./subscribe.js";
 
 interface IndexProps {
@@ -62,6 +62,7 @@ export function IndexPage({
   <title>${escapeHtml(config.name)}</title>
   <link rel="canonical" href="${escapeHtml(config.url)}/">
   ${ogMetaTags({ title: config.name, description, url: `${config.url}/`, siteName: config.name, type: "website" })}
+  ${websiteJsonLd({ name: config.name, url: `${config.url}/`, description: config.description })}
   <link rel="icon" type="image/svg+xml" href="${readFaviconDataUri()}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
