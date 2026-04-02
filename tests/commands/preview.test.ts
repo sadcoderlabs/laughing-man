@@ -34,4 +34,19 @@ describe("shouldIgnorePreviewWatchEvent", () => {
       shouldIgnorePreviewWatchEvent("issue-1.md", issuesDir, previewDir),
     ).toBe(false);
   });
+
+  it("ignores non-markdown files in the issues root", () => {
+    expect(
+      shouldIgnorePreviewWatchEvent(".DS_Store", issuesDir, previewDir),
+    ).toBe(true);
+  });
+
+  it("ignores nested markdown files outside the scanned issue set", () => {
+    expect(
+      shouldIgnorePreviewWatchEvent("preview/draft.md", issuesDir, previewDir),
+    ).toBe(true);
+    expect(
+      shouldIgnorePreviewWatchEvent("nested/issue-2.md", issuesDir, previewDir),
+    ).toBe(true);
+  });
 });

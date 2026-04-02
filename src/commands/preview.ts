@@ -1,5 +1,5 @@
 import { watch, existsSync, readFileSync, readdirSync, createReadStream, statSync } from "node:fs";
-import { join, resolve, extname } from "node:path";
+import { join, resolve, extname, basename } from "node:path";
 import { createServer } from "node:http";
 import { runBuild } from "./build.js";
 import { handleSubscribe } from "../../functions/api/subscribe.js";
@@ -54,7 +54,13 @@ export function shouldIgnorePreviewWatchEvent(
     return true;
   }
 
-  return parts.includes("output") || parts.includes("preview") || parts.includes("node_modules") || parts.includes(".git");
+  if (parts.includes("output") || parts.includes("preview") || parts.includes("node_modules") || parts.includes(".git")) {
+    return true;
+  }
+
+  // runBuild only scans top-level Markdown issue files inside issues_dir, so
+  // ignore watcher noise from unrelated files at the project root.
+  return basename(filePath) !== filename || extname(filename) !== ".md";
 }
 
 export async function runPreview(options: PreviewOptions): Promise<void> {
