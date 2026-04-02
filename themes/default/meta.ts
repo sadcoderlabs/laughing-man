@@ -37,7 +37,7 @@ interface OgMeta {
 
 export function ogMetaTags({ title, description, url, siteName, type, publishedTime }: OgMeta): string {
   const siteOrigin = new URL(url).origin;
-  const imageUrl = `${siteOrigin}/images/laughing-man.png`;
+  const imageUrl = `${siteOrigin}/assets/laughing-man.png`;
 
   const tags = [
     `<meta name="description" content="${escapeHtml(description)}">`,

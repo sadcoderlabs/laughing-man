@@ -156,11 +156,11 @@ env: {}
       "utf8",
     );
     expect(indexHtml).toContain("Hello World");
-    expect(indexHtml).toMatch(/href="\/styles\.[0-9a-f]{10}\.css"/);
-    expect(indexHtml).toMatch(/<script src="\/subscribe\.[0-9a-f]{10}\.js" defer><\/script>/);
+    expect(indexHtml).toMatch(/href="\/assets\/styles\.[0-9a-f]{10}\.css"/);
+    expect(indexHtml).toMatch(/<script src="\/assets\/subscribe\.[0-9a-f]{10}\.js" defer><\/script>/);
     expect(indexHtml).not.toContain("<style>:root");
     expect(indexHtml).not.toContain("const subscribeSection = document.getElementById");
-    expect(issueHtml).toMatch(/<script src="\/subscribe\.[0-9a-f]{10}\.js" defer><\/script>/);
+    expect(issueHtml).toMatch(/<script src="\/assets\/subscribe\.[0-9a-f]{10}\.js" defer><\/script>/);
     expect(issueHtml).not.toContain("const subscribeSection = document.getElementById");
   });
 
@@ -251,9 +251,9 @@ env: {}
 
     await runBuild({ configDir: tmpDir, includeDrafts: false });
 
-    const websiteFiles = readdirSync(join(tmpDir, "output", "website"));
-    const stylesheetFile = websiteFiles.find((name) => /^styles\.[0-9a-f]{10}\.css$/.test(name));
-    const subscribeScriptFile = websiteFiles.find((name) => /^subscribe\.[0-9a-f]{10}\.js$/.test(name));
+    const assetsFiles = readdirSync(join(tmpDir, "output", "website", "assets"));
+    const stylesheetFile = assetsFiles.find((name) => /^styles\.[0-9a-f]{10}\.css$/.test(name));
+    const subscribeScriptFile = assetsFiles.find((name) => /^subscribe\.[0-9a-f]{10}\.js$/.test(name));
 
     expect(stylesheetFile).toBeDefined();
     expect(subscribeScriptFile).toBeDefined();
@@ -262,8 +262,8 @@ env: {}
       join(tmpDir, "output", "website", "_headers"),
       "utf8",
     );
-    expect(headers).toContain(`/${stylesheetFile}`);
-    expect(headers).toContain(`/${subscribeScriptFile}`);
+    expect(headers).toContain(`/assets/${stylesheetFile}`);
+    expect(headers).toContain(`/assets/${subscribeScriptFile}`);
     expect(headers).toContain("Cache-Control: public, max-age=31536000, immutable");
   });
 
@@ -389,7 +389,7 @@ env: {}
     expect(issueHtml).toContain('"@type": "Article"');
     expect(issueHtml).toContain('"headline": "Issue One"');
     expect(issueHtml).toContain('"datePublished": "2026-03-15"');
-    expect(issueHtml).toContain("/images/laughing-man.png");
+    expect(issueHtml).toContain("/assets/laughing-man.png");
   });
 
   it("generates sitemap.xml with index and issue URLs", async () => {

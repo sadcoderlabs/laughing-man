@@ -63,24 +63,26 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const websiteDir = join(outputDir, "website");
   const emailDir = join(outputDir, "email");
   const websiteImagesDir = join(websiteDir, "images");
+  const websiteAssetsDir = join(websiteDir, "assets");
 
   rmSync(outputDir, { recursive: true, force: true });
 
   mkdirSync(websiteDir, { recursive: true });
   mkdirSync(emailDir, { recursive: true });
   mkdirSync(websiteImagesDir, { recursive: true });
+  mkdirSync(websiteAssetsDir, { recursive: true });
 
   const styles = readStyles();
   const stylesheetHash = createHash("sha256").update(styles).digest("hex").slice(0, 10);
   const stylesheetFileName = `styles.${stylesheetHash}.css`;
-  const stylesheetHref = `/${stylesheetFileName}`;
+  const stylesheetHref = `/assets/${stylesheetFileName}`;
   const subscribeScript = readSubscribeScript();
   const subscribeScriptHash = createHash("sha256").update(subscribeScript).digest("hex").slice(0, 10);
   const subscribeScriptFileName = `subscribe.${subscribeScriptHash}.js`;
-  const subscribeScriptHref = `/${subscribeScriptFileName}`;
+  const subscribeScriptHref = `/assets/${subscribeScriptFileName}`;
 
-  writeFileSync(join(websiteDir, stylesheetFileName), styles, "utf8");
-  writeFileSync(join(websiteDir, subscribeScriptFileName), subscribeScript, "utf8");
+  writeFileSync(join(websiteAssetsDir, stylesheetFileName), styles, "utf8");
+  writeFileSync(join(websiteAssetsDir, subscribeScriptFileName), subscribeScript, "utf8");
 
   for (const issue of sorted) {
     const { webHtml: contentWeb, emailHtml: contentEmail } = await processImages({
@@ -134,7 +136,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
   const ogImageSource = resolve(import.meta.dirname, "../../themes/default/assets/laughing-man.png");
   if (existsSync(ogImageSource)) {
-    cpSync(ogImageSource, join(websiteImagesDir, "laughing-man.png"));
+    cpSync(ogImageSource, join(websiteAssetsDir, "laughing-man.png"));
   }
 
   // Only route /api/* through Pages Functions; serve everything else as
@@ -158,10 +160,10 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       "/feed.xml",
       "  Content-Type: application/rss+xml; charset=utf-8",
       "",
-      `/${stylesheetFileName}`,
+      `/assets/${stylesheetFileName}`,
       "  Cache-Control: public, max-age=31536000, immutable",
       "",
-      `/${subscribeScriptFileName}`,
+      `/assets/${subscribeScriptFileName}`,
       "  Cache-Control: public, max-age=31536000, immutable",
       "",
     ].join("\n"),
