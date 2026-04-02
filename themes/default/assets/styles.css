@@ -614,7 +614,7 @@ strong {
 }
 
 .issue-emblem {
-  inline-size: clamp(6.25rem, 14vw, 8.75rem);
+  inline-size: clamp(7.5rem, 16vw, 10rem);
   margin-block-end: 1.5rem;
   opacity: 0.95;
 }
