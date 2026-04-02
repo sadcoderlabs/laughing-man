@@ -1,5 +1,5 @@
 import { watch, existsSync, readFileSync, readdirSync, createReadStream, statSync } from "node:fs";
-import { join, resolve, extname, basename } from "node:path";
+import { join, resolve, extname, basename, sep } from "node:path";
 import { createServer } from "node:http";
 import { runBuild } from "./build.js";
 import { handleSubscribe } from "../../functions/api/subscribe.js";
@@ -39,6 +39,7 @@ export function shouldIgnorePreviewWatchEvent(
   filename: string | null,
   issuesDir: string,
   previewOutputDir: string,
+  outputDir: string,
 ): boolean {
   // Node's fs.watch may omit filenames on macOS. Treat those events as
   // non-actionable here instead of guessing, otherwise preview's own writes
@@ -50,11 +51,15 @@ export function shouldIgnorePreviewWatchEvent(
   const filePath = resolve(issuesDir, filename);
   const parts = filePath.split(/[/\\]/);
 
-  if (filePath.startsWith(previewOutputDir)) {
+  if (filePath === previewOutputDir || filePath.startsWith(`${previewOutputDir}${sep}`)) {
     return true;
   }
 
-  if (parts.includes("output") || parts.includes("preview") || parts.includes("node_modules") || parts.includes(".git")) {
+  if (filePath === outputDir || filePath.startsWith(`${outputDir}${sep}`)) {
+    return true;
+  }
+
+  if (parts.includes("node_modules") || parts.includes(".git")) {
     return true;
   }
 
@@ -112,7 +117,7 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
   }
 
   watch(config.issues_dir, { recursive: true }, (_event, filename) => {
-    if (!shouldIgnorePreviewWatchEvent(filename, config.issues_dir, previewOutputDir)) {
+    if (!shouldIgnorePreviewWatchEvent(filename, config.issues_dir, previewOutputDir, resolve(configDir, "output"))) {
       scheduleRebuild();
     }
   });

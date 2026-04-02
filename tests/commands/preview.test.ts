@@ -18,35 +18,51 @@ describe("getPreviewContentType", () => {
 describe("shouldIgnorePreviewWatchEvent", () => {
   const issuesDir = "/tmp/newsletter";
   const previewDir = "/tmp/newsletter/preview";
+  const outputDir = "/tmp/newsletter/output";
 
   it("ignores null filenames from fs.watch", () => {
-    expect(shouldIgnorePreviewWatchEvent(null, issuesDir, previewDir)).toBe(true);
+    expect(shouldIgnorePreviewWatchEvent(null, issuesDir, previewDir, outputDir)).toBe(true);
   });
 
   it("ignores writes inside preview output", () => {
     expect(
-      shouldIgnorePreviewWatchEvent("preview/website/index.html", issuesDir, previewDir),
+      shouldIgnorePreviewWatchEvent("preview/website/index.html", issuesDir, previewDir, outputDir),
     ).toBe(true);
   });
 
   it("allows real issue edits through", () => {
     expect(
-      shouldIgnorePreviewWatchEvent("issue-1.md", issuesDir, previewDir),
+      shouldIgnorePreviewWatchEvent("issue-1.md", issuesDir, previewDir, outputDir),
+    ).toBe(false);
+  });
+
+  it("does not ignore top-level issue files whose names start with preview", () => {
+    expect(
+      shouldIgnorePreviewWatchEvent("preview-1.md", issuesDir, previewDir, outputDir),
+    ).toBe(false);
+  });
+
+  it("does not ignore top-level issue files whose names start with output", () => {
+    expect(
+      shouldIgnorePreviewWatchEvent("output-1.md", issuesDir, previewDir, outputDir),
     ).toBe(false);
   });
 
   it("ignores non-markdown files in the issues root", () => {
     expect(
-      shouldIgnorePreviewWatchEvent(".DS_Store", issuesDir, previewDir),
+      shouldIgnorePreviewWatchEvent(".DS_Store", issuesDir, previewDir, outputDir),
     ).toBe(true);
   });
 
   it("ignores nested markdown files outside the scanned issue set", () => {
     expect(
-      shouldIgnorePreviewWatchEvent("preview/draft.md", issuesDir, previewDir),
+      shouldIgnorePreviewWatchEvent("preview/draft.md", issuesDir, previewDir, outputDir),
     ).toBe(true);
     expect(
-      shouldIgnorePreviewWatchEvent("nested/issue-2.md", issuesDir, previewDir),
+      shouldIgnorePreviewWatchEvent("output/build.md", issuesDir, previewDir, outputDir),
+    ).toBe(true);
+    expect(
+      shouldIgnorePreviewWatchEvent("nested/issue-2.md", issuesDir, previewDir, outputDir),
     ).toBe(true);
   });
 });
