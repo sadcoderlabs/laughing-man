@@ -21,8 +21,8 @@ web_hosting:
 
 email_hosting:
   provider: resend
-  from: "Your Name <newsletter@example.com>"
-  reply_to: newsletter@example.com
+  from: "Your Name <your-name@newsletter.example.com>"
+  reply_to: your-name@newsletter.example.com
 
 env:
   CLOUDFLARE_API_TOKEN: "cf_xxxxx" # or set CLOUDFLARE_API_TOKEN env var
