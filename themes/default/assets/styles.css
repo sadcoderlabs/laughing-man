@@ -609,7 +609,7 @@ strong {
   text-align: center;
   max-inline-size: var(--content-width);
   margin-inline: auto;
-  padding-block: clamp(3.5rem, 8vw, 6.5rem) clamp(1.5rem, 3vw, 2.5rem);
+  padding-block: clamp(1.5rem, 3vw, 2.5rem) clamp(1.5rem, 3vw, 2.5rem);
   animation: fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
