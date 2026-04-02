@@ -77,8 +77,6 @@ Use these skills for Cloudflare-specific work. They pull from Cloudflare docs an
 | `cloudflare`             | General Cloudflare platform work (Workers, Pages, KV, D1, R2, AI) |
 | `wrangler`               | Running wrangler commands, configuring `wrangler.jsonc`           |
 | `workers-best-practices` | Writing or reviewing Workers/Pages Functions code                 |
-| `durable-objects`        | Stateful coordination (not needed for v1)                         |
-| `web-perf`               | Auditing page load performance with Lighthouse/DevTools           |
 
 ### Context7 Library IDs
 
