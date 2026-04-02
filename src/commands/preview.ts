@@ -35,6 +35,28 @@ export function getPreviewContentType(pathname: string, filePath: string): strin
   return MIME_TYPES[ext] ?? "application/octet-stream";
 }
 
+export function shouldIgnorePreviewWatchEvent(
+  filename: string | null,
+  issuesDir: string,
+  previewOutputDir: string,
+): boolean {
+  // Node's fs.watch may omit filenames on macOS. Treat those events as
+  // non-actionable here instead of guessing, otherwise preview's own writes
+  // can trigger rebuild loops when preview/ lives under issues_dir.
+  if (!filename) {
+    return true;
+  }
+
+  const filePath = resolve(issuesDir, filename);
+  const parts = filePath.split(/[/\\]/);
+
+  if (filePath.startsWith(previewOutputDir)) {
+    return true;
+  }
+
+  return parts.includes("output") || parts.includes("preview") || parts.includes("node_modules") || parts.includes(".git");
+}
+
 export async function runPreview(options: PreviewOptions): Promise<void> {
   const { configDir, includeDrafts } = options;
   const previewOutputDir = resolve(configDir, "preview");
@@ -83,23 +105,10 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
     }, 300);
   }
 
-  function shouldIgnore(filename: string | null) {
-    if (!filename) {
-      // macOS may report null for non-ASCII filenames. Rebuild unless the
-      // preview dir was recently touched (which means a build just ran and
-      // these events are from preview writes, not user edits).
-      try {
-        const previewMtime = statSync(previewOutputDir).mtimeMs;
-        if (Date.now() - previewMtime < 2000) return true;
-      } catch {}
-      return false;
-    }
-    const parts = filename.split(/[/\\]/);
-    return parts.includes("output") || parts.includes("preview") || parts.includes("node_modules") || parts.includes(".git");
-  }
-
   watch(config.issues_dir, { recursive: true }, (_event, filename) => {
-    if (!shouldIgnore(filename)) scheduleRebuild();
+    if (!shouldIgnorePreviewWatchEvent(filename, config.issues_dir, previewOutputDir)) {
+      scheduleRebuild();
+    }
   });
   watch(themesDir, { recursive: true }, () => scheduleRebuild());
   watch(join(configDir, "laughing-man.yaml"), () => scheduleRebuild());
