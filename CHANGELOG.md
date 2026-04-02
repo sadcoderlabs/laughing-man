@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.3.0] - 2026-04-02
+
+### Added
+
+- RSS feed generation with per-issue entries
+- PNG feed icon and apple-touch-icon for Feedly compatibility
+- `favicon.ico` with link tags ordered per Evil Martians guide
+- Pretty-print generated HTML output for build and preview
+
+### Changed
+
+- Reorganize output directory structure: CSS, JS, and OG image under `/assets/`; per-issue images under `/issues/{N}/assets/`
+- Rename `laughing-man.png` to `cover.png` and `icon-512.png` to `icon.png`
+- Use relative paths for favicon link tags
+- Harden RSS feed generation and reuse `escapeHtml`/`stripMarkdown` helpers
+- Publish cacheable site assets and externalize subscribe script
+- Suppress wrangler banner during deploy
+
+### Fixed
+
+- Stop preview watch rebuild loops and tighten watcher path filters
+- Fix hero spacing: reduce h1 bottom margin on index page, reduce top padding above issue hero logo, increase issue page logo size
+
 ## [0.2.0] - 2026-04-01
 
 ### Added
