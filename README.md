@@ -8,7 +8,7 @@
 
 Turn your Markdown into a self-hosted newsletter.
 
-You write Markdown files with whatever apps/tools you like (Obsidian, Logseq, VSCode, etc.). The `laughing-man` CLI builds them into a browsable archive website and send-ready email newsletter. Deploy the site to Cloudflare Pages, send issues to subscribers via Resend. Fully self-hosted and free (within Resend and Cloudflare free tiers). No CMS, no database, no code — just you and your Markdown files.
+Write your issues in Markdown with whatever tools you like (Obsidian, Logseq, VSCode, etc.). `laughing-man` turns them into a static archive site and email-ready newsletter HTML. Host on Cloudflare Pages, deliver to subscribers with Resend. Fully self-hosted, fully free within their free tiers. No CMS, no database, no code.
 
 ## Installation
 
