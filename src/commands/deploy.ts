@@ -56,6 +56,7 @@ export async function runDeploy(options: DeployOptions): Promise<void> {
         ...process.env,
         PATH: `${packageBinDir}${delimiter}${process.env.PATH ?? ""}`,
         CLOUDFLARE_API_TOKEN: config.env.CLOUDFLARE_API_TOKEN,
+        WRANGLER_HIDE_BANNER: "true", // Wrangler's startup banner triggers an npm registry update check.
       },
     },
   );

@@ -63,6 +63,7 @@ describe("runDeploy", () => {
     expect(options.stdio).toBe("inherit");
     expect(options.env.CLOUDFLARE_API_TOKEN).toBe("cf_test_123");
     expect(options.env.PATH.startsWith(`${expectedBinDir}${delimiter}`)).toBe(true);
+    expect(options.env.WRANGLER_HIDE_BANNER).toBe("true");
     expect(logs.some((line) => line.includes("Deploy complete"))).toBe(true);
   });
 
