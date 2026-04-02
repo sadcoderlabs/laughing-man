@@ -67,7 +67,7 @@ export function IndexPage({
   <link rel="canonical" href="${escapeHtml(config.url)}/">
   ${ogMetaTags({ title: config.name, description, url: `${config.url}/`, siteName: config.name, type: "website" })}
   ${websiteJsonLd({ name: config.name, url: `${config.url}/`, description: config.description })}
-  ${faviconLinkTags(config.url)}
+  ${faviconLinkTags()}
   <link rel="alternate" type="application/rss+xml" title="${escapeHtml(config.name)}" href="${escapeHtml(config.url)}/feed.xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

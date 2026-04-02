@@ -240,7 +240,7 @@ env: {}
       join(tmpDir, "output", "website", "index.html"),
       "utf8",
     );
-    expect(indexHtml).toContain('href="https://my-newsletter.pages.dev/favicon.svg"');
+    expect(indexHtml).toContain('href="/favicon.svg"');
   });
 
   it("writes hashed stylesheet and subscribe assets and marks them immutable", async () => {

@@ -33,10 +33,9 @@ export function ogImageUrl(siteUrl: string): string {
   return `${publicSiteUrl(siteUrl)}/assets/${OG_IMAGE_FILE_NAME}`;
 }
 
-export function faviconLinkTags(siteUrl: string): string {
-  const site = publicSiteUrl(siteUrl);
+export function faviconLinkTags(): string {
   return [
-    `<link rel="icon" type="image/svg+xml" href="${site}/${FAVICON_FILE_NAME}">`,
-    `<link rel="apple-touch-icon" href="${site}/${APPLE_TOUCH_ICON_FILE_NAME}">`,
+    `<link rel="icon" type="image/svg+xml" href="/${FAVICON_FILE_NAME}">`,
+    `<link rel="apple-touch-icon" href="/${APPLE_TOUCH_ICON_FILE_NAME}">`,
   ].join("\n    ");
 }

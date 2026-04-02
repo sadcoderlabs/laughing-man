@@ -30,7 +30,7 @@ export function WebPage({ title, issue, date, rawContent, content, config, style
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
   ${ogMetaTags({ title, description, url: canonicalUrl, siteName: config.name, type: "article", publishedTime: date })}
   ${articleJsonLd({ headline: title, datePublished: date ?? "", url: canonicalUrl, description, imageUrl: ogImageUrl(config.url), siteName: config.name, siteUrl: `${config.url}/` })}
-  ${faviconLinkTags(config.url)}
+  ${faviconLinkTags()}
   <link rel="alternate" type="application/rss+xml" title="${escapeHtml(config.name)}" href="${escapeHtml(config.url)}/feed.xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
