@@ -9,7 +9,7 @@ import { scanIssuesDir } from "../pipeline/markdown.js";
 import { backfillDates, validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
 import type { SiteConfig, IssueData } from "../types.js";
-import { FAVICON_FILE_NAME, ICON_512_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME, readStyles, readSubscribeScript } from "../../themes/default/assets.js";
+import { FAVICON_FILE_NAME, ICON_512_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME, OG_IMAGE_FILE_NAME, readStyles, readSubscribeScript } from "../../themes/default/assets.js";
 
 const formatHtml = (html: string) =>
   html_beautify(html, { indent_size: 2, preserve_newlines: false, indent_inner_html: true });
@@ -140,9 +140,9 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     }
   }
 
-  const ogImageSource = join(assetsDir, "laughing-man.png");
+  const ogImageSource = join(assetsDir, OG_IMAGE_FILE_NAME);
   if (existsSync(ogImageSource)) {
-    cpSync(ogImageSource, join(websiteAssetsDir, "laughing-man.png"));
+    cpSync(ogImageSource, join(websiteAssetsDir, OG_IMAGE_FILE_NAME));
   }
 
   // Only route /api/* through Pages Functions; serve everything else as

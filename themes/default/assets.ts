@@ -5,6 +5,7 @@ const subscribeScriptPath = new URL("assets/subscribe.js", import.meta.url).path
 const FAVICON_FILE_NAME = "favicon.svg";
 const ICON_512_FILE_NAME = "icon-512.png";
 const APPLE_TOUCH_ICON_FILE_NAME = "apple-touch-icon.png";
+const OG_IMAGE_FILE_NAME = "laughing-man.png";
 
 export function readStyles() {
   return readFileSync(stylesPath, "utf8");
@@ -18,7 +19,7 @@ function publicSiteUrl(siteUrl: string): string {
   return siteUrl.replace(/\/$/, "");
 }
 
-export { FAVICON_FILE_NAME, ICON_512_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME };
+export { FAVICON_FILE_NAME, ICON_512_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME, OG_IMAGE_FILE_NAME };
 
 export function faviconUrl(siteUrl: string): string {
   return `${publicSiteUrl(siteUrl)}/${FAVICON_FILE_NAME}`;
@@ -26,6 +27,10 @@ export function faviconUrl(siteUrl: string): string {
 
 export function iconUrl(siteUrl: string): string {
   return `${publicSiteUrl(siteUrl)}/${ICON_512_FILE_NAME}`;
+}
+
+export function ogImageUrl(siteUrl: string): string {
+  return `${publicSiteUrl(siteUrl)}/assets/${OG_IMAGE_FILE_NAME}`;
 }
 
 export function faviconLinkTags(siteUrl: string): string {

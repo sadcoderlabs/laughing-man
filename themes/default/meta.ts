@@ -1,4 +1,5 @@
 import { marked, type Token, type Tokens } from "marked";
+import { ogImageUrl } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 
 function collectText(token: Token): string {
@@ -36,8 +37,7 @@ interface OgMeta {
 }
 
 export function ogMetaTags({ title, description, url, siteName, type, publishedTime }: OgMeta): string {
-  const siteOrigin = new URL(url).origin;
-  const imageUrl = `${siteOrigin}/assets/laughing-man.png`;
+  const imageUrl = ogImageUrl(new URL(url).origin);
 
   const tags = [
     `<meta name="description" content="${escapeHtml(description)}">`,

@@ -1,5 +1,5 @@
 import type { SiteConfig } from "../../src/types.js";
-import { faviconLinkTags } from "./assets.js";
+import { faviconLinkTags, ogImageUrl } from "./assets.js";
 import { escapeHtml } from "./escape.js";
 import { readLaughingManLogo } from "./logo.js";
 import { siteHeader, siteFooter } from "./layout.js";
@@ -29,7 +29,7 @@ export function WebPage({ title, issue, date, rawContent, content, config, style
   <title>${escapeHtml(title)} - ${escapeHtml(config.name)}</title>
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
   ${ogMetaTags({ title, description, url: canonicalUrl, siteName: config.name, type: "article", publishedTime: date })}
-  ${articleJsonLd({ headline: title, datePublished: date ?? "", url: canonicalUrl, description, imageUrl: `${new URL(config.url).origin}/assets/laughing-man.png`, siteName: config.name, siteUrl: `${config.url}/` })}
+  ${articleJsonLd({ headline: title, datePublished: date ?? "", url: canonicalUrl, description, imageUrl: ogImageUrl(config.url), siteName: config.name, siteUrl: `${config.url}/` })}
   ${faviconLinkTags(config.url)}
   <link rel="alternate" type="application/rss+xml" title="${escapeHtml(config.name)}" href="${escapeHtml(config.url)}/feed.xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
