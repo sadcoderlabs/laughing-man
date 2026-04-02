@@ -63,10 +63,10 @@ describe("generateRssFeed", () => {
     const rss = generateRssFeed({ config, issues: [makeIssue()] });
 
     expect(rss).toContain("<image>");
-    expect(rss).toContain("<url>https://example.com/assets/icon-512.png</url>");
+    expect(rss).toContain("<url>https://example.com/assets/icon.png</url>");
     expect(rss).toContain("<title>Test Newsletter</title>");
     expect(rss).toContain("<link>https://example.com/</link>");
-    expect(rss).toContain("<webfeedly:icon>https://example.com/assets/icon-512.png</webfeedly:icon>");
+    expect(rss).toContain("<webfeedly:icon>https://example.com/assets/icon.png</webfeedly:icon>");
     expect(rss).toContain('xmlns:webfeedly="http://webfeedly.com/rss/1.0"');
   });
 

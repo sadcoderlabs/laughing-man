@@ -28,7 +28,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 
 - Open Graph, Twitter Card, and canonical URL meta tags on all pages
-- OG image (`laughing-man.png`) for social sharing previews
+- OG image (`cover.png`) for social sharing previews
 - Auto-backfill missing `date` field on ready issues instead of erroring
 
 ### Changed

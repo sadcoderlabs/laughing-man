@@ -391,7 +391,7 @@ env: {}
     expect(issueHtml).toContain('"@type": "Article"');
     expect(issueHtml).toContain('"headline": "Issue One"');
     expect(issueHtml).toContain('"datePublished": "2026-03-15"');
-    expect(issueHtml).toContain("/assets/laughing-man.png");
+    expect(issueHtml).toContain("/assets/cover.png");
   });
 
   it("generates sitemap.xml with index and issue URLs", async () => {
