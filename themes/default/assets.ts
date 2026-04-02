@@ -27,7 +27,7 @@ export function faviconUrl(siteUrl: string): string {
 }
 
 export function iconUrl(siteUrl: string): string {
-  return `${publicSiteUrl(siteUrl)}/${ICON_512_FILE_NAME}`;
+  return `${publicSiteUrl(siteUrl)}/assets/${ICON_512_FILE_NAME}`;
 }
 
 export function ogImageUrl(siteUrl: string): string {

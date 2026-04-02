@@ -133,16 +133,18 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
   // Copy static assets into website root.
   const assetsDir = resolve(import.meta.dirname, "../../themes/default/assets");
-  for (const file of [FAVICON_SVG_FILE_NAME, FAVICON_ICO_FILE_NAME, ICON_512_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME]) {
+  for (const file of [FAVICON_SVG_FILE_NAME, FAVICON_ICO_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME]) {
     const src = join(assetsDir, file);
     if (existsSync(src)) {
       cpSync(src, join(websiteDir, file));
     }
   }
 
-  const ogImageSource = join(assetsDir, OG_IMAGE_FILE_NAME);
-  if (existsSync(ogImageSource)) {
-    cpSync(ogImageSource, join(websiteAssetsDir, OG_IMAGE_FILE_NAME));
+  for (const file of [ICON_512_FILE_NAME, OG_IMAGE_FILE_NAME]) {
+    const src = join(assetsDir, file);
+    if (existsSync(src)) {
+      cpSync(src, join(websiteAssetsDir, file));
+    }
   }
 
   // Only route /api/* through Pages Functions; serve everything else as
