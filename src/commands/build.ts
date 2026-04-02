@@ -62,14 +62,12 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const outputDir = join(configDir, outputDirName);
   const websiteDir = join(outputDir, "website");
   const emailDir = join(outputDir, "email");
-  const websiteImagesDir = join(websiteDir, "images");
   const websiteAssetsDir = join(websiteDir, "assets");
 
   rmSync(outputDir, { recursive: true, force: true });
 
   mkdirSync(websiteDir, { recursive: true });
   mkdirSync(emailDir, { recursive: true });
-  mkdirSync(websiteImagesDir, { recursive: true });
   mkdirSync(websiteAssetsDir, { recursive: true });
 
   const styles = readStyles();

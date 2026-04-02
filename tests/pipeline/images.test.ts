@@ -34,9 +34,9 @@ describe("processImages", () => {
       siteUrl: "https://example.com",
     });
 
-    expect(result.webHtml).toContain('src="/images/1/cover.jpg"');
-    expect(result.emailHtml).toContain('src="https://example.com/images/1/cover.jpg"');
-    expect(existsSync(join(outputDir, "images", "1", "cover.jpg"))).toBe(true);
+    expect(result.webHtml).toContain('src="/issues/1/assets/cover.jpg"');
+    expect(result.emailHtml).toContain('src="https://example.com/issues/1/assets/cover.jpg"');
+    expect(existsSync(join(outputDir, "issues", "1", "assets", "cover.jpg"))).toBe(true);
   });
 
   it("resolves image from attachments_dir if not found relative to markdown", async () => {
@@ -53,8 +53,8 @@ describe("processImages", () => {
       siteUrl: "https://example.com",
     });
 
-    expect(result.webHtml).toContain('src="/images/2/photo.jpg"');
-    expect(existsSync(join(outputDir, "images", "2", "photo.jpg"))).toBe(true);
+    expect(result.webHtml).toContain('src="/issues/2/assets/photo.jpg"');
+    expect(existsSync(join(outputDir, "issues", "2", "assets", "photo.jpg"))).toBe(true);
   });
 
   it("does not touch absolute or external image src", async () => {
@@ -86,7 +86,7 @@ describe("processImages", () => {
       siteUrl: "https://example.com",
     });
 
-    expect(result.webHtml).toBe(`<p><img src="/images/1/cover.jpg" alt="Cover"></p>`);
+    expect(result.webHtml).toBe(`<p><img src="/issues/1/assets/cover.jpg" alt="Cover"></p>`);
     expect(result.emailHtml).toContain('width="100%"');
     expect(result.emailHtml).toContain('style="display:block;max-width:100%;height:auto;"');
   });
@@ -120,8 +120,8 @@ describe("processImages", () => {
       siteUrl: "https://example.com",
     });
 
-    expect(result.webHtml).toContain('src="/images/3/photo.jpg"');
-    expect(existsSync(join(outputDir, "images", "3", "photo.jpg"))).toBe(true);
+    expect(result.webHtml).toContain('src="/issues/3/assets/photo.jpg"');
+    expect(existsSync(join(outputDir, "issues", "3", "assets", "photo.jpg"))).toBe(true);
   });
 
   it("throws if relative image cannot be found", async () => {

@@ -508,7 +508,7 @@ env: {}
       join(tmpDir, "output", "website", "feed.xml"),
       "utf8",
     );
-    expect(feed).toContain('src="https://my-newsletter.pages.dev/images/10/cover.jpg"');
+    expect(feed).toContain('src="https://my-newsletter.pages.dev/issues/10/assets/cover.jpg"');
     expect(feed).not.toContain('src="cover.jpg"');
     expect(feed).toContain("<lastBuildDate>Fri, 20 Mar 2026 12:00:00 GMT</lastBuildDate>");
     expect(feed.indexOf("Newer by date")).toBeLessThan(feed.indexOf("Older by date"));

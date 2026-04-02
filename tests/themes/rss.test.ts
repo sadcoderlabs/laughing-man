@@ -252,12 +252,12 @@ describe("generateRssFeed", () => {
     const config = makeConfig();
     const issues = [makeIssue({
       issue: 7,
-      html: '<p><a href="./notes">Notes</a><img src="/images/7/cover.jpg" alt="Cover"><a href="#footnote">Footnote</a></p>',
+      html: '<p><a href="./notes">Notes</a><img src="/issues/7/assets/cover.jpg" alt="Cover"><a href="#footnote">Footnote</a></p>',
     })];
     const rss = generateRssFeed({ config, issues });
 
     expect(rss).toContain('href="https://example.com/issues/7/notes"');
-    expect(rss).toContain('src="https://example.com/images/7/cover.jpg"');
+    expect(rss).toContain('src="https://example.com/issues/7/assets/cover.jpg"');
     expect(rss).toContain('href="https://example.com/issues/7/#footnote"');
   });
 });

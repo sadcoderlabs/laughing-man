@@ -73,7 +73,7 @@ export async function processImages(
 
   const imgPattern = /<img([^>]*?)src="([^"]+)"([^>]*?)>/g;
 
-  const imageOutputDir = join(outputDir, "images", String(issueNumber));
+  const imageOutputDir = join(outputDir, "issues", String(issueNumber), "assets");
   let webHtml = html;
   let emailHtml = html;
   const copiedImages = new Map<string, string>();
@@ -118,8 +118,8 @@ export async function processImages(
     }
 
     const encodedFilename = encodeURIComponent(filename);
-    const webSrc = `/images/${issueNumber}/${encodedFilename}`;
-    const emailSrc = `${siteUrl.replace(/\/$/, "")}/images/${issueNumber}/${encodedFilename}`;
+    const webSrc = `/issues/${issueNumber}/assets/${encodedFilename}`;
+    const emailSrc = `${siteUrl.replace(/\/$/, "")}/issues/${issueNumber}/assets/${encodedFilename}`;
 
     const webTag = `<img${before}src="${webSrc}"${after}>`;
     const emailTag = `<img${before}src="${emailSrc}"${after}>`;
