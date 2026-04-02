@@ -55,13 +55,14 @@ Re-run `bun link` after Bun upgrades or if `laughing-man` stops resolving.
 ### Releasing a New Version
 
 1. Bump the version in `package.json`
-2. Commit the version bump and push to `main`
-3. Tag the commit and push the tag:
+2. Update `CHANGELOG.md` with the new version's changes
+3. Commit the version bump and push to `main`
+4. Tag the commit and push the tag:
    ```bash
    git tag v<version>
    git push origin v<version>
    ```
-4. The `publish.yml` workflow runs on `v*` tags: typechecks, tests, verifies the tag matches `package.json` version, then publishes to npm with provenance via Trusted Publishing (OIDC).
+5. The `publish.yml` workflow runs on `v*` tags: typechecks, tests, verifies the tag matches `package.json` version, then publishes to npm with provenance via Trusted Publishing (OIDC).
 
 ## External Tool Documentation
 
