@@ -53,6 +53,9 @@ Ask the user for each value, then edit `laughing-man.yaml`:
 | `attachments_dir`        | Image/attachment directory?    | "./attachments" (optional)                     |
 | `web_hosting.project`    | Cloudflare Pages project name? | "my-newsletter"                                |
 | `web_hosting.domain`     | Custom domain? (optional)      | "example.com"                                  |
+| `author.name`            | Author name? (optional)        | "Your Name"                                    |
+| `author.url`             | Author URL? (optional)         | "https://example.com"                          |
+| `author.x_handle`        | X/Twitter handle? (optional)   | "@your_handle"                                 |
 | `email_hosting.from`     | Sender name and email?         | "Your Name <your-name@newsletter.example.com>" |
 | `email_hosting.reply_to` | Reply-to email? (optional)     | "your-name@newsletter.example.com"             |
 
@@ -211,7 +214,7 @@ If you ran `init`, a sample `your-first-newsletter-issue.md` already exists as a
 issue: 1
 status: ready
 title: Welcome to My Newsletter
-date: 2025-01-15
+date: 2026-01-15
 ---
 
 # Welcome to My Newsletter
