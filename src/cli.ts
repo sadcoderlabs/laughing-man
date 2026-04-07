@@ -67,7 +67,7 @@ Drafts are excluded from output/.
         if (wantsHelp) {
           showHelp(`Usage: laughing-man preview [options]
 
-Build (including drafts) and start a local preview server.
+Build (including drafts) and start a local preview server with live reload.
 Writes preview artifacts to preview/.
 
 Options:
