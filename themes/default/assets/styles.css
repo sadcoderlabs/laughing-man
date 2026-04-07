@@ -353,7 +353,7 @@ strong {
   flex-shrink: 0;
 }
 
-.feed-row:hover .feed-marker {
+.feed-row:not(.feed-teaser):hover .feed-marker {
   color: var(--accent);
 }
 
@@ -372,7 +372,7 @@ strong {
   transition: color 0.2s ease;
 }
 
-.feed-row:hover .feed-title {
+.feed-row:not(.feed-teaser):hover .feed-title {
   color: var(--accent);
   text-decoration: underline;
 }
