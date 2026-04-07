@@ -14,7 +14,7 @@ Write your newsletter in Markdown with whatever tools you like (Obsidian, Logseq
 
 ## Installation
 
-Requires Node.js 22+ and a domain name.
+Requires Node.js 22+ (for npx) and a domain name.
 
 ```bash
 npm install -g @sadcoderlabs/laughing-man
