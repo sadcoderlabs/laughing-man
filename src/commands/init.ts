@@ -14,10 +14,10 @@ description: A newsletter by [Your Name](https://blog.example.com)
 issues_dir: .
 attachments_dir: .
 
-author:
-  name: Your Name
-  url: https://example.com
-  x_handle: "@your_handle"
+# author:
+#   name: Your Name
+#   url: https://example.com
+#   x_handle: your_handle
 
 web_hosting:
   provider: cloudflare-pages
