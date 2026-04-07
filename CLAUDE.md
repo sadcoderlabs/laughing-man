@@ -98,3 +98,4 @@ Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skippi
 | MJML                                         | `/mjmlio/mjml`                            |
 | js-beautify                                  | `/beautifier/js-beautify`                 |
 | yaml                                         | `/eemeli/yaml`                            |
+| Open Graph Protocol                          | `/facebook/open-graph-protocol`           |
