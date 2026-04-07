@@ -59,7 +59,7 @@ export function generateLlmsTxt(
   name: string,
   description: string | undefined,
   issues: readonly LlmsTxtIssue[],
-  author?: { name: string; url?: string },
+  author?: { name: string; url?: string; x_handle?: string },
 ): string {
   const lines: string[] = [`# ${name}`];
 
@@ -77,7 +77,16 @@ export function generateLlmsTxt(
 
   if (author) {
     lines.push("", "## Author", "");
-    lines.push(author.url ? `- [${author.name}](${author.url})` : `- ${author.name}`);
+    const handle = author.x_handle?.replace(/^@/, "");
+    if (author.url && handle) {
+      lines.push(`- [${author.name}](${author.url}) ([@${handle}](https://x.com/${handle}))`);
+    } else if (handle) {
+      lines.push(`- [@${handle}](https://x.com/${handle})`);
+    } else if (author.url) {
+      lines.push(`- [${author.name}](${author.url})`);
+    } else {
+      lines.push(`- ${author.name}`);
+    }
   }
 
   lines.push("");

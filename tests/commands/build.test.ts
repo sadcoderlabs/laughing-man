@@ -590,7 +590,7 @@ env: {}
 
     // llms.txt Author section
     expect(llmsTxt).toContain("## Author");
-    expect(llmsTxt).toContain("[Jane Doe](https://janedoe.com)");
+    expect(llmsTxt).toContain("[Jane Doe](https://janedoe.com) ([@janedoe](https://x.com/janedoe))");
   });
 
   it("omits author metadata when author is not configured", async () => {
