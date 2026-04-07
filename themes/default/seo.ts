@@ -47,3 +47,33 @@ Allow: /
 Sitemap: ${siteUrl}/sitemap.xml
 `;
 }
+
+interface LlmsTxtIssue {
+  issue: number;
+  title: string;
+  date?: string;
+}
+
+export function generateLlmsTxt(
+  siteUrl: string,
+  name: string,
+  description: string | undefined,
+  issues: readonly LlmsTxtIssue[],
+): string {
+  const lines: string[] = [`# ${name}`];
+
+  if (description) {
+    lines.push("", `> ${description}`);
+  }
+
+  if (issues.length > 0) {
+    lines.push("", "## Issues", "");
+    for (const i of issues) {
+      const dateSuffix = i.date ? ` (${i.date})` : "";
+      lines.push(`- [Issue ${i.issue}: ${i.title}](${siteUrl}/issues/${i.issue}/)${dateSuffix}`);
+    }
+  }
+
+  lines.push("");
+  return lines.join("\n");
+}

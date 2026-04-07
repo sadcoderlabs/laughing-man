@@ -35,7 +35,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const bust = `?v=${Date.now()}`;
   const themeUrl = (name: string) =>
     `${pathToFileURL(join(themesDir, `${name}.${ext}`))}${bust}`;
-  const [{ EmailPage }, { WebPage }, { IndexPage }, { NotFoundPage }, { generateSitemap, generateRobotsTxt }, { generateRssFeed }] = await Promise.all([
+  const [{ EmailPage }, { WebPage }, { IndexPage }, { NotFoundPage }, { generateSitemap, generateRobotsTxt, generateLlmsTxt }, { generateRssFeed }] = await Promise.all([
     import(themeUrl("email")),
     import(themeUrl("web")),
     import(themeUrl("index")),
@@ -193,6 +193,12 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   writeFileSync(
     join(websiteDir, "robots.txt"),
     generateRobotsTxt(config.url),
+    "utf8",
+  );
+
+  writeFileSync(
+    join(websiteDir, "llms.txt"),
+    generateLlmsTxt(config.url, config.name, config.description, sorted),
     "utf8",
   );
 
