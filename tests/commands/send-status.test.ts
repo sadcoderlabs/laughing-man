@@ -11,6 +11,7 @@ const mockEmailsList = mock(async () => ({
       { id: "e1", to: ["alice@test.com"], subject: "Issue #2 Hello", last_event: "delivered" },
       { id: "e2", to: ["bob@test.com"], subject: "Issue #2 Hello", last_event: "bounced" },
       { id: "e3", to: ["carol@test.com"], subject: "Issue #1 World", last_event: "delivered" },
+      { id: "e4", to: ["dave@test.com"], subject: "Issue #2 Hello", last_event: "complained" },
     ],
   },
   error: null,
@@ -119,7 +120,15 @@ env:
   it("lists bounced addresses", async () => {
     await runSendStatus({ configDir: tmpDir });
     const output = logs.join("\n");
+    expect(output).toContain("Bounced:");
     expect(output).toContain("bob@test.com");
+  });
+
+  it("lists complained addresses", async () => {
+    await runSendStatus({ configDir: tmpDir });
+    const output = logs.join("\n");
+    expect(output).toContain("Complained:");
+    expect(output).toContain("dave@test.com");
   });
 
   it("prints sent_at timestamp for each broadcast", async () => {
