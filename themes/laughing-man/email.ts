@@ -119,9 +119,10 @@ export function EmailPage({ title, issue, content, config }: EmailPageProps): st
         overflow-x: auto;
         padding: 20px;
         border-radius: 12px;
-        background: #1e2d3d;
-        color: #e0e6ed;
+        background-color: #FAFAFA;
+        color: #90A4AE;
         line-height: 1;
+        border: 1px solid rgba(0, 85, 119, 0.12);
       }
       .issue-body pre code {
         color: inherit;
