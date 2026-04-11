@@ -781,6 +781,7 @@ pre {
   background: var(--code-bg);
   color: var(--code-text);
   border: 1px solid var(--line);
+  line-height: 1;
 }
 
 /* Shiki wraps highlighted code in its own <pre>, let it control colors */
