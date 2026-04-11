@@ -6,6 +6,7 @@ import { runBuild } from "./commands/build.js";
 import { runPreview } from "./commands/preview.js";
 import { runDeploy } from "./commands/deploy.js";
 import { runSend } from "./commands/send.js";
+import { runSendStatus } from "./commands/send-status.js";
 import { runSetupWeb } from "./commands/setup-web.js";
 import { runSetupNewsletter } from "./commands/setup-newsletter.js";
 import { runStamp } from "./commands/stamp.js";
@@ -43,6 +44,7 @@ Commands:
   stamp             Add frontmatter to .md files that don't have it
   deploy            Deploy output/website/ to Cloudflare Pages
   send <issue>      Send an issue via Resend Broadcast
+  send status       Show delivery status for all sent broadcasts
 
 Run 'laughing-man <command> --help' for command-specific options.
 `);
@@ -161,6 +163,21 @@ All stamped issues are set to 'draft' status.
       }
 
       case "send": {
+        const subcommand = args[1];
+
+        if (subcommand === "status") {
+          if (wantsHelp) {
+            showHelp(`Usage: laughing-man send status
+
+Show delivery status for all sent broadcasts.
+Displays per-recipient event counts (delivered, opened, clicked, bounced, etc.)
+and lists bounced/complained addresses.
+`);
+          }
+          await runSendStatus({ configDir });
+          break;
+        }
+
         if (wantsHelp) {
           showHelp(`Usage: laughing-man send <issue-number> [options]
 
@@ -172,7 +189,7 @@ Options:
   --test <address>     Send a test email to this address instead of broadcasting
 `);
         }
-        const issueArg = args[1];
+        const issueArg = subcommand;
         if (!issueArg || !/^\d+$/.test(issueArg)) {
           console.error("Usage: laughing-man send <issue-number> [--yes]");
           process.exit(1);
