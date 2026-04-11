@@ -13,6 +13,8 @@ name: Your Newsletter Name
 description: A newsletter by [Your Name](https://blog.example.com)
 issues_dir: .
 attachments_dir: .
+
+theme: laughing-man
 syntax_highlight_theme: material-theme-lighter
 
 author:

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { generateLlmsTxt } from "../../themes/default/seo";
+import { generateLlmsTxt } from "../../themes/laughing-man/seo";
 
 describe("generateLlmsTxt author section", () => {
   const base = {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { EmailPage } from "../../themes/default/email";
+import { EmailPage } from "../../themes/laughing-man/email";
 import type { SiteConfig } from "../../src/types";
 
 const testConfig: SiteConfig = {

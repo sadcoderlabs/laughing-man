@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { websiteJsonLd, articleJsonLd, plainTextExcerpt } from "../../themes/default/meta";
+import { websiteJsonLd, articleJsonLd, plainTextExcerpt } from "../../themes/laughing-man/meta";
 
 describe("websiteJsonLd", () => {
   it("returns WebSite JSON-LD script tag", () => {

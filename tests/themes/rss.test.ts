@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { generateRssFeed } from "../../themes/default/rss";
+import { generateRssFeed } from "../../themes/laughing-man/rss";
 import type { SiteConfig, IssueData } from "../../src/types";
 
 function makeConfig(overrides: Partial<SiteConfig> = {}): SiteConfig {

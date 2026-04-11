@@ -34,7 +34,7 @@
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "bun run clean && tsc --project tsconfig.build.json && mkdir -p dist/skills/laughing-man && cp -R themes/default/assets dist/themes/default/ && cp skills/laughing-man/SKILL.md dist/skills/laughing-man/",
+    "build": "bun run clean && tsc --project tsconfig.build.json && mkdir -p dist/skills/laughing-man && cp -R themes/laughing-man/assets dist/themes/laughing-man/ && cp skills/laughing-man/SKILL.md dist/skills/laughing-man/",
     "prepack": "bun run build",
     "test": "bun test",
     "typecheck": "tsc --noEmit"

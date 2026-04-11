@@ -14,6 +14,7 @@ const ConfigSchema = z.object({
   }).optional(),
   issues_dir: z.string().default("."),
   attachments_dir: z.string().optional(),
+  theme: z.string().default("laughing-man"),
   syntax_highlight_theme: z.string().default("material-theme-lighter"),
   web_hosting: z.object({
     provider: z.literal("cloudflare-pages"),

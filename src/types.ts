@@ -19,6 +19,7 @@ export interface SiteConfig {
   name: string;
   description?: string;
   author?: { name: string; url?: string; x_handle?: string };
+  theme?: string;                     // Visual theme (default: "laughing-man")
   syntax_highlight_theme?: string;    // Shiki theme name (default: "material-theme-lighter")
   url: string;                    // Computed: https://{domain} or https://{project}.pages.dev
   issues_dir: string;           // Resolved absolute path

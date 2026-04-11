@@ -85,7 +85,7 @@ export async function runPreview(options: PreviewOptions): Promise<void> {
   });
   const websiteDir = join(previewOutputDir, "website");
   const emailDir = join(previewOutputDir, "email");
-  const themesDir = resolve(import.meta.dirname, "../../themes/default");
+  const themesDir = resolve(import.meta.dirname, "../../themes/laughing-man");
 
   const clients = new Set<{ write: (data: string) => void; end: () => void }>();
   const reloadScript = `<script>new EventSource("/__reload").onmessage=()=>location.reload()</script>`;

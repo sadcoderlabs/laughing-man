@@ -9,12 +9,12 @@ import { scanIssuesDir } from "../pipeline/markdown.js";
 import { backfillDates, validateIssues } from "../pipeline/validation.js";
 import { processImages } from "../pipeline/images.js";
 import type { SiteConfig, IssueData } from "../types.js";
-import { FAVICON_SVG_FILE_NAME, FAVICON_ICO_FILE_NAME, ICON_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME, OG_IMAGE_FILE_NAME, readStyles, readSubscribeScript } from "../../themes/default/assets.js";
+import { FAVICON_SVG_FILE_NAME, FAVICON_ICO_FILE_NAME, ICON_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME, OG_IMAGE_FILE_NAME, readStyles, readSubscribeScript } from "../../themes/laughing-man/assets.js";
 
 const formatHtml = (html: string) =>
   html_beautify(html, { indent_size: 2, preserve_newlines: false, indent_inner_html: true });
 
-const themesDir = resolve(import.meta.dirname, "../../themes/default");
+const themesDir = resolve(import.meta.dirname, "../../themes/laughing-man");
 
 interface BuildOptions {
   configDir: string;
@@ -133,7 +133,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   writeFileSync(join(websiteDir, "404.html"), formatHtml(notFoundHtml), "utf8");
 
   // Copy static assets into website root.
-  const assetsDir = resolve(import.meta.dirname, "../../themes/default/assets");
+  const assetsDir = resolve(import.meta.dirname, "../../themes/laughing-man/assets");
   for (const file of [FAVICON_SVG_FILE_NAME, FAVICON_ICO_FILE_NAME, APPLE_TOUCH_ICON_FILE_NAME]) {
     const src = join(assetsDir, file);
     if (existsSync(src)) {
