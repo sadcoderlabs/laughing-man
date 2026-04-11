@@ -147,4 +147,50 @@ describe("createResendProvider", () => {
       })
     ).rejects.toThrow("Invalid email");
   });
+
+  it("paginates all emails from resend.emails.list", async () => {
+    let callCount = 0;
+    const mockList = mock(async (opts?: { after?: string }) => {
+      callCount++;
+      if (callCount === 1) {
+        return {
+          data: {
+            object: "list",
+            has_more: true,
+            data: [{ id: "e1", to: ["a@test.com"], subject: "Issue #1 Hello", last_event: "delivered" }],
+          },
+          error: null,
+        };
+      }
+      return {
+        data: {
+          object: "list",
+          has_more: false,
+          data: [{ id: "e2", to: ["b@test.com"], subject: "Issue #2 World", last_event: "bounced" }],
+        },
+        error: null,
+      };
+    });
+
+    const fakeResend = { emails: { list: mockList } } as any;
+    const provider = createResendProvider(fakeResend);
+
+    const emails = await provider.listEmails();
+    expect(mockList).toHaveBeenCalledTimes(2);
+    expect(emails).toHaveLength(2);
+    expect(emails[0]).toEqual({ id: "e1", to: ["a@test.com"], subject: "Issue #1 Hello", last_event: "delivered" });
+    expect(emails[1]).toEqual({ id: "e2", to: ["b@test.com"], subject: "Issue #2 World", last_event: "bounced" });
+  });
+
+  it("throws if resend.emails.list returns an error", async () => {
+    const mockList = mock(async () => ({
+      data: null,
+      error: { message: "Unauthorized" },
+    }));
+
+    const fakeResend = { emails: { list: mockList } } as any;
+    const provider = createResendProvider(fakeResend);
+
+    await expect(provider.listEmails()).rejects.toThrow("Unauthorized");
+  });
 });

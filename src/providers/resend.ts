@@ -28,12 +28,20 @@ export interface SendEmailParams {
   html: string;
 }
 
+export interface EmailSummary {
+  id: string;
+  to: string[];
+  subject: string;
+  last_event: string;
+}
+
 export interface ResendProvider {
   listSegments(): Promise<SegmentSummary[]>;
   listBroadcasts(): Promise<BroadcastSummary[]>;
   createBroadcast(params: CreateBroadcastParams): Promise<string>;
   sendBroadcast(broadcastId: string): Promise<void>;
   sendEmail(params: SendEmailParams): Promise<string>;
+  listEmails(): Promise<EmailSummary[]>;
 }
 
 export function createResendProvider(client: Resend): ResendProvider {
@@ -80,6 +88,27 @@ export function createResendProvider(client: Resend): ResendProvider {
       if (error) throw new Error(`Resend error: ${error.message}`);
       if (!data?.id) throw new Error("Resend returned no email id");
       return data.id;
+    },
+
+    async listEmails(): Promise<EmailSummary[]> {
+      const all: EmailSummary[] = [];
+      let after: string | undefined;
+      for (;;) {
+        const { data, error } = await client.emails.list(after ? { after } : undefined);
+        if (error) throw new Error(`Resend error: ${error.message}`);
+        const items = data?.data ?? [];
+        for (const e of items) {
+          all.push({
+            id: e.id,
+            to: e.to,
+            subject: e.subject,
+            last_event: e.last_event,
+          });
+        }
+        if (!data?.has_more || items.length === 0) break;
+        after = items[items.length - 1].id;
+      }
+      return all;
     },
   };
 }
